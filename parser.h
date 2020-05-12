@@ -10,12 +10,15 @@ namespace myscript
 	struct SyntaxNode
 	{
 		size_t line;
-		virtual string GetType() { return "node"; }
+		virtual string GetType() { return "empty"; }
 		virtual bool CreateCode(CompliationData& cd) { return false; }
+	};
+	struct SyntaxExpr : SyntaxNode
+	{
 		virtual bool CreateLCode(CompliationData& cd) { return false; } 
 		virtual bool CreateRCode(CompliationData& cd) { return false; }
 	};
-	struct SyntaxLiteral : SyntaxNode
+	struct SyntaxLiteral : SyntaxExpr
 	{
 		Token data;
 		SyntaxLiteral(const Token _data) : data(_data) { line = _data.line; }
@@ -67,7 +70,7 @@ namespace myscript
 		}
 		
 	};
-	struct SyntaxIdentifier : SyntaxNode
+	struct SyntaxIdentifier : SyntaxExpr
 	{
 		string id;
 		
@@ -135,16 +138,16 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxSelf : SyntaxNode
+	struct SyntaxSelf : SyntaxExpr
 	{
 		SyntaxSelf(size_t _line) { line = _line; }
 		string GetType() const { return "self"; }
 	};
-	struct SyntaxComma : SyntaxNode // ,
+	struct SyntaxComma : SyntaxExpr // ,
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxComma(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) { line = lexpr->line; }
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxComma(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) { line = lexpr->line; }
 		~SyntaxComma() { delete lexpr;	delete rexpr; }
 		
 		bool CreateCode(CompliationData& cd)
@@ -160,10 +163,10 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxNot : SyntaxNode // !
+	struct SyntaxNot : SyntaxExpr // !
 	{
-		SyntaxNode* expr;
-		SyntaxNot(SyntaxNode* _expr) : expr(_expr) { line = _expr->line; }
+		SyntaxExpr* expr;
+		SyntaxNot(SyntaxExpr* _expr) : expr(_expr) { line = _expr->line; }
 		~SyntaxNot() { delete expr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -174,11 +177,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxOr : SyntaxNode // ||
+	struct SyntaxOr : SyntaxExpr // ||
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxOr(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) { line = lexpr->line; }
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxOr(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) { line = lexpr->line; }
 		~SyntaxOr() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -191,11 +194,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxAnd : SyntaxNode // &&
+	struct SyntaxAnd : SyntaxExpr // &&
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxAnd(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxAnd(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxAnd() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -208,11 +211,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxXor : SyntaxNode // ^
+	struct SyntaxXor : SyntaxExpr // ^
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxXor(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxXor(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxXor() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -225,11 +228,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxEqual : SyntaxNode // ==
+	struct SyntaxEqual : SyntaxExpr // ==
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxEqual(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxEqual() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -242,11 +245,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxNotEqual : SyntaxNode // !=
+	struct SyntaxNotEqual : SyntaxExpr // !=
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxNotEqual(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxNotEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxNotEqual() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -259,11 +262,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxGreatThan : SyntaxNode // >
+	struct SyntaxGreatThan : SyntaxExpr // >
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxGreatThan(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxGreatThan(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxGreatThan() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -276,11 +279,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxGreatEqual : SyntaxNode // >=
+	struct SyntaxGreatEqual : SyntaxExpr // >=
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxGreatEqual(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxGreatEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxGreatEqual() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -293,11 +296,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxLessThan : SyntaxNode // <
+	struct SyntaxLessThan : SyntaxExpr // <
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxLessThan(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxLessThan(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxLessThan() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -310,11 +313,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxLessEqual : SyntaxNode // <=
+	struct SyntaxLessEqual : SyntaxExpr // <=
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxLessEqual(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxLessEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxLessEqual() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -327,11 +330,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxAdd : SyntaxNode // +
+	struct SyntaxAdd : SyntaxExpr // +
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxAdd(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxAdd(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxAdd() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -344,11 +347,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxSub : SyntaxNode // -
+	struct SyntaxSub : SyntaxExpr // -
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxSub(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxSub(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxSub() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -361,11 +364,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxMul : SyntaxNode // *
+	struct SyntaxMul : SyntaxExpr // *
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxMul(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxMul(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxMul() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -378,11 +381,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxDiv : SyntaxNode // /
+	struct SyntaxDiv : SyntaxExpr // /
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxDiv(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxDiv(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxDiv() { delete lexpr, rexpr; }
 		
 		bool CreateRCode(CompliationData& cd)
@@ -395,11 +398,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxMod : SyntaxNode // %
+	struct SyntaxMod : SyntaxExpr // %
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxMod(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxMod(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxMod() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "mod"; }
@@ -413,11 +416,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxPow : SyntaxNode // **
+	struct SyntaxPow : SyntaxExpr // **
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxPow(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxPow(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxPow() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "pow"; }
@@ -431,11 +434,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxAssign : SyntaxNode
+	struct SyntaxAssign : SyntaxExpr
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxAssign(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxAssign(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxAssign() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "assign"; }
@@ -457,10 +460,10 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxPrefixPlus : SyntaxNode // +
+	struct SyntaxPrefixPlus : SyntaxExpr // +
 	{
-		SyntaxNode* expr;
-		SyntaxPrefixPlus(SyntaxNode* _expr) : expr(_expr) {}
+		SyntaxExpr* expr;
+		SyntaxPrefixPlus(SyntaxExpr* _expr) : expr(_expr) {}
 		~SyntaxPrefixPlus() { delete expr; }
 		
 		string GetType() const { return "minus"; }
@@ -471,10 +474,10 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxPrefixMinus : SyntaxNode // -
+	struct SyntaxPrefixMinus : SyntaxExpr // -
 	{
-		SyntaxNode* expr;
-		SyntaxPrefixMinus(SyntaxNode* _expr) : expr(_expr) {}
+		SyntaxExpr* expr;
+		SyntaxPrefixMinus(SyntaxExpr* _expr) : expr(_expr) {}
 		~SyntaxPrefixMinus() { delete expr; }
 		
 		string GetType() const { return "minus"; }
@@ -486,10 +489,10 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxPrefixPlusx2 : SyntaxNode // ++
+	struct SyntaxPrefixPlusx2 : SyntaxExpr // ++
 	{
-		SyntaxNode* expr;
-		SyntaxPrefixPlusx2(SyntaxNode* _expr) : expr(_expr) {}
+		SyntaxExpr* expr;
+		SyntaxPrefixPlusx2(SyntaxExpr* _expr) : expr(_expr) {}
 		~SyntaxPrefixPlusx2() { delete expr; }
 		
 		string GetType() const { return "prefix plusx2"; }
@@ -525,10 +528,10 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxPostfixPlusx2 : SyntaxNode // ++
+	struct SyntaxPostfixPlusx2 : SyntaxExpr // ++
 	{
-		SyntaxNode* expr;
-		SyntaxPostfixPlusx2(SyntaxNode* _expr) : expr(_expr) {}
+		SyntaxExpr* expr;
+		SyntaxPostfixPlusx2(SyntaxExpr* _expr) : expr(_expr) {}
 		~SyntaxPostfixPlusx2() { delete expr; }
 		
 		string GetType() const { return "postfix plusx2"; }
@@ -568,10 +571,10 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxPrefixMinusx2 : SyntaxNode // --
+	struct SyntaxPrefixMinusx2 : SyntaxExpr // --
 	{
-		SyntaxNode* expr;
-		SyntaxPrefixMinusx2(SyntaxNode* _expr) : expr(_expr) {}
+		SyntaxExpr* expr;
+		SyntaxPrefixMinusx2(SyntaxExpr* _expr) : expr(_expr) {}
 		~SyntaxPrefixMinusx2() { delete expr; }
 		
 		string GetType() const { return "minusx2"; }
@@ -607,10 +610,10 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxPostfixMinusx2 : SyntaxNode // --
+	struct SyntaxPostfixMinusx2 : SyntaxExpr // --
 	{
-		SyntaxNode* expr;
-		SyntaxPostfixMinusx2(SyntaxNode* _expr) : expr(_expr) {}
+		SyntaxExpr* expr;
+		SyntaxPostfixMinusx2(SyntaxExpr* _expr) : expr(_expr) {}
 		~SyntaxPostfixMinusx2() { delete expr; }
 		
 		string GetType() const { return "minusx2"; }
@@ -650,10 +653,10 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxNew : SyntaxNode // new
+	struct SyntaxNew : SyntaxExpr // new
 	{
-		SyntaxNode* expr;
-		SyntaxNew(SyntaxNode* _expr) : expr(_expr) {}
+		SyntaxExpr* expr;
+		SyntaxNew(SyntaxExpr* _expr) : expr(_expr) {}
 		~SyntaxNew() { delete expr; }
 		
 		string GetType() const { return "new"; }
@@ -665,11 +668,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxAs : SyntaxNode // as
+	struct SyntaxAs : SyntaxExpr // as
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxAs(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxAs(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxAs() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "as"; }
@@ -683,11 +686,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxIs : SyntaxNode // is
+	struct SyntaxIs : SyntaxExpr // is
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxIs(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxIs(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxIs() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "is"; }
@@ -701,11 +704,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxDot : SyntaxNode // .
+	struct SyntaxDot : SyntaxExpr // .
 	{
-		SyntaxNode* expr;
+		SyntaxExpr* expr;
 		string str;
-		SyntaxDot(SyntaxNode* _expr, string _str) : expr(_expr), str(_str) {}
+		SyntaxDot(SyntaxExpr* _expr, string _str) : expr(_expr), str(_str) {}
 		~SyntaxDot() { delete expr; }
 		
 		string GetType() const { return "dot"; }
@@ -744,11 +747,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxRef : SyntaxNode // arr[0]
+	struct SyntaxRef : SyntaxExpr // arr[0]
 	{
-		SyntaxNode* lexpr;
-		SyntaxNode* rexpr;
-		SyntaxRef(SyntaxNode* _lexpr, SyntaxNode* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxRef(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxRef() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "ref"; }
@@ -771,11 +774,11 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxCall : SyntaxNode
+	struct SyntaxCall : SyntaxExpr
 	{
-		SyntaxNode* expr;
-		vector<SyntaxNode*> params;
-		SyntaxCall(SyntaxNode* _func) : expr(_func) {}
+		SyntaxExpr* expr;
+		vector<SyntaxExpr*> params;
+		SyntaxCall(SyntaxExpr* _func) : expr(_func) {}
 		~SyntaxCall() { delete expr; for (auto param : params) delete param; }
 		
 		string GetType() const { return "call"; }
@@ -805,9 +808,9 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxArray : SyntaxNode
+	struct SyntaxArray : SyntaxExpr
 	{
-		vector<SyntaxNode*> elements;
+		vector<SyntaxExpr*> elements;
 		SyntaxArray() {}
 		~SyntaxArray() { for (auto element : elements) delete element; }
 		
@@ -823,9 +826,9 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxDictionary : SyntaxNode
+	struct SyntaxDictionary : SyntaxExpr
 	{
-		vector<pair<SyntaxNode*, SyntaxNode*>> elements;
+		vector<pair<SyntaxExpr*, SyntaxExpr*>> elements;
 		
 		string GetType() const { return "dictionary"; }
 
@@ -844,9 +847,9 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxDeclare : SyntaxNode
+	struct SyntaxDeclare : SyntaxExpr
 	{
-		vector<pair<VarDesc, SyntaxNode*>> elements;
+		vector<pair<VarDesc, SyntaxExpr*>> elements;
 
 		~SyntaxDeclare() { for (auto element : elements) delete element.second; }
 		string GetType() const { return "declare"; }
@@ -921,9 +924,9 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxBlock : SyntaxNode
+	struct SyntaxBlock : SyntaxExpr
 	{
-		vector<SyntaxNode*> sents;
+		vector<SyntaxExpr*> sents;
 		virtual ~SyntaxBlock() { for (auto sent : sents) delete sent; }
 		
 		bool CreateCode(CompliationData& cd)
@@ -968,7 +971,7 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxFunction : SyntaxNode
+	struct SyntaxFunction : SyntaxExpr
 	{
 		vector<string> params;
 		SyntaxBlock* sents;
@@ -1000,10 +1003,10 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxSingleSentence : SyntaxNode
+	struct SyntaxSingleSentence : SyntaxExpr
 	{
-		SyntaxNode* expr;
-		SyntaxSingleSentence(SyntaxNode* _expr = nullptr) : expr(_expr) {}
+		SyntaxExpr* expr;
+		SyntaxSingleSentence(SyntaxExpr* _expr = nullptr) : expr(_expr) {}
 		~SyntaxSingleSentence() { delete expr; }
 		
 		bool CreateCode(CompliationData& cd)
@@ -1013,9 +1016,9 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxIf : SyntaxNode
+	struct SyntaxIf : SyntaxExpr
 	{
-		SyntaxNode* cond;
+		SyntaxExpr* cond;
 		SyntaxBlock* truesents;
 		SyntaxBlock* falsesents;
 		~SyntaxIf() { delete cond; delete truesents; if (falsesents) delete falsesents; }
@@ -1045,12 +1048,12 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxLoop : SyntaxNode
+	struct SyntaxLoop : SyntaxExpr
 	{
-		SyntaxNode* init;
-		SyntaxNode* prefix_condition;
-		SyntaxNode* postfix_condition;
-		SyntaxNode* loop;
+		SyntaxExpr* init;
+		SyntaxExpr* prefix_condition;
+		SyntaxExpr* postfix_condition;
+		SyntaxExpr* loop;
 		SyntaxBlock* sents;
 		~SyntaxLoop() { if (init) delete init; if (prefix_condition) delete prefix_condition; if (postfix_condition) delete postfix_condition; if (loop) delete loop; }
 		
@@ -1124,10 +1127,10 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxReturn : SyntaxNode
+	struct SyntaxReturn : SyntaxExpr
 	{
-		SyntaxNode* value;
-		SyntaxReturn(SyntaxNode* _value) : value(_value) { line = value->line; }
+		SyntaxExpr* value;
+		SyntaxReturn(SyntaxExpr* _value) : value(_value) { line = value->line; }
 		~SyntaxReturn() { delete value; }
 		string GetType() const { return "return"; }
 		bool CreateCode(CompliationData& cd)
@@ -1151,7 +1154,7 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxContinue : SyntaxNode
+	struct SyntaxContinue : SyntaxExpr
 	{
 		SyntaxContinue(size_t _line) { line = _line; }
 		string GetType() const { return "continue"; }
@@ -1168,7 +1171,7 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxBreak : SyntaxNode
+	struct SyntaxBreak : SyntaxExpr
 	{
 		SyntaxBreak(size_t _line) { line = _line; }
 		string GetType() const { return "break"; }
@@ -1185,9 +1188,9 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxClass : SyntaxNode
+	struct SyntaxClass : SyntaxExpr
 	{
-		vector<SyntaxNode*> member;
+		vector<SyntaxExpr*> member;
 		
 		string GetType() const { return "class"; }
 		bool CreateRCode(CompliationData& cd)
@@ -1201,29 +1204,29 @@ namespace myscript
 			return false;
 		}
 	};
-	SyntaxNode* ParseExpr(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseComma(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseAssign(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseOr(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseAnd(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseCmp(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseAdd(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseMul(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParsePow(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParsePrefix(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParsePostfix(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseElement(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseLiteral(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseSimpleLiteral(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseArray(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	pair<SyntaxNode*, SyntaxNode*>* ParseKeyVal(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseDictionary(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseFunction(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseSentence(vector<Token>& tokens, size_t& index, vector<Error>& errors, size_t args_count ...);
-	SyntaxNode* ParseIf(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseLoop(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseFlowControl(vector<Token>& tokens, size_t& index, vector<Error>& errors);
-	SyntaxNode* ParseDeclare(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseExpr(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseComma(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseAssign(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseOr(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseAnd(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseCmp(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseAdd(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseMul(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParsePow(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParsePrefix(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParsePostfix(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseElement(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseLiteral(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseSimpleLiteral(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseArray(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	pair<SyntaxExpr*, SyntaxExpr*>* ParseKeyVal(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseDictionary(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseFunction(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseSentence(vector<Token>& tokens, size_t& index, vector<Error>& errors, size_t args_count ...);
+	SyntaxExpr* ParseIf(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseLoop(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseFlowControl(vector<Token>& tokens, size_t& index, vector<Error>& errors);
+	SyntaxExpr* ParseDeclare(vector<Token>& tokens, size_t& index, vector<Error>& errors);
 	SyntaxBlock* ParseBlock(vector<Token>& tokens, size_t& index, vector<Error>& errors);
 };
 #endif

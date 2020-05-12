@@ -5,15 +5,15 @@
 
 namespace myscript 
 {
-SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &errors)
-{
-	return ParseComma(tokens, index, errors);
+	SyntaxExpr* ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &errors)
+	{
+		return ParseComma(tokens, index, errors);
 	}
-	SyntaxNode* ParseComma(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseComma(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* lexp = nullptr;
-		SyntaxNode* rexp = nullptr;
+		SyntaxExpr* lexp = nullptr;
+		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParseAssign(tokens, temp, errors)) == nullptr)
 			return nullptr;
 		while (tokens[temp].type == Token::COMMA)
@@ -29,11 +29,11 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		index = temp;
 		return lexp;
 	}
-	SyntaxNode* ParseAssign(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseAssign(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* lexp = nullptr;
-		SyntaxNode* rexp = nullptr;
+		SyntaxExpr* lexp = nullptr;
+		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParseOr(tokens, temp, errors)) == nullptr)
 			return nullptr;
 		switch (tokens[temp].type)
@@ -93,20 +93,11 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		delete lexp;
 		return nullptr;
 	}
-	SyntaxNode* ParseBinary(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseOr(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* lexp = nullptr;
-		SyntaxNode* rexp = nullptr;
-		if((lexp = ParseBinary(tokens, temp, errors)) == nullptr)
-			return nullptr;
-		return nullptr;
-	}
-	SyntaxNode* ParseOr(vector<Token>& tokens, size_t& index, vector<Error>& errors)
-	{
-		size_t temp = index;
-		SyntaxNode* lexp = nullptr;
-		SyntaxNode* rexp = nullptr;
+		SyntaxExpr* lexp = nullptr;
+		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParseAnd(tokens, temp, errors)) == nullptr)
 			return nullptr;
 		while (tokens[temp].type == Token::OR)
@@ -122,11 +113,11 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		index = temp;
 		return lexp;
 	}
-	SyntaxNode* ParseAnd(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseAnd(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* lexp = nullptr;
-		SyntaxNode* rexp = nullptr;
+		SyntaxExpr* lexp = nullptr;
+		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParseCmp(tokens, temp, errors)) == nullptr)
 			return nullptr;
 		while (tokens[temp].type == Token::amp_amp)
@@ -144,11 +135,11 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		delete lexp;
 		return nullptr;
 	}
-	SyntaxNode* ParseCmp(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseCmp(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* lexp = nullptr;
-		SyntaxNode* rexp = nullptr;
+		SyntaxExpr* lexp = nullptr;
+		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParseAdd(tokens, temp, errors)) == nullptr)
 			return nullptr;
 		switch (tokens[temp].type)
@@ -208,11 +199,11 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		delete lexp;
 		return nullptr;
 	}
-	SyntaxNode* ParseAdd(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseAdd(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* lexp = nullptr;
-		SyntaxNode* rexp = nullptr;
+		SyntaxExpr* lexp = nullptr;
+		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParseMul(tokens, temp, errors)) == nullptr)
 			return nullptr;
 	_loop_:
@@ -238,11 +229,11 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		index = temp;
 		return lexp;
 	}
-	SyntaxNode* ParseMul(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseMul(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* lexp = nullptr;
-		SyntaxNode* rexp = nullptr;
+		SyntaxExpr* lexp = nullptr;
+		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParsePow(tokens, temp, errors)) == nullptr)
 			return nullptr;
 	_loop_:
@@ -276,11 +267,11 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		index = temp;
 		return lexp;
 	}
-	SyntaxNode* ParsePow(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParsePow(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* lexp = nullptr;
-		SyntaxNode* rexp = nullptr;
+		SyntaxExpr* lexp = nullptr;
+		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParsePrefix(tokens, temp, errors)) == nullptr)
 			return nullptr;
 		while (tokens[temp].type == Token::POW)
@@ -295,10 +286,10 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		index = temp;
 		return lexp;
 	}
-	SyntaxNode* ParsePrefix(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParsePrefix(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* expr = nullptr;
+		SyntaxExpr* expr = nullptr;
 		switch (tokens[temp].type)
 		{
 		case Token::INC:
@@ -357,11 +348,11 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		index = temp;
 		return expr;
 	}
-	SyntaxNode* ParsePostfix(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParsePostfix(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* lexp = nullptr;
-		SyntaxNode* rexp = nullptr;
+		SyntaxExpr* lexp = nullptr;
+		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParseElement(tokens, temp, errors)) == nullptr)
 			return nullptr;
 	_loop_:
@@ -441,10 +432,10 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		delete lexp;
 		return nullptr;
 	}
-	SyntaxNode* ParseElement(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseElement(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* expr = nullptr;
+		SyntaxExpr* expr = nullptr;
 		switch (tokens[temp].type)
 		{
 		case Token::LPARAM:
@@ -497,15 +488,15 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		delete expr;
 		return nullptr;
 	}
-	SyntaxNode* ParseLiteral(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseLiteral(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* expr = nullptr;
+		SyntaxExpr* expr = nullptr;
 		if ((expr = ParseSimpleLiteral(tokens, temp, errors)) || (expr = ParseArray(tokens, temp, errors)) || (expr = ParseDictionary(tokens, temp, errors)))
 			index = temp;
 		return expr;
 	}
-	SyntaxNode* ParseSimpleLiteral(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseSimpleLiteral(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		switch (tokens[index].type)
 		{
@@ -518,11 +509,11 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		}
 		return nullptr;
 	}
-	SyntaxNode* ParseArray(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseArray(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxArray* expr = new SyntaxArray();
-		SyntaxNode* element;
+		SyntaxExpr* element;
 		if (tokens[temp++].type != Token::LSUBRACKET)
 			goto ErrorHandle;
 		if ((element = ParseAssign(tokens, temp, errors)) != nullptr)
@@ -566,11 +557,11 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		delete expr;
 		return nullptr;
 	}
-	pair<SyntaxNode*, SyntaxNode*>* ParseKeyVal(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	pair<SyntaxExpr*, SyntaxExpr*>* ParseKeyVal(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxNode* key;
-		SyntaxNode* value;
+		SyntaxExpr* key;
+		SyntaxExpr* value;
 		if (tokens[temp].type == Token::IDENTIFIER)
 			key = new SyntaxLiteral({Token::LITERAL_STRING, tokens[temp].str, tokens[temp].line}), ++temp;
 		else if ((key = ParseLiteral(tokens, temp, errors)) == NULL)
@@ -583,16 +574,16 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 			goto ErrorHandle;
 		}
 		index = temp;
-		return new pair<SyntaxNode*, SyntaxNode*>(key, value);
+		return new pair<SyntaxExpr*, SyntaxExpr*>(key, value);
 	ErrorHandle:
 		delete key;
 		return NULL;
 	}
-	SyntaxNode* ParseDictionary(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseDictionary(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxDictionary* dict = new SyntaxDictionary();
-		pair<SyntaxNode*, SyntaxNode*>* key;
+		pair<SyntaxExpr*, SyntaxExpr*>* key;
 		if (tokens[temp++].type != Token::LBRACKET)
 			goto ErrorHandle;
 		if ((key = ParseKeyVal(tokens, temp, errors)) != NULL)
@@ -619,7 +610,7 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		delete dict;
 		return NULL;
 	}
-	SyntaxNode* ParseFunction(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseFunction(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxFunction* expr = new SyntaxFunction();
@@ -653,21 +644,21 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		delete expr;
 		return nullptr;
 	}
-	SyntaxNode* ParseSentence(vector<Token>& tokens, size_t& index, vector<Error>& errors, size_t args_count ...)
+	SyntaxExpr* ParseSentence(vector<Token>& tokens, size_t& index, vector<Error>& errors, size_t args_count ...)
 	{
 		size_t temp = index;
-		SyntaxNode* sent = nullptr;
+		SyntaxExpr* sent = nullptr;
 		va_list args_ptr;
 		va_start(args_ptr, args_count);
 		for (size_t count = 0; count < args_count; ++count)
-			if ((sent = va_arg(args_ptr, SyntaxNode* (*)(vector<Token>&, size_t&, vector<Error>&))(tokens, temp, errors)) != nullptr)
+			if ((sent = va_arg(args_ptr, SyntaxExpr* (*)(vector<Token>&, size_t&, vector<Error>&))(tokens, temp, errors)) != nullptr)
 				break;
 		va_end(args_ptr);
 		while (tokens[temp].type == Token::SEMICOLON)	++temp;
 		index = temp;
 		return sent;
 	}
-	SyntaxNode* ParseIf(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseIf(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxIf* sent = new SyntaxIf();
@@ -698,7 +689,7 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		delete sent;
 		return nullptr;
 	}
-	SyntaxNode* ParseLoop(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseLoop(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxLoop* sent = new SyntaxLoop();
@@ -748,7 +739,7 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		delete sent;
 		return nullptr;
 	}
-	SyntaxNode* ParseDeclare(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseDeclare(vector<Token>& tokens, size_t& index, vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxDeclare* expr = new SyntaxDeclare();
@@ -760,7 +751,7 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 			desc.option = VarDesc::CONST;
 		case Token::VAR:
 		{
-			SyntaxNode* init = nullptr;
+			SyntaxExpr* init = nullptr;
 			do
 			{
 				if (tokens[temp].type != Token::IDENTIFIER)
@@ -822,7 +813,7 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 				errors.push_back({"Expected {", tokens[--temp].line});
 				goto ErrorHandle;
 			}
-			while (SyntaxNode* expr = ParseDeclare(tokens, temp, errors))
+			while (SyntaxExpr* expr = ParseDeclare(tokens, temp, errors))
 			{
 				clsinf->member.push_back(expr);
 				while (tokens[temp].type == Token::SEMICOLON)	++temp;
@@ -847,7 +838,7 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 	{
 		size_t temp = index;
 		SyntaxBlock* blocks = new SyntaxBlock();
-		SyntaxNode* expr;
+		SyntaxExpr* expr;
 		bool check = false;
 		if (tokens[temp].type == Token::LBRACKET)
 		{
@@ -1154,7 +1145,7 @@ SyntaxNode *ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &error
 		size_t index = 0;
 		while (tokens[index].type != Token::EOT)
 		{
-			SyntaxNode* sent;
+			SyntaxExpr* sent;
 			if ((sent = ParseGeneralSentences(tokens, index, code.errors)) == nullptr)
 				return false;
 			code.sents.push_back(sent);

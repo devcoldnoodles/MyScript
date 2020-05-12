@@ -50,7 +50,12 @@ namespace myscript
 		friend class ADRThread;
 		ADRMemory(CompliationData& data);
 		~ADRMemory();
-		ADRThread* GetMainThread();
+		inline void Execute()
+		{
+			auto thread = new ADRThread(this, &codes[0]);
+			threads.push_back(thread);
+			thread->Execute();
+		}
 		inline void Lock(Object* index)
 		{
 			allocs.insert(index);
@@ -134,6 +139,7 @@ namespace myscript
 		vector<uint16_t*> callstack;
 		vector<size_t> basestack;
 		vector<Error> errors;
+		bool state;
 		Object* OperateEQ(Object* l, Object* r);
 		Object* OperateNEQ(Object* l, Object* r);
 		Object* OperateGT(Object* l, Object* r);

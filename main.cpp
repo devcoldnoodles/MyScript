@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 	char* buffer;
-	size_t buf_size;
+	long buf_size;
 	fseek(fp, 0, SEEK_END);
 	buf_size = ftell(fp);
 	buffer = (char*)malloc(buf_size + 1);
@@ -75,7 +75,7 @@ int main(int argc, char** argv) {
 		for (size_t index = 0; index < error_size; ++index)
 			temp += ToString(code.errors[index]) + "\n";
 		printf("%s", temp.c_str());
-		goto ErrorHandling;
+		goto ErrorHandle;
 	}
 	if (!code.CreateCode(cdata))
 	{
@@ -85,10 +85,10 @@ int main(int argc, char** argv) {
 		for (size_t index = 0; index < error_size; ++index)
 			temp += ToString(cdata.errors[index]) + "\n";
 		printf("%s", temp.c_str());
-		goto ErrorHandling;
+		goto ErrorHandle;
 	}
 	vm = new ADRMemory(cdata);
-	vm->GetMainThread()->Execute();
+	vm->Execute();
 	// printf("[console output]\n");
 	// printf("\n%s\n[using time] = %0.4f (sec)\n", vm->Report().c_str(), (float)(clock() - begin) / CLOCKS_PER_SEC);
 	// while (script_loop)
@@ -116,7 +116,7 @@ int main(int argc, char** argv) {
 	delete buffer;
 	delete vm;
 	return EXIT_SUCCESS;
-ErrorHandling:
+ErrorHandle:
 	delete buffer;
 	return EXIT_FAILURE;
 }

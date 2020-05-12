@@ -86,10 +86,6 @@ namespace myscript
 	{
 		free(memory);
 	}
-	ADRThread* ADRMemory::GetMainThread()
-	{
-		return new ADRThread(this, &codes[0]);
-	}
 	Object* ADRThread::OperateEQ(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
@@ -448,7 +444,6 @@ namespace myscript
 		size_t callback = 1;
 		while (callback)
 		{
-			//printf("%p\n", cursor);
 			switch (*cursor++)
 			{
 			case OpCode::PUSH:
