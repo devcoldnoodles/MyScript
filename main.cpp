@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
 	}
 	fseek(fp, 0, SEEK_SET);
 	fread(buffer, buf_size, 1, fp);
+	buffer[buf_size] = '\0';
 	fclose(fp);
 	SyntaxTree code;
 	cdata.RegistCFunc("clock", [](ADRThread* thread) {

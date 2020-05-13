@@ -864,9 +864,8 @@ namespace myscript
 		delete blocks;
 		return nullptr;
 	}
-	bool SyntaxTree::ParseText(SyntaxTree& code, const string& str)
+	static void Tokenize(vector<Token>& tokens, const string& str)
 	{
-		vector<Token> tokens;
 		size_t str_size = str.size();
 		string temp = "";
 		size_t marker = 0;
@@ -1140,6 +1139,11 @@ namespace myscript
 		if (marker < str_size)
 			tokens.push_back({predicted, string(str, marker, str_size - marker), lines});
 		tokens.push_back({Token::EOT, "[eof]", lines});
+	}
+	bool SyntaxTree::ParseText(SyntaxTree& code, const string& str)
+	{
+		vector<Token> tokens;
+		Tokenize(tokens, str);
 		// for (auto& token : tokens)
 		// 	printf("[%d] %s\n", token.type, token.str.c_str());
 		size_t index = 0;
