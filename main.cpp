@@ -2,6 +2,7 @@
 #include "bytecode.h"
 #include "parser.h"
 #include <ctime>
+#include <fstream>
 
 using namespace myscript;
 
@@ -10,10 +11,10 @@ int main(int argc, char** argv) {
 	ADRMemory* vm;
 	static bool script_loop = true;
 	FILE* fp = fopen("D:\\script.txt", "a+");
-	if (fp == NULL)
+	if (!fp)
 	{
-		printf("find error and close");
-		return -1;
+		printf("Failed to find script");
+		return EXIT_FAILURE;
 	}
 	char* buffer;
 	long buf_size;
@@ -21,13 +22,13 @@ int main(int argc, char** argv) {
 	buf_size = ftell(fp);
 	buffer = (char*)malloc(buf_size + 1);
 	if (!buffer)
-		return 1;
-	memset(buffer, 0, buf_size + 1);
+	{
+		printf("Failed to allocate buffer");
+		return EXIT_FAILURE;
+	}
 	fseek(fp, 0, SEEK_SET);
 	fread(buffer, buf_size, 1, fp);
 	fclose(fp);
-	// printf("[console input]\n%s\n", buffer);
-	clock_t begin = clock();
 	SyntaxTree code;
 	cdata.RegistCFunc("clock", [](ADRThread* thread) {
 		return thread->CreateNumber(clock());
@@ -89,8 +90,6 @@ int main(int argc, char** argv) {
 	}
 	vm = new ADRMemory(cdata);
 	vm->Execute();
-	// printf("[console output]\n");
-	// printf("\n%s\n[using time] = %0.4f (sec)\n", vm->Report().c_str(), (float)(clock() - begin) / CLOCKS_PER_SEC);
 	// while (script_loop)
 	// {
 	// 	fgets(buffer, buf_size - 1, stdin);
