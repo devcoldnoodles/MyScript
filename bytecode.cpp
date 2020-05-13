@@ -66,7 +66,12 @@ namespace myscript
 		sprintf_s(temp, buf_size, "[%llu lines] %s", err.line, err.inf.c_str());
 		return temp;
 	}
-
+	void ADRMemory::Execute()
+	{
+		auto thread = new ADRThread(this, &codes[0]);
+		threads.push_back(thread);
+		thread->Execute();
+	}
 	ADRMemory::ADRMemory(CompliationData& data) : codes(data.code)
 	{
 		memory = (char*)malloc(capacity = 1024 * 1024);
@@ -457,7 +462,7 @@ namespace myscript
 				uint16_t operand = (uint16_t)*cursor++;
 				if (stack.empty())
 				{
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				machine->UnLock(machine->global[operand]);
@@ -612,7 +617,7 @@ namespace myscript
 			{
 				if (callstack.empty())
 				{
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				cursor = callstack.back();
@@ -625,7 +630,7 @@ namespace myscript
 			{
 				if (callstack.empty())
 				{
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				cursor = callstack.back();
@@ -675,7 +680,7 @@ namespace myscript
 				if (stack.size() < 3)
 				{
 					errors.push_back({"잘못된 호출", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* arr = StackBack(0);
@@ -686,7 +691,7 @@ namespace myscript
 					if (key->type != Object::NUMBER)
 					{
 						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
-						callback = -1;
+						callback = 0;
 						break;
 					}
 					size_t index = static_cast<size_t>(*(double *)key->content);
@@ -694,7 +699,7 @@ namespace myscript
 					if (index >= size)
 					{
 						errors.push_back({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
-						callback = -1;
+						callback = 0;
 						break;
 					}
 					Object* *elements = (Object* *)arr->content;
@@ -709,20 +714,20 @@ namespace myscript
 					if (key->type != Object::NUMBER)
 					{
 						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
-						callback = -1;
+						callback = 0;
 						break;
 					}
 					size_t index = static_cast<size_t>(*(double *)key->content);
 					if (index >= arr->size)
 					{
 						errors.push_back({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
-						callback = -1;
+						callback = 0;
 						break;
 					}
 					if (value->type != Object::STRING)
 					{
 						errors.push_back({"문자만 대입가능합니다.", 0});
-						callback = -1;
+						callback = 0;
 						break;
 					}
 					arr->content[index] = value->content[0];
@@ -732,7 +737,7 @@ namespace myscript
 				else
 				{
 					errors.push_back({"왼쪽 표현식은 인덱스 참조가 불가능합니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 			}
@@ -742,7 +747,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 호출.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* arr = StackBack(0);
@@ -752,7 +757,7 @@ namespace myscript
 					if (key->type != Object::NUMBER)
 					{
 						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
-						callback = -1;
+						callback = 0;
 						break;
 					}
 					size_t index = static_cast<size_t>(*(double *)key->content);
@@ -760,7 +765,7 @@ namespace myscript
 					if (index >= size)
 					{
 						errors.push_back({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
-						callback = -1;
+						callback = 0;
 						break;
 					}
 					Object* *elements = (Object* *)arr->content;
@@ -772,14 +777,14 @@ namespace myscript
 					if (key->type != Object::NUMBER)
 					{
 						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
-						callback = -1;
+						callback = 0;
 						break;
 					}
 					size_t index = static_cast<size_t>(*(double *)key->content);
 					if (index >= arr->size)
 					{
 						errors.push_back({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
-						callback = -1;
+						callback = 0;
 						break;
 					}
 					StackPop(2);
@@ -788,7 +793,7 @@ namespace myscript
 				else
 				{
 					errors.push_back({"왼쪽 표현식은 인덱스 참조가 불가능합니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 			}
@@ -798,7 +803,7 @@ namespace myscript
 				if (stack.size() < 3)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* arr = StackBack(0);
@@ -807,7 +812,7 @@ namespace myscript
 				if (arr->type != Object::OBJECT)
 				{
 					errors.push_back({"참조할 수 없는 객체입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* *elements = (Object* *)arr->content;
@@ -839,7 +844,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* arr = StackBack(0);
@@ -847,7 +852,7 @@ namespace myscript
 				if (arr->type != Object::OBJECT)
 				{
 					errors.push_back({"참조할 수 없는 객체입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* *elements = (Object* *)arr->content;
@@ -875,7 +880,7 @@ namespace myscript
 				if (stack.size() < 1)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateNOT(stack.back());
@@ -888,7 +893,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateEQ(StackBack(1), StackBack(0));
@@ -901,7 +906,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = machine->p_null;
@@ -943,7 +948,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = machine->p_null;
@@ -976,7 +981,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateGE(StackBack(1), StackBack(0));
@@ -989,7 +994,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateLT(StackBack(1), StackBack(0));
@@ -1002,7 +1007,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateLE(StackBack(1), StackBack(0));
@@ -1015,7 +1020,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateOR(StackBack(1), StackBack(0));
@@ -1028,7 +1033,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateAND(StackBack(1), StackBack(0));
@@ -1041,7 +1046,7 @@ namespace myscript
 				if (stack.size() < 1)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateSIGN(stack.back());
@@ -1054,7 +1059,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateADD(StackBack(1), StackBack(0));
@@ -1067,7 +1072,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateSUB(StackBack(1), StackBack(0));
@@ -1080,7 +1085,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateMUL(StackBack(1), StackBack(0));
@@ -1093,7 +1098,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateDIV(StackBack(1), StackBack(0));
@@ -1106,7 +1111,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperateMOD(StackBack(1), StackBack(0));
@@ -1119,7 +1124,7 @@ namespace myscript
 				if (stack.size() < 2)
 				{
 					errors.push_back({"잘못된 바이트코드입니다.", 0});
-					callback = -1;
+					callback = 0;
 					break;
 				}
 				Object* operand = OperatePOW(StackBack(1), StackBack(0));
@@ -1128,7 +1133,7 @@ namespace myscript
 			}
 			break;
 			default:
-				callback = -1;
+				callback = 0;
 				break;
 			}
 		}

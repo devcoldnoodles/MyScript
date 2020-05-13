@@ -50,12 +50,7 @@ namespace myscript
 		friend class ADRThread;
 		ADRMemory(CompliationData& data);
 		~ADRMemory();
-		inline void Execute()
-		{
-			auto thread = new ADRThread(this, &codes[0]);
-			threads.push_back(thread);
-			thread->Execute();
-		}
+		void Execute();
 		inline void Lock(Object* index)
 		{
 			allocs.insert(index);
