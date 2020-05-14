@@ -640,11 +640,27 @@ namespace myscript
 				basestack.pop_back();
 			}
 			break;
+			case OpCode::NEW:
+			{
+				uint16_t operand = (uint16_t)*cursor++;
+				Object* target = machine->global[operand];
+				if(target->type != Object::METADATA)
+				{
+					errors.push_back({"invalid operation"});
+					callback = 0;
+					break;
+				}
+				Object* dest = machine->CreateHeader(Object::OBJECT, sizeof(Object*) * (stack.size() - basestack.back() -1), operand);
+				Object** content = (Object**)dest->content;
+				StackErase(basestack.back() - 1, stack.size());
+				StackPush(dest);
+			}
+			break;
 			case OpCode::INSTARR:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
 				Object* addr = machine->CreateHeader(Object::ARRAY, operand * sizeof(Object* ));
-				Object* *content = (Object* *)addr->content;
+				Object**content = (Object**)addr->content;
 				for (size_t index = 0; index < operand; ++index)
 				{
 					content[index] = stack.back();
@@ -657,7 +673,7 @@ namespace myscript
 			{
 				uint16_t operand = (uint16_t)*cursor++;
 				Object* addr = machine->CreateHeader(Object::OBJECT, operand * sizeof(Object* ) * 2);
-				Object* *content = (Object* *)addr->content;
+				Object**content = (Object**)addr->content;
 				for (size_t index = 0; index < operand; ++index)
 				{
 					content[index * 2] = stack.back();
@@ -702,7 +718,7 @@ namespace myscript
 						callback = 0;
 						break;
 					}
-					Object* *elements = (Object* *)arr->content;
+					Object** elements = (Object**)arr->content;
 					machine->UnLock(elements[index]);
 					machine->Lock(value);
 					elements[index] = value;
@@ -768,7 +784,7 @@ namespace myscript
 						callback = 0;
 						break;
 					}
-					Object* *elements = (Object* *)arr->content;
+					Object** elements = (Object**)arr->content;
 					StackPop(2);
 					StackPush(elements[index]);
 				}
@@ -815,7 +831,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* *elements = (Object* *)arr->content;
+				Object** elements = (Object**)arr->content;
 				size_t size = arr->size / sizeof(Object* ) / 2;
 				size_t index = 0;
 				while (index < size)
@@ -855,7 +871,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* *elements = (Object* *)arr->content;
+				Object** elements = (Object**)arr->content;
 				size_t size = arr->size / sizeof(Object* ) / 2;
 				size_t index = 0;
 				while (index < size)

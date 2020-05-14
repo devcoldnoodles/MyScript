@@ -23,12 +23,12 @@ namespace myscript
 			NEQ, // !=
 			QUESTION, // ?
 			NOT, // !
-			BAR, // |
-			ASSIGNBAR, // |=
+			BOR, // |
+			ASSIGN_BOR, // |=
 			OR, // ||
-			amp, // &
-			amp_equal, // &=
-			amp_amp, // &&
+			BAND, // &
+			ASSIGN_BAND, // &=
+			AND, // &&
 			ADD, // +
 			ASSIGN_ADD, // +=
 			INC, // ++
@@ -61,9 +61,8 @@ namespace myscript
 			SEMICOLON, // ;	
 			APOSTROPHE, // '
 			QUOTATION, // "
-			LITERAL_NUMBER, // literal of number
-			LITERAL_STRING, // literal of string
-			LITERAL_BOOL, // literal of bool
+			NUMBER, // literal of number
+			STRING, // literal of string
 			VAR, // var
 			CONST, // const
 			STATIC, // static
@@ -132,7 +131,7 @@ namespace myscript
 		REFGET, //
 		ARRSET, //
 		ARRGET, //
-		INST, //
+		NEW, //
 		DEF, // define class
 		AS, // operator as
 		IS, // operator is

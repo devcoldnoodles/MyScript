@@ -24,13 +24,18 @@ namespace myscript
 		SyntaxLiteral(const Token _data) : data(_data) { line = _data.line; }
 		bool CreateRCode(CompliationData& cd)
 		{
-			if (data.type == Token::NULLPTR)
+			switch (data.type)
+			{
+			case Token::NULLPTR:
 				cd.code.push_back(OpCode::PUSHNULL);
-			else if (data.type == Token::TRUE)
+				break;
+			case Token::TRUE:
 				cd.code.push_back(OpCode::PUSHTRUE);
-			else if (data.type == Token::FALSE)
+				break;
+			case Token::FALSE:
 				cd.code.push_back(OpCode::PUSHFALSE);
-			else if (data.type == Token::LITERAL_NUMBER)
+				break;
+			case Token::LITERAL_NUMBER:
 			{
 				double value = stod(data.str);
 				if (value <= std::numeric_limits<float>::max())
@@ -52,7 +57,8 @@ namespace myscript
 					delete dvalue;
 				}
 			}
-			else if (data.type == Token::LITERAL_STRING)
+			break;
+			case Token::LITERAL_STRING:
 			{
 				string& str = data.str;
 				size_t str_size = str.size();
@@ -66,9 +72,13 @@ namespace myscript
 				else
 					cd.code.push_back(str[index]);
 			}
+			break;
+			default:
+				cd.errors.push_back({"Invalid literal type", line});
+				return false;
+			}
 			return true;
 		}
-		
 	};
 	struct SyntaxIdentifier : SyntaxExpr
 	{
@@ -664,7 +674,7 @@ namespace myscript
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd.code.back() = OpCode::INST;
+			cd.code.back() = OpCode::NEW;
 			return true;
 		}
 	};

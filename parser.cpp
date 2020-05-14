@@ -120,7 +120,7 @@ namespace myscript
 		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParseCmp(tokens, temp, errors)) == nullptr)
 			return nullptr;
-		while (tokens[temp].type == Token::amp_amp)
+		while (tokens[temp].type == Token::AND)
 		{
 			if ((rexp = ParseCmp(tokens, ++temp, errors)) != nullptr)
 			{
@@ -500,8 +500,8 @@ namespace myscript
 	{
 		switch (tokens[index].type)
 		{
-		case Token::LITERAL_NUMBER:
-		case Token::LITERAL_STRING:
+		case Token::NUMBER:
+		case Token::STRING:
 		case Token::TRUE:
 		case Token::FALSE:
 		case Token::NULLPTR:
@@ -537,7 +537,7 @@ namespace myscript
 		}
 		if (tokens[temp].type == Token::LT)
 		{
-			if (tokens[++temp].type == Token::LITERAL_NUMBER)
+			if (tokens[++temp].type == Token::NUMBER)
 			{
 				size_t init = static_cast<size_t>(stoi(tokens[temp++].str));
 				for (size_t index = expr->elements.size(); index < init; ++index)
@@ -563,7 +563,7 @@ namespace myscript
 		SyntaxExpr* key;
 		SyntaxExpr* value;
 		if (tokens[temp].type == Token::IDENTIFIER)
-			key = new SyntaxLiteral({Token::LITERAL_STRING, tokens[temp].str, tokens[temp].line}), ++temp;
+			key = new SyntaxLiteral({Token::STRING, tokens[temp].str, tokens[temp].line}), ++temp;
 		else if ((key = ParseLiteral(tokens, temp, errors)) == NULL)
 			return NULL;
 		if (tokens[temp++].type != Token::COLON)
@@ -882,7 +882,7 @@ namespace myscript
 					marker = index + 1;
 					break;
 				case '\"':
-					predicted = Token::LITERAL_STRING;
+					predicted = Token::STRING;
 					marker = index + 1;
 					break;
 				case '\r':case '\n':
@@ -890,7 +890,7 @@ namespace myscript
 					++lines;
 					break;
 				case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
-					predicted = Token::LITERAL_NUMBER;
+					predicted = Token::NUMBER;
 					marker = index;
 					break;
 				case ':':
@@ -1001,20 +1001,20 @@ namespace myscript
 					break;
 				case '|':
 					if (str[index + 1] == '=')
-						tokens.push_back({Token::ASSIGNBAR, "|=", lines}), ++index;
+						tokens.push_back({Token::ASSIGN_BOR, "|=", lines}), ++index;
 					else if (str[index + 1] == '|')
 						tokens.push_back({Token::OR, "||", lines}), ++index;
 					else
-						tokens.push_back({Token::BAR, "|", lines});
+						tokens.push_back({Token::BOR, "|", lines});
 					marker = index + 1;
 					break;
 				case '&':
 					if (str[index + 1] == '=')
-						tokens.push_back({Token::amp_equal, "&=", lines}), ++index;
+						tokens.push_back({Token::ASSIGN_BAND, "&=", lines}), ++index;
 					else if (str[index + 1] == '&')
-						tokens.push_back({Token::amp_amp, "&&", lines}), ++index;
+						tokens.push_back({Token::AND, "&&", lines}), ++index;
 					else
-						tokens.push_back({Token::amp, "&", lines});
+						tokens.push_back({Token::BAND, "&", lines});
 					marker = index + 1;
 					break;
 				case '^':
@@ -1037,7 +1037,7 @@ namespace myscript
 					break;
 				}
 				break;
-			case Token::LITERAL_STRING:
+			case Token::STRING:
 				switch (str[index])
 				{
 				case '\"':
@@ -1078,7 +1078,7 @@ namespace myscript
 					break;
 				}
 				break;
-			case Token::LITERAL_NUMBER:
+			case Token::NUMBER:
 				if(!(str[index] >= '0' && str[index] <= '9'))
 				{
 					tokens.push_back({predicted, string(str, marker, index - marker), lines});
