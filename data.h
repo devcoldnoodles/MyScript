@@ -156,8 +156,8 @@ namespace myscript
 	struct VarDesc
 	{
 		string name;
-		enum : uint16_t{
-			NONE = 0,
+		enum : uint16_t {
+			VAR = 0,
 			CONST = 1,
 			STATIC = 2,
 			PUBLIC = 4,
@@ -173,7 +173,12 @@ namespace myscript
 		LocalScope* prev;
 		LocalScope* next;
 	};
-	struct CompliationData
+	struct ScriptState
+	{
+		std::vector<LocalScope> scope;
+		std::map<string, void*> variables;
+	};
+	struct Compliation
 	{
 		vector<uint16_t> code;
 		map<string, CFunction> regist_func;

@@ -48,7 +48,7 @@ namespace myscript
 		vector<ADRThread*> threads;
 	public:
 		friend class ADRThread;
-		ADRMemory(CompliationData& data);
+		ADRMemory(Compliation& data);
 		~ADRMemory();
 		void Execute();
 		inline void Lock(Object* index)

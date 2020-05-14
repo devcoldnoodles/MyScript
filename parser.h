@@ -11,18 +11,18 @@ namespace myscript
 	{
 		size_t line;
 		virtual string GetType() { return "empty"; }
-		virtual bool CreateCode(CompliationData* cd) { return false; }
+		virtual bool CreateCode(Compliation* cd) { return false; }
 	};
 	struct SyntaxExpr : SyntaxNode
 	{
-		virtual bool CreateLCode(CompliationData* cd) { return false; } 
-		virtual bool CreateRCode(CompliationData* cd) { return false; }
+		virtual bool CreateLCode(Compliation* cd) { return false; } 
+		virtual bool CreateRCode(Compliation* cd) { return false; }
 	};
 	struct SyntaxLiteral : SyntaxExpr
 	{
 		Token data;
 		SyntaxLiteral(const Token _data) : data(_data) { line = _data.line; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			switch (data.type)
 			{
@@ -85,7 +85,7 @@ namespace myscript
 		string id;
 		
 		SyntaxIdentifier(const Token& _token) : id(_token.str) { line = _token.line; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			uint16_t value = cd->Identify(id);
 			if (value == 0xFFFF)
@@ -111,7 +111,7 @@ namespace myscript
 			cd->code.push_back(value);
 			return true;
 		}
-		bool CreateLCode(CompliationData* cd)
+		bool CreateLCode(Compliation* cd)
 		{
 			uint16_t value = cd->Identify(id);
 			if (value == 0xFFFF)
@@ -160,11 +160,11 @@ namespace myscript
 		SyntaxComma(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) { line = lexpr->line; }
 		~SyntaxComma() { delete lexpr;	delete rexpr; }
 		
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			return CreateRCode(cd);
 		}
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
@@ -179,7 +179,7 @@ namespace myscript
 		SyntaxNot(SyntaxExpr* _expr) : expr(_expr) { line = _expr->line; }
 		~SyntaxNot() { delete expr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -194,7 +194,7 @@ namespace myscript
 		SyntaxOr(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) { line = lexpr->line; }
 		~SyntaxOr() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -211,7 +211,7 @@ namespace myscript
 		SyntaxAnd(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxAnd() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -228,7 +228,7 @@ namespace myscript
 		SyntaxXor(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxXor() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -245,7 +245,7 @@ namespace myscript
 		SyntaxEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxEqual() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -262,7 +262,7 @@ namespace myscript
 		SyntaxNotEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxNotEqual() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -279,7 +279,7 @@ namespace myscript
 		SyntaxGreatThan(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxGreatThan() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -296,7 +296,7 @@ namespace myscript
 		SyntaxGreatEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxGreatEqual() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -313,7 +313,7 @@ namespace myscript
 		SyntaxLessThan(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxLessThan() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -330,7 +330,7 @@ namespace myscript
 		SyntaxLessEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxLessEqual() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -347,7 +347,7 @@ namespace myscript
 		SyntaxAdd(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxAdd() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -364,7 +364,7 @@ namespace myscript
 		SyntaxSub(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxSub() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -381,7 +381,7 @@ namespace myscript
 		SyntaxMul(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxMul() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -398,7 +398,7 @@ namespace myscript
 		SyntaxDiv(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxDiv() { delete lexpr, rexpr; }
 		
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -416,7 +416,7 @@ namespace myscript
 		~SyntaxMod() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "mod"; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -434,7 +434,7 @@ namespace myscript
 		~SyntaxPow() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "pow"; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -452,7 +452,7 @@ namespace myscript
 		~SyntaxAssign() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "assign"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
@@ -461,7 +461,7 @@ namespace myscript
 			cd->code.push_back(OpCode::POP);
 			return true;
 		}
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
@@ -477,7 +477,7 @@ namespace myscript
 		~SyntaxPrefixPlus() { delete expr; }
 		
 		string GetType() const { return "minus"; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -491,7 +491,7 @@ namespace myscript
 		~SyntaxPrefixMinus() { delete expr; }
 		
 		string GetType() const { return "minus"; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -506,7 +506,7 @@ namespace myscript
 		~SyntaxPrefixPlusx2() { delete expr; }
 		
 		string GetType() const { return "prefix plusx2"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -522,7 +522,7 @@ namespace myscript
 			cd->code.push_back(OpCode::POP);
 			return true;
 		}
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -545,7 +545,7 @@ namespace myscript
 		~SyntaxPostfixPlusx2() { delete expr; }
 		
 		string GetType() const { return "postfix plusx2"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -561,7 +561,7 @@ namespace myscript
 			cd->code.push_back(OpCode::POP);
 			return true;
 		}
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -588,7 +588,7 @@ namespace myscript
 		~SyntaxPrefixMinusx2() { delete expr; }
 		
 		string GetType() const { return "minusx2"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -604,7 +604,7 @@ namespace myscript
 			cd->code.push_back(OpCode::POP);
 			return true;
 		}
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -627,7 +627,7 @@ namespace myscript
 		~SyntaxPostfixMinusx2() { delete expr; }
 		
 		string GetType() const { return "minusx2"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -643,7 +643,7 @@ namespace myscript
 			cd->code.push_back(OpCode::POP);
 			return true;
 		}
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -670,7 +670,7 @@ namespace myscript
 		~SyntaxNew() { delete expr; }
 		
 		string GetType() const { return "new"; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -686,7 +686,7 @@ namespace myscript
 		~SyntaxAs() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "as"; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -704,7 +704,7 @@ namespace myscript
 		~SyntaxIs() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "is"; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -722,7 +722,7 @@ namespace myscript
 		~SyntaxDot() { delete expr; }
 		
 		string GetType() const { return "dot"; }
-		bool CreateLCode(CompliationData* cd)
+		bool CreateLCode(Compliation* cd)
 		{
 			size_t str_size = str.size();
 			size_t index = 0;
@@ -739,7 +739,7 @@ namespace myscript
 			cd->code.push_back(OpCode::REFSET);
 			return true;
 		}
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			size_t str_size = str.size();
 			size_t index = 0;
@@ -765,7 +765,7 @@ namespace myscript
 		~SyntaxRef() { delete lexpr, rexpr; }
 		
 		string GetType() const { return "ref"; }
-		bool CreateLCode(CompliationData* cd)
+		bool CreateLCode(Compliation* cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
@@ -774,7 +774,7 @@ namespace myscript
 			cd->code.push_back(OpCode::ARRSET);
 			return true;
 		}
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
@@ -792,7 +792,7 @@ namespace myscript
 		~SyntaxCall() { delete expr; for (auto param : params) delete param; }
 		
 		string GetType() const { return "call"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -805,7 +805,7 @@ namespace myscript
 			cd->code.push_back(OpCode::POP);
 			return true;
 		}
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -825,7 +825,7 @@ namespace myscript
 		~SyntaxArray() { for (auto element : elements) delete element; }
 		
 		string GetType() const { return "array"; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			size_t elements_size = elements.size();
 			for (size_t index = 0; index < elements_size; ++index)
@@ -842,7 +842,7 @@ namespace myscript
 		
 		string GetType() const { return "dictionary"; }
 
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			size_t elements_size = elements.size();
 			for (size_t index = 0; index < elements_size; ++index)
@@ -863,7 +863,7 @@ namespace myscript
 
 		~SyntaxDeclare() { for (auto element : elements) delete element.second; }
 		string GetType() const { return "declare"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			for (auto element : elements)
 			{
@@ -904,7 +904,7 @@ namespace myscript
 			}
 			return true;
 		}
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			for (auto element : elements)
 			{
@@ -939,7 +939,7 @@ namespace myscript
 		vector<SyntaxExpr*> sents;
 		virtual ~SyntaxBlock() { for (auto sent : sents) delete sent; }
 		
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			cd->scope.push_back(LocalScope());
 			size_t sents_size = sents.size();
@@ -960,7 +960,7 @@ namespace myscript
 	{
 		vector<Error> errors;
 		static bool ParseText(SyntaxTree& code, const string& str);
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			// for (auto sent = sents.begin(); sent != sents.end(); ++sent)
 			// {
@@ -988,7 +988,7 @@ namespace myscript
 		~SyntaxFunction() { if (sents) delete sents; }
 		
 		string GetType() const { return "function"; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			cd->scope.push_back(LocalScope());
 			size_t param_size = params.size();
@@ -1019,7 +1019,7 @@ namespace myscript
 		SyntaxSingleSentence(SyntaxExpr* _expr = nullptr) : expr(_expr) {}
 		~SyntaxSingleSentence() { delete expr; }
 		
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			if (expr != nullptr)
 				return expr->CreateCode(cd);
@@ -1034,7 +1034,7 @@ namespace myscript
 		~SyntaxIf() { delete cond; delete truesents; if (falsesents) delete falsesents; }
 		
 		string GetType() const { return "if"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			if (!cond->CreateRCode(cd))
 				return false;
@@ -1068,7 +1068,7 @@ namespace myscript
 		~SyntaxLoop() { if (init) delete init; if (prefix_condition) delete prefix_condition; if (postfix_condition) delete postfix_condition; if (loop) delete loop; }
 		
 		string GetType() const { return "loop"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			cd->scope.push_back(LocalScope());
 			if (init != nullptr)
@@ -1143,7 +1143,7 @@ namespace myscript
 		SyntaxReturn(SyntaxExpr* _value) : value(_value) { line = value->line; }
 		~SyntaxReturn() { delete value; }
 		string GetType() const { return "return"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			if (cd->scope.empty())
 			{
@@ -1168,7 +1168,7 @@ namespace myscript
 	{
 		SyntaxContinue(size_t _line) { line = _line; }
 		string GetType() const { return "continue"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			if (cd->scope.empty())
 			{
@@ -1185,7 +1185,7 @@ namespace myscript
 	{
 		SyntaxBreak(size_t _line) { line = _line; }
 		string GetType() const { return "break"; }
-		bool CreateCode(CompliationData* cd)
+		bool CreateCode(Compliation* cd)
 		{
 			if (cd->scope.empty())
 			{
@@ -1203,7 +1203,7 @@ namespace myscript
 		vector<SyntaxExpr*> member;
 		
 		string GetType() const { return "class"; }
-		bool CreateRCode(CompliationData* cd)
+		bool CreateRCode(Compliation* cd)
 		{
 			auto delta = cd->code.size();
 			cd->scope.push_back(LocalScope());

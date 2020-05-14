@@ -72,7 +72,7 @@ namespace myscript
 		threads.push_back(thread);
 		thread->Execute();
 	}
-	ADRMemory::ADRMemory(CompliationData& data) : codes(data.code)
+	ADRMemory::ADRMemory(Compliation& data) : codes(data.code)
 	{
 		memory = (char*)malloc(capacity = 1024 * 1024);
 		Lock(p_null = CreateHeader(Object::NULLPTR, 0));

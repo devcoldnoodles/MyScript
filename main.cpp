@@ -7,8 +7,8 @@
 using namespace myscript;
 
 int main(int argc, char** argv) {
-	CompliationData cdata;
-	ADRMemory* vm;
+	Compliation cdata;
+	VirtualMachine* vm;
 	FILE* fp = fopen("D:\\script.txt", "a+");
 	if (!fp)
 	{
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
 		printf("%s", temp.c_str());
 		goto ErrorHandle;
 	}
-	vm = new ADRMemory(cdata);
+	vm = new VirtualMachine(cdata);
 	vm->Execute();
 	// while (script_loop)
 	// {
