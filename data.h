@@ -1,5 +1,5 @@
-#ifndef DATA_H
-#define DATA_H
+#ifndef __DATA_H__
+#define __DATA_H__
 #include"pch.h"
 
 namespace myscript 

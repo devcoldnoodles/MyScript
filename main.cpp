@@ -9,7 +9,6 @@ using namespace myscript;
 int main(int argc, char** argv) {
 	CompliationData cdata;
 	ADRMemory* vm;
-	static bool script_loop = true;
 	FILE* fp = fopen("D:\\script.txt", "a+");
 	if (!fp)
 	{
@@ -59,22 +58,17 @@ int main(int argc, char** argv) {
 	cdata.RegistCFunc("copy", [](ADRThread *thread) {
 		Object* source = thread->GetParameters()[0];
 		Object* dest = thread->CreateHeader(source->type, source->size, source->adinf);
-		memcpy_s(dest->content, source->size, source->content, source->size);
+		memcpy_s(dest->content, dest->size, source->content, source->size);
 		return dest;
 	});
 	cdata.RegistCFunc("size", [](ADRThread *thread) {
 		return thread->CreateNumber(double(thread->GetParameters()[0]->size - sizeof(Object*)));
 	});
-	cdata.RegistCFunc("exit", [](ADRThread* thread) {
-		script_loop = false;
-		return thread->CreateNull();
-	});
 	if (!SyntaxTree::ParseText(code, string(buffer)))
 	{
 		printf("[parsing error]\n");
 		string temp;
-		size_t error_size = code.errors.size();
-		for (size_t index = 0; index < error_size; ++index)
+		for (size_t index = 0; index < code.errors.size(); ++index)
 			temp += ToString(code.errors[index]) + "\n";
 		printf("%s", temp.c_str());
 		goto ErrorHandle;
@@ -83,8 +77,7 @@ int main(int argc, char** argv) {
 	{
 		printf("[code generate error]\n");
 		string temp;
-		size_t error_size = cdata.errors.size();
-		for (size_t index = 0; index < error_size; ++index)
+		for (size_t index = 0; index < cdata.errors.size(); ++index)
 			temp += ToString(cdata.errors[index]) + "\n";
 		printf("%s", temp.c_str());
 		goto ErrorHandle;

@@ -1,5 +1,5 @@
-#ifndef BYTECODE_H
-#define BYTECODE_H
+#ifndef __BYTECODE_H__
+#define __BYTECODE_H__
 
 #include"pch.h"
 #include"data.h"

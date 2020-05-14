@@ -909,6 +909,10 @@ namespace myscript
 					tokens.push_back({Token::COMMA, ",", lines});
 					marker = index + 1;
 					break;
+				case '?':
+					tokens.push_back({Token::QUESTION, "?", lines});
+					marker = index + 1;
+					break;
 				case '(':
 					tokens.push_back({Token::LPARAM, "(", lines});
 					marker = index + 1;
