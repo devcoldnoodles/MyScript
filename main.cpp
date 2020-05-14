@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
 		printf("%s", temp.c_str());
 		goto ErrorHandle;
 	}
-	if (!code.CreateCode(cdata))
+	if (!code.CreateCode(&cdata))
 	{
 		printf("[code generate error]\n");
 		string temp;
