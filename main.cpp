@@ -16,7 +16,7 @@ int main(int argc, char** argv) {
 		return EXIT_FAILURE;
 	}
 	char* buffer;
-	long buf_size;
+	long buf_size;	
 	fseek(fp, 0, SEEK_END);
 	buf_size = ftell(fp);
 	buffer = (char*)malloc(buf_size + 1);
@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
 		printf("%s", temp.c_str());
 		goto ErrorHandle;
 	}
-	vm = new VirtualMachine(cdata);
+	vm = new VirtualMachine(&cdata);
 	vm->Execute();
 	// while (script_loop)
 	// {

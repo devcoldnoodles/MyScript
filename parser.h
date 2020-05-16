@@ -15,7 +15,7 @@ namespace myscript
 	};
 	struct SyntaxExpr : SyntaxNode
 	{
-		virtual bool CreateLCode(Compliation* cd) { return false; } 
+		virtual bool CreateLCode(Compliation* cd) { return false; }
 		virtual bool CreateRCode(Compliation* cd) { return false; }
 	};
 	struct SyntaxLiteral : SyntaxExpr

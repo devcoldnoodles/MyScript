@@ -66,28 +66,28 @@ namespace myscript
 		sprintf_s(temp, buf_size, "[%llu lines] %s", err.line, err.inf.c_str());
 		return temp;
 	}
-	void ADRMemory::Execute()
+	void VirtualMachine::Execute()
 	{
 		auto thread = new ADRThread(this, &codes[0]);
 		threads.push_back(thread);
 		thread->Execute();
 	}
-	ADRMemory::ADRMemory(Compliation& data) : codes(data.code)
+	VirtualMachine::VirtualMachine(Compliation* data) : codes(data->code)
 	{
 		memory = (char*)malloc(capacity = 1024 * 1024);
 		Lock(p_null = CreateHeader(Object::NULLPTR, 0));
 		Lock(p_true = CreateHeader(Object::BOOLEAN, 0, 1));
 		Lock(p_false = CreateHeader(Object::BOOLEAN, 0));
-		for(auto iter : data.global)
+		for(auto iter : data->global)
 		{
 			names.push_back(iter.name);
 			global.push_back(p_null);
 			Lock(p_null);
 		}
-		for (auto iter : data.regist_func)
+		for (auto iter : data->regist_func)
 			SetGlobalValue(GetGlobalIndex(iter.first), CreateHeader(Object::CFUNCTION, sizeof(CFunction), 0, &iter.second));
 	}
-	ADRMemory::~ADRMemory()
+	VirtualMachine::~VirtualMachine()
 	{
 		free(memory);
 	}
@@ -1153,10 +1153,7 @@ namespace myscript
 				break;
 			}
 		}
-		if (errors.size() > 0)
-		{
-			for (auto error : errors)
-				std::cout << ToString(error).c_str() << std::endl;
-		}
+		for (auto error : errors)
+			std::cout << ToString(error).c_str() << std::endl;
 	}
 }

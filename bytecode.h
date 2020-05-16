@@ -32,7 +32,7 @@ namespace myscript
 	const string ToString(Object*);
 	const string ToString(Error);
 
-	class ADRMemory
+	class VirtualMachine
 	{
 	private:
 		char* memory;
@@ -48,8 +48,8 @@ namespace myscript
 		vector<ADRThread*> threads;
 	public:
 		friend class ADRThread;
-		ADRMemory(Compliation& data);
-		~ADRMemory();
+		VirtualMachine(Compliation* data);
+		~VirtualMachine();
 		void Execute();
 		inline void Lock(Object* index)
 		{
@@ -128,7 +128,7 @@ namespace myscript
 	class ADRThread
 	{
 	private:
-		ADRMemory* machine;
+		VirtualMachine* machine;
 		uint16_t* cursor;
 		vector<Object*> stack;
 		vector<uint16_t*> callstack;
@@ -186,7 +186,7 @@ namespace myscript
 		}
 	public:
 		void Execute();
-		ADRThread(ADRMemory* _machine, uint16_t* _cursor) : machine(_machine), cursor(_cursor)
+		ADRThread(VirtualMachine* _machine, uint16_t* _cursor) : machine(_machine), cursor(_cursor)
 		{
 			stack.reserve(1024);
 			callstack.reserve(256);
