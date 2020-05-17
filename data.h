@@ -176,7 +176,7 @@ namespace myscript
 	struct ScriptState
 	{
 		std::vector<LocalScope> scope;
-		std::map<string, void*> variables;
+		std::map<string, Object*> variables;
 	};
 	struct Compliation
 	{
