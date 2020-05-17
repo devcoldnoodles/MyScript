@@ -340,6 +340,41 @@ namespace myscript
 			return true;
 		}
 	};
+	struct SyntaxUnaryOperator : SyntaxExpr
+	{
+		SyntaxExpr* expr;
+		OpCode operation;
+		~SyntaxUnaryOperator() { if(expr) delete expr; }
+	};
+	struct SyntaxBinaryOperator : SyntaxExpr
+	{
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		OpCode operation;
+		~SyntaxBinaryOperator() { if(lexpr) delete lexpr; if(rexpr) delete rexpr; }
+
+		bool CreateRCode(Compliation* cd)
+		{
+			if (!lexpr->CreateRCode(cd))
+				return false;
+			if (!rexpr->CreateRCode(cd))
+				return false;
+			cd->code.push_back(operation);
+			return true;
+		}
+	};
+	struct SyntaxTernaryOperator : SyntaxExpr
+	{
+		SyntaxExpr* lexpr;
+		SyntaxExpr* expr;
+		SyntaxExpr* rexpr;
+		OpCode operation;
+		
+		bool CreateRCode(Compliation* cd)
+		{
+			
+		}
+	};
 	struct SyntaxAdd : SyntaxExpr // +
 	{
 		SyntaxExpr* lexpr;
