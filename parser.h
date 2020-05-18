@@ -345,6 +345,14 @@ namespace myscript
 		SyntaxExpr* expr;
 		OpCode operation;
 		~SyntaxUnaryOperator() { if(expr) delete expr; }
+
+		bool CreateRCode(Compliation* cd)
+		{
+			if (!expr->CreateRCode(cd))
+				return false;
+			cd->code.push_back(operation);
+			return true;
+		}
 	};
 	struct SyntaxBinaryOperator : SyntaxExpr
 	{
@@ -372,7 +380,11 @@ namespace myscript
 		
 		bool CreateRCode(Compliation* cd)
 		{
-			
+			if(!lexpr->CreateRCode(cd))
+				return false;
+			cd->code.push_back(OpCode::CFJMP);
+			cd->scope.back().endpoint.push_back(cd->code.size());
+			return true;
 		}
 	};
 	struct SyntaxAdd : SyntaxExpr // +
@@ -511,7 +523,7 @@ namespace myscript
 		SyntaxPrefixPlus(SyntaxExpr* _expr) : expr(_expr) {}
 		~SyntaxPrefixPlus() { delete expr; }
 		
-		string GetType() const { return "minus"; }
+		string GetType() const { return "prefix plus"; }
 		bool CreateRCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))
@@ -525,7 +537,7 @@ namespace myscript
 		SyntaxPrefixMinus(SyntaxExpr* _expr) : expr(_expr) {}
 		~SyntaxPrefixMinus() { delete expr; }
 		
-		string GetType() const { return "minus"; }
+		string GetType() const { return "prefix minus"; }
 		bool CreateRCode(Compliation* cd)
 		{
 			if (!expr->CreateRCode(cd))

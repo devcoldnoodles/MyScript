@@ -176,8 +176,8 @@ namespace myscript
 	struct ScriptState
 	{
 		std::vector<LocalScope> scope;
+		std::stack<LocalScope> scope_t;
 		std::map<VarDesc, Object*> variables;
-
 	};
 	struct Compliation
 	{
@@ -186,6 +186,7 @@ namespace myscript
 		vector<LocalScope> scope;
 		vector<VarDesc> global;
 		vector<Error> errors;
+		std::map<VarDesc, Object*> variables;
 
 		const uint16_t Identify(const string& id) const
 		{
