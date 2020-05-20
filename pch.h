@@ -15,6 +15,4 @@
 #include <set>
 #include <stack>
 
-using namespace std;
-
 #endif //PCH_H

@@ -7,7 +7,7 @@
 using namespace myscript;
 
 int main(int argc, char** argv) {
-	Compliation cdata;
+	CompliationDesc cdesc;
 	VirtualMachine* vm;
 	FILE* fp = fopen("D:\\script.txt", "a+");
 	if (!fp)
@@ -30,19 +30,19 @@ int main(int argc, char** argv) {
 	buffer[buf_size] = '\0';
 	fclose(fp);
 	SyntaxTree code;
-	cdata.RegistCFunc("clock", [](ADRThread* thread) {
+	cdesc.RegistCFunc("clock", [](VirtualThread* thread) {
 		return thread->CreateNumber(clock());
 	});
-	cdata.RegistCFunc("typeof", [](ADRThread *thread) {
+	cdesc.RegistCFunc("typeof", [](VirtualThread *thread) {
 		auto params = thread->GetParameters();
 		if (params.size() == 1)
 		{
-			string tpyeinfo = ToString(Object::Type(params[0]->type));
+			std::string tpyeinfo = ToString(Object::Type(params[0]->type));
 			return thread->CreateString(tpyeinfo.c_str(), tpyeinfo.size());
 		}
 		return thread->CreateNull();
 	});
-	cdata.RegistCFunc("print", [](ADRThread *thread) {
+	cdesc.RegistCFunc("print", [](VirtualThread *thread) {
 		auto params = thread->GetParameters();
 		for (auto iter : params)
 		{
@@ -50,39 +50,39 @@ int main(int argc, char** argv) {
 		}
 		return thread->CreateNumber(params.size());
 	});
-	cdata.RegistCFunc("scan", [](ADRThread *thread) {
+	cdesc.RegistCFunc("scan", [](VirtualThread *thread) {
 		char buf[2048];
 		fgets(buf, 2047, stdin);
 		return thread->CreateString(buf, strlen(buf));
 	});
-	cdata.RegistCFunc("copy", [](ADRThread *thread) {
+	cdesc.RegistCFunc("copy", [](VirtualThread *thread) {
 		Object* source = thread->GetParameters()[0];
 		Object* dest = thread->CreateHeader(source->type, source->size, source->adinf);
 		memcpy_s(dest->content, dest->size, source->content, source->size);
 		return dest;
 	});
-	cdata.RegistCFunc("size", [](ADRThread *thread) {
+	cdesc.RegistCFunc("size", [](VirtualThread *thread) {
 		return thread->CreateNumber(double(thread->GetParameters()[0]->size - sizeof(Object*)));
 	});
-	if (!SyntaxTree::ParseText(code, string(buffer)))
+	if (!SyntaxTree::ParseText(code, std::string(buffer)))
 	{
 		printf("[parsing error]\n");
-		string temp;
+		std::string temp;
 		for (size_t index = 0; index < code.errors.size(); ++index)
 			temp += ToString(code.errors[index]) + "\n";
 		printf("%s", temp.c_str());
 		goto ErrorHandle;
 	}
-	if (!code.CreateCode(&cdata))
+	if (!code.CreateCode(&cdesc))
 	{
 		printf("[code generate error]\n");
-		string temp;
-		for (size_t index = 0; index < cdata.errors.size(); ++index)
-			temp += ToString(cdata.errors[index]) + "\n";
+		std::string temp;
+		for (size_t index = 0; index < cdesc.errors.size(); ++index)
+			temp += ToString(cdesc.errors[index]) + "\n";
 		printf("%s", temp.c_str());
 		goto ErrorHandle;
 	}
-	vm = new VirtualMachine(&cdata);
+	vm = new VirtualMachine(&cdesc);
 	vm->Execute();
 	// while (script_loop)
 	// {

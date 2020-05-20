@@ -5,11 +5,11 @@
 
 namespace myscript 
 {
-	SyntaxExpr* ParseExpr(vector<Token> &tokens, size_t &index, vector<Error> &errors)
+	SyntaxExpr* ParseExpr(std::vector<Token> &tokens, size_t &index, std::vector<Error> &errors)
 	{
 		return ParseComma(tokens, index, errors);
 	}
-	SyntaxExpr* ParseComma(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseComma(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* lexp = nullptr;
@@ -29,7 +29,7 @@ namespace myscript
 		index = temp;
 		return lexp;
 	}
-	SyntaxExpr* ParseAssign(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseAssign(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* lexp = nullptr;
@@ -93,7 +93,7 @@ namespace myscript
 		delete lexp;
 		return nullptr;
 	}
-	SyntaxExpr* ParseOr(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseOr(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* lexp = nullptr;
@@ -113,7 +113,7 @@ namespace myscript
 		index = temp;
 		return lexp;
 	}
-	SyntaxExpr* ParseAnd(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseAnd(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* lexp = nullptr;
@@ -135,7 +135,7 @@ namespace myscript
 		delete lexp;
 		return nullptr;
 	}
-	SyntaxExpr* ParseCmp(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseCmp(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* lexp = nullptr;
@@ -199,7 +199,7 @@ namespace myscript
 		delete lexp;
 		return nullptr;
 	}
-	SyntaxExpr* ParseAdd(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseAdd(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* lexp = nullptr;
@@ -229,7 +229,7 @@ namespace myscript
 		index = temp;
 		return lexp;
 	}
-	SyntaxExpr* ParseMul(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseMul(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* lexp = nullptr;
@@ -267,7 +267,7 @@ namespace myscript
 		index = temp;
 		return lexp;
 	}
-	SyntaxExpr* ParsePow(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParsePow(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* lexp = nullptr;
@@ -286,7 +286,7 @@ namespace myscript
 		index = temp;
 		return lexp;
 	}
-	SyntaxExpr* ParsePrefix(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParsePrefix(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* expr = nullptr;
@@ -348,7 +348,7 @@ namespace myscript
 		index = temp;
 		return expr;
 	}
-	SyntaxExpr* ParsePostfix(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParsePostfix(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* lexp = nullptr;
@@ -432,7 +432,7 @@ namespace myscript
 		delete lexp;
 		return nullptr;
 	}
-	SyntaxExpr* ParseElement(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseElement(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* expr = nullptr;
@@ -488,7 +488,7 @@ namespace myscript
 		delete expr;
 		return nullptr;
 	}
-	SyntaxExpr* ParseLiteral(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseLiteral(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* expr = nullptr;
@@ -496,7 +496,7 @@ namespace myscript
 			index = temp;
 		return expr;
 	}
-	SyntaxExpr* ParseSimpleLiteral(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseSimpleLiteral(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		switch (tokens[index].type)
 		{
@@ -509,7 +509,7 @@ namespace myscript
 		}
 		return nullptr;
 	}
-	SyntaxExpr* ParseArray(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseArray(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxArray* expr = new SyntaxArray();
@@ -557,7 +557,7 @@ namespace myscript
 		delete expr;
 		return nullptr;
 	}
-	pair<SyntaxExpr*, SyntaxExpr*>* ParseKeyVal(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	std::pair<SyntaxExpr*, SyntaxExpr*>* ParseKeyVal(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* key;
@@ -574,16 +574,16 @@ namespace myscript
 			goto ErrorHandle;
 		}
 		index = temp;
-		return new pair<SyntaxExpr*, SyntaxExpr*>(key, value);
+		return new std::pair<SyntaxExpr*, SyntaxExpr*>(key, value);
 	ErrorHandle:
 		delete key;
 		return NULL;
 	}
-	SyntaxExpr* ParseDictionary(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseDictionary(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxDictionary* dict = new SyntaxDictionary();
-		pair<SyntaxExpr*, SyntaxExpr*>* key;
+		std::pair<SyntaxExpr*, SyntaxExpr*>* key;
 		if (tokens[temp++].type != Token::LBRACKET)
 			goto ErrorHandle;
 		if ((key = ParseKeyVal(tokens, temp, errors)) != NULL)
@@ -610,7 +610,7 @@ namespace myscript
 		delete dict;
 		return NULL;
 	}
-	SyntaxExpr* ParseFunction(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseFunction(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxFunction* expr = new SyntaxFunction();
@@ -644,21 +644,21 @@ namespace myscript
 		delete expr;
 		return nullptr;
 	}
-	SyntaxExpr* ParseSentence(vector<Token>& tokens, size_t& index, vector<Error>& errors, size_t args_count ...)
+	SyntaxExpr* ParseSentence(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors, size_t args_count ...)
 	{
 		size_t temp = index;
 		SyntaxExpr* sent = nullptr;
 		va_list args_ptr;
 		va_start(args_ptr, args_count);
 		for (size_t count = 0; count < args_count; ++count)
-			if ((sent = va_arg(args_ptr, SyntaxExpr* (*)(vector<Token>&, size_t&, vector<Error>&))(tokens, temp, errors)) != nullptr)
+			if ((sent = va_arg(args_ptr, SyntaxExpr* (*)(std::vector<Token>&, size_t&, std::vector<Error>&))(tokens, temp, errors)) != nullptr)
 				break;
 		va_end(args_ptr);
 		while (tokens[temp].type == Token::SEMICOLON)	++temp;
 		index = temp;
 		return sent;
 	}
-	SyntaxExpr* ParseIf(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseIf(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxIf* sent = new SyntaxIf();
@@ -689,7 +689,7 @@ namespace myscript
 		delete sent;
 		return nullptr;
 	}
-	SyntaxExpr* ParseLoop(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseLoop(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxLoop* sent = new SyntaxLoop();
@@ -739,7 +739,7 @@ namespace myscript
 		delete sent;
 		return nullptr;
 	}
-	SyntaxExpr* ParseDeclare(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxExpr* ParseDeclare(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxDeclare* expr = new SyntaxDeclare();
@@ -765,7 +765,7 @@ namespace myscript
 						goto ErrorHandle;
 					}
 				}
-				expr->elements.push_back(make_pair(desc, init));
+				expr->elements.push_back(std::make_pair(desc, init));
 			} while (tokens[temp].type == Token::COMMA);
 		}
 		break;
@@ -774,7 +774,7 @@ namespace myscript
 			if (tokens[temp].type != Token::IDENTIFIER)
 				goto ErrorHandle;
 			SyntaxFunction* func = new SyntaxFunction();
-			expr->elements.push_back(make_pair(desc = {tokens[temp++].str, VarDesc::CONST}, func));
+			expr->elements.push_back(std::make_pair(desc = {tokens[temp++].str, VarDesc::CONST}, func));
 			if (tokens[temp++].type != Token::LPARAM)
 			{
 				errors.push_back({"Expected (", tokens[--temp].line});
@@ -807,7 +807,7 @@ namespace myscript
 			if (tokens[temp].type != Token::IDENTIFIER)
 				goto ErrorHandle;
 			SyntaxClass* clsinf = new SyntaxClass();
-			expr->elements.push_back(make_pair(desc = {tokens[temp++].str, VarDesc::CONST}, clsinf));
+			expr->elements.push_back(std::make_pair(desc = {tokens[temp++].str, VarDesc::CONST}, clsinf));
 			if (tokens[temp++].type != Token::LBRACKET)
 			{
 				errors.push_back({"Expected {", tokens[--temp].line});
@@ -834,7 +834,7 @@ namespace myscript
 		delete expr;
 		return nullptr;
 	}
-	SyntaxBlock* ParseBlock(vector<Token>& tokens, size_t& index, vector<Error>& errors)
+	SyntaxBlock* ParseBlock(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxBlock* blocks = new SyntaxBlock();
@@ -864,10 +864,10 @@ namespace myscript
 		delete blocks;
 		return nullptr;
 	}
-	static void Tokenize(vector<Token>& tokens, const string& str)
+	static void Tokenize(std::vector<Token>& tokens, const std::string& str)
 	{
 		size_t str_size = str.size();
-		string temp = "";
+		std::string temp = "";
 		size_t marker = 0;
 		size_t lines = 1;
 		Token::Type predicted = Token::NONE;
@@ -1085,7 +1085,7 @@ namespace myscript
 			case Token::NUMBER:
 				if(!(str[index] >= '0' && str[index] <= '9'))
 				{
-					tokens.push_back({predicted, string(str, marker, index - marker), lines});
+					tokens.push_back({predicted, std::string(str, marker, index - marker), lines});
 					predicted = Token::NONE;
 					index--;
 				}
@@ -1093,7 +1093,7 @@ namespace myscript
 			case Token::IDENTIFIER:
 				if(!(str[index] >= 'a' && str[index] <= 'z') && !(str[index] >= 'A' && str[index] <= 'Z') && !(str[index] >= '0' && str[index] <= '9') && str[index] != '_')
 				{
-					string id = string(str, marker, index - marker);
+					std::string id = std::string(str, marker, index - marker);
 					tokens.push_back({id == "if" ? Token::IF :
 		 			id == "else" ? Token::ELSE :
 					id == "match" ? Token::MATCh :
@@ -1141,12 +1141,12 @@ namespace myscript
 			}
 		}
 		if (marker < str_size)
-			tokens.push_back({predicted, string(str, marker, str_size - marker), lines});
+			tokens.push_back({predicted, std::string(str, marker, str_size - marker), lines});
 		tokens.push_back({Token::EOT, "[eof]", lines});
 	}
-	bool SyntaxTree::ParseText(SyntaxTree& code, const string& str)
+	bool SyntaxTree::ParseText(SyntaxTree& code, const std::string& str)
 	{
-		vector<Token> tokens;
+		std::vector<Token> tokens;
 		Tokenize(tokens, str);
 		// for (auto& token : tokens)
 		// 	printf("[%d] %s\n", token.type, token.str.c_str());

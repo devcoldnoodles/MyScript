@@ -3,7 +3,7 @@
 
 namespace myscript 
 {
-	const string ToString(Object::Type type)
+	const std::string ToString(Object::Type type)
 	{
 		return type == Object::NULLPTR ? "null" :
 			type == Object::BOOLEAN ? "boolean" :
@@ -15,7 +15,7 @@ namespace myscript
 			type == Object::COBJECT ? "cobject" :
 			type == Object::CFUNCTION ? "cfunction" : "error";
 	}
-	const string ToString(Object* object)
+	const std::string ToString(Object* object)
 	{
 		switch (object->type)
 		{
@@ -35,7 +35,7 @@ namespace myscript
 			return "cfunction";
 		case Object::ARRAY:
 		{
-			string temp = "array [ ";
+			std::string temp = "array [ ";
 			Object** element_content = (Object**)object->content;
 			size_t count = object->size / sizeof(Object*);
 			for (size_t index = 0; index < count; ++index)
@@ -45,7 +45,7 @@ namespace myscript
 		}
 		case Object::OBJECT:
 		{
-			string temp = "object { \n";
+			std::string temp = "object { \n";
 			Object** element_content = (Object**)object->content;
 			size_t count = object->size / sizeof(Object*) / 2;
 			for (size_t index = 0; index < count; ++index)
@@ -59,7 +59,7 @@ namespace myscript
 			return "error";
 		}
 	}
-	const string ToString(Error err)
+	const std::string ToString(Error err)
 	{
 		constexpr unsigned int buf_size = 64;
 		char temp[buf_size];
@@ -68,11 +68,11 @@ namespace myscript
 	}
 	void VirtualMachine::Execute()
 	{
-		auto thread = new ADRThread(this, &codes[0]);
+		auto thread = new VirtualThread(this, &codes[0]);
 		threads.push_back(thread);
 		thread->Execute();
 	}
-	VirtualMachine::VirtualMachine(Compliation* data) : codes(data->code)
+	VirtualMachine::VirtualMachine(CompliationDesc* data) : codes(data->code)
 	{
 		memory = (char*)malloc(capacity = 1024 * 1024);
 		Lock(p_null = CreateHeader(Object::NULLPTR, 0));
@@ -91,7 +91,7 @@ namespace myscript
 	{
 		free(memory);
 	}
-	Object* ADRThread::OperateEQ(Object* l, Object* r)
+	Object* VirtualThread::OperateEQ(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -124,7 +124,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateNEQ(Object* l, Object* r)
+	Object* VirtualThread::OperateNEQ(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -157,7 +157,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateGT(Object* l, Object* r)
+	Object* VirtualThread::OperateGT(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -181,7 +181,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateGE(Object* l, Object* r)
+	Object* VirtualThread::OperateGE(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -205,7 +205,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateLT(Object* l, Object* r)
+	Object* VirtualThread::OperateLT(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -229,7 +229,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateLE(Object* l, Object* r)
+	Object* VirtualThread::OperateLE(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -253,7 +253,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateNOT(Object* l)
+	Object* VirtualThread::OperateNOT(Object* l)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -264,7 +264,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateAND(Object* l, Object* r)
+	Object* VirtualThread::OperateAND(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -278,7 +278,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateOR(Object* l, Object* r)
+	Object* VirtualThread::OperateOR(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -292,7 +292,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateXOR(Object* l, Object* r)
+	Object* VirtualThread::OperateXOR(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		/*
@@ -308,7 +308,7 @@ namespace myscript
 		*/
 		return addr;
 	}
-	Object* ADRThread::OperateSIGN(Object* l)
+	Object* VirtualThread::OperateSIGN(Object* l)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -320,7 +320,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateADD(Object* l, Object* r)
+	Object* VirtualThread::OperateADD(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -364,7 +364,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateSUB(Object* l, Object* r)
+	Object* VirtualThread::OperateSUB(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -380,7 +380,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateMUL(Object* l, Object* r)
+	Object* VirtualThread::OperateMUL(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -396,7 +396,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateDIV(Object* l, Object* r)
+	Object* VirtualThread::OperateDIV(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -412,7 +412,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperateMOD(Object* l, Object* r)
+	Object* VirtualThread::OperateMOD(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -428,7 +428,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* ADRThread::OperatePOW(Object* l, Object* r)
+	Object* VirtualThread::OperatePOW(Object* l, Object* r)
 	{
 		Object* addr = machine->p_null;
 		switch (l->type)
@@ -444,7 +444,7 @@ namespace myscript
 		}
 		return addr;
 	}
-	void ADRThread::Execute()
+	void VirtualThread::Execute()
 	{
 		size_t callback = 1;
 		while (callback)

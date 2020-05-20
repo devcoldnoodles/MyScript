@@ -28,27 +28,27 @@ namespace myscript
 		uint32_t size;
 		char content[0];
 	};
-	const string ToString(Object::Type);
-	const string ToString(Object*);
-	const string ToString(Error);
+	const std::string ToString(Object::Type);
+	const std::string ToString(Object*);
+	const std::string ToString(Error);
 
 	class VirtualMachine
 	{
 	private:
 		char* memory;
 		size_t capacity;
-		multiset<Object*> allocs;
-		vector<Object*> global;
-		map<string, Object*> glob;
-		vector<string> names;
-		vector<uint16_t> codes;
+		std::multiset<Object*> allocs;
+		std::vector<Object*> global;
+		std::map<std::string, Object*> glob;
+		std::vector<std::string> names;
+		std::vector<uint16_t> codes;
 		Object* p_null;
 		Object* p_true;
 		Object* p_false;
-		vector<ADRThread*> threads;
+		std::vector<VirtualThread*> threads;
 	public:
-		friend class ADRThread;
-		VirtualMachine(Compliation* data);
+		friend class VirtualThread;
+		VirtualMachine(CompliationDesc* data);
 		~VirtualMachine();
 		void Execute();
 		inline void Lock(Object* index)
@@ -86,8 +86,8 @@ namespace myscript
 			}
 			return rear_index;
 		}
-		inline size_t GetGlobalIndex(const string& id) { return distance(names.begin(), find(names.begin(), names.end(), id)); }
-		inline Object* GetGlobalValue(const string& id) { return global[GetGlobalIndex(id)]; }
+		inline size_t GetGlobalIndex(const std::string& id) { return distance(names.begin(), find(names.begin(), names.end(), id)); }
+		inline Object* GetGlobalValue(const std::string& id) { return global[GetGlobalIndex(id)]; }
 		inline void SetGlobalValue(const size_t id, Object* ref)
 		{
 			if (global[id] != ref)
@@ -113,27 +113,27 @@ namespace myscript
 			memcpy_s(addr->content, _size, _content, _size);
 			return addr;
 		}
-		string Report()
+		std::string Report()
 		{
-			string temp = "[report]\n";
-			temp += "[Capacity] = " + to_string(capacity) + "\n";
+			std::string temp = "[report]\n";
+			temp += "[Capacity] = " + std::to_string(capacity) + "\n";
 			size_t usingMemory = 0;
 			for (auto iter = allocs.begin(); iter != allocs.end(); iter = allocs.upper_bound(*iter))
 				usingMemory += (*iter)->size;
-			temp += "[Using Space] = " + to_string(usingMemory) + "\n";
-			temp += "[Available Space] = " + to_string(capacity - usingMemory);
+			temp += "[Using Space] = " + std::to_string(usingMemory) + "\n";
+			temp += "[Available Space] = " + std::to_string(capacity - usingMemory);
 			return temp;
 		}
 	};
-	class ADRThread
+	class VirtualThread
 	{
 	private:
 		VirtualMachine* machine;
 		uint16_t* cursor;
-		vector<Object*> stack;
-		vector<uint16_t*> callstack;
-		vector<size_t> basestack;
-		vector<Error> errors;
+		std::vector<Object*> stack;
+		std::vector<uint16_t*> callstack;
+		std::vector<size_t> basestack;
+		std::vector<Error> errors;
 		bool state;
 		Object* OperateEQ(Object* l, Object* r);
 		Object* OperateNEQ(Object* l, Object* r);
@@ -186,7 +186,7 @@ namespace myscript
 		}
 	public:
 		void Execute();
-		ADRThread(VirtualMachine* _machine, uint16_t* _cursor) : machine(_machine), cursor(_cursor)
+		VirtualThread(VirtualMachine* _machine, uint16_t* _cursor) : machine(_machine), cursor(_cursor)
 		{
 			stack.reserve(1024);
 			callstack.reserve(256);
@@ -233,9 +233,9 @@ namespace myscript
 		{
 			return machine->CreateHeader(Object::COBJECT, size, 0, addr);
 		}
-		inline vector<Object*> GetParameters()
+		inline std::vector<Object*> GetParameters()
 		{
-			return vector<Object*>(stack.begin() + basestack.back(), stack.begin() + stack.size());
+			return std::vector<Object*>(stack.begin() + basestack.back(), stack.begin() + stack.size());
 		}
 	};
 }

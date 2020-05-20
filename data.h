@@ -6,8 +6,8 @@ namespace myscript
 {
 	struct SyntaxLiteral;
 	struct Object;
-	class ADRThread;
-	typedef Object* (*CFunction)(ADRThread*);
+	class VirtualThread;
+	typedef Object* (*CFunction)(VirtualThread*);
 
 	struct Token
 	{
@@ -62,7 +62,7 @@ namespace myscript
 			APOSTROPHE, // '
 			QUOTATION, // "
 			NUMBER, // literal of number
-			STRING, // literal of string
+			STRING, // literal of std::string
 			VAR, // var
 			CONST, // const
 			STATIC, // static
@@ -88,12 +88,12 @@ namespace myscript
 			AS, // as
 		};
 		Type type;
-		string str;
+		std::string str;
 		size_t line;
 	};
 	struct Error
 	{
-		string inf;
+		std::string inf;
 		size_t line;
 	};
 	enum OpCode : uint16_t
@@ -103,7 +103,7 @@ namespace myscript
 		PUSHBINARY, // push binary at stack
 		PUSHDWORD, // push 4byte nubmer at stack 
 		PUSHQWORD, // push 8byte nubmer at stack
-		PUSHSTR, //  push string at stack
+		PUSHSTR, //  push std::string at stack
 		PUSHFUNC, // push function at stack
 		PUSHNULL, // push null at stack
 		PUSHTRUE, // push true at stack
@@ -155,7 +155,7 @@ namespace myscript
 	};
 	struct VarDesc
 	{
-		string name;
+		std::string name;
 		enum : uint16_t {
 			VAR = 0,
 			CONST = 1,
@@ -164,14 +164,21 @@ namespace myscript
 			PRIVATE = 8,
 			INTERNAL = 16,
 		} option;
+
+		bool operator==(VarDesc desc)
+		{
+			return desc.name == name;
+		}
+		bool operator==(std::string desc)
+		{
+			return name == desc;
+		}
 	};
 	struct LocalScope
 	{
-		vector<VarDesc> idlist;
-		vector<size_t> startpoint;
-		vector<size_t> endpoint;
-		LocalScope* prev;
-		LocalScope* next;
+		std::vector<VarDesc> idlist;
+		std::vector<size_t> startpoint;
+		std::vector<size_t> endpoint;
 	};
 	struct ScriptState
 	{
@@ -179,16 +186,16 @@ namespace myscript
 		std::stack<LocalScope> scope_t;
 		std::map<VarDesc, Object*> variables;
 	};
-	struct Compliation
+	struct CompliationDesc
 	{
-		vector<uint16_t> code;
-		map<string, CFunction> regist_func;
-		vector<LocalScope> scope;
-		vector<VarDesc> global;
-		vector<Error> errors;
+		std::vector<uint16_t> code;
+		std::map<std::string, CFunction> regist_func;
+		std::vector<LocalScope> scope;
+		std::vector<VarDesc> global;
+		std::vector<Error> errors;
 		std::map<VarDesc, Object*> variables;
 
-		const uint16_t Identify(const string& id) const
+		const uint16_t Identify(const std::string& id) const
 		{
 			size_t scope_size = scope.size();
 			for (size_t depth = 0; depth < scope_size; ++depth)
@@ -214,7 +221,7 @@ namespace myscript
 					return &scope[index].idlist[unique + scope[index].idlist.size()];
 			return nullptr;
 		}
-		void RegistCFunc(string name, const CFunction& func)
+		void RegistCFunc(std::string name, const CFunction& func)
 		{
 			regist_func[name] = func;
 			global.push_back({name, VarDesc::CONST});
