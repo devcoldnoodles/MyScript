@@ -9,7 +9,27 @@ using namespace myscript;
 int main(int argc, char** argv) {
 	CompliationDesc cdesc;
 	VirtualMachine* vm;
-	FILE* fp = fopen("D:\\script.txt", "a+");
+	#ifdef __cplusplus
+	std::ifstream in("D:\\script.txt");
+	if(!in.is_open())
+	{
+		printf("Failed to find script");
+		return EXIT_FAILURE;
+	}
+	in.seekg(0, std::ios::end);
+    std::streampos size = in.tellg();
+	char* buffer = new char[size + 1];
+	if (!buffer)
+	{
+		printf("Failed to allocate buffer");
+		return EXIT_FAILURE;
+	}
+	in.seekg(0, std::ios::beg);
+	in.read(buffer, size);
+	buffer[size] = 0;
+	in.close();
+	#else
+	FILE* fp = fopen("D:\\script.txt", "r"); // C:\\Users\\Administrator\\Desktop\\script.txt
 	if (!fp)
 	{
 		printf("Failed to find script");
@@ -27,8 +47,9 @@ int main(int argc, char** argv) {
 	}
 	fseek(fp, 0, SEEK_SET);
 	fread(buffer, buf_size, 1, fp);
-	buffer[buf_size] = '\0';
+	buffer[buf_size] = 0;
 	fclose(fp);
+	#endif
 	SyntaxTree code;
 	cdesc.RegistCFunc("clock", [](VirtualThread* thread) {
 		return thread->CreateNumber(clock());

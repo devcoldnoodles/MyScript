@@ -1187,7 +1187,7 @@ namespace myscript
 	struct SyntaxReturn : SyntaxExpr
 	{
 		SyntaxExpr* value;
-		SyntaxReturn(SyntaxExpr* _value) : value(_value) { line = value->line; }
+		SyntaxReturn(SyntaxExpr* _value) : value(_value) { }
 		~SyntaxReturn() { delete value; }
 		std::string GetType() const { return "return"; }
 		bool CreateCode(CompliationDesc* cd)
