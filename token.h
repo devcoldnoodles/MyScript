@@ -2,12 +2,7 @@
 #define __TOKEN_H__
 #include <string>
 #include <vector>
-
-typedef unsigned char 		byte;
-typedef unsigned short 		ushort;
-typedef unsigned int 		uint;
-typedef unsigned long 		ulong;
-typedef unsigned long long 	ulonglong;
+#include <cstdlib>
 
 #define TOKEN(_ELEM_)                	\
 	/* category : symbols */          	\
@@ -66,10 +61,10 @@ namespace script
 static struct Token
 {
 #define T(SIGN, STR, PREC) SIGN,
-    enum Type : ushort {TOKEN(T)EOT};
+    enum Type : short {TOKEN(T)EOT};
 #undef T
-    ushort type;
-	ushort precedence;
+    short type;
+	short precedence;
     std::string str;
 	//const char str[12];
 #define T(SIGN, STR, PREC) {Token::SIGN, PREC, STR},
@@ -78,12 +73,9 @@ static struct Token
 
 struct TokenDesc
 {
-	ushort value;
+	short value;
 	std::string literal;
 	TokenDesc* next;
 };
-
-TokenDesc* Scan(std::string input);
-
 } // namespace script
 #endif

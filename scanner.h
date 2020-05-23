@@ -13,8 +13,10 @@ private:
     size_t lines;
 public:
     void Scan(TokenDesc* desc);
-    ushort Advance(bool inc_lines = false);
-    ushort GetSingleToken(TokenDesc* desc);
+    short Advance(bool inc_lines = false);
+    bool Advance(const char* dest);
+    short Advance(char32_t cond, short true_sign, short false_sign);
+    short GetSingleToken(TokenDesc* desc);
     TokenDesc* ScanString(TokenDesc* desc);
     TokenDesc* ScanNumber(TokenDesc* desc);
     TokenDesc* ScanChar(TokenDesc* desc);
