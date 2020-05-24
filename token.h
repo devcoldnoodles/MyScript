@@ -77,5 +77,10 @@ struct TokenDesc
 	std::string literal;
 	TokenDesc* next;
 };
+
+TokenDesc* Scan(char32_t* src);
+
+template<typename T>
+TokenDesc* basic_scan(T* src);
 } // namespace script
 #endif
