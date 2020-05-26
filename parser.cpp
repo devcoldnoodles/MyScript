@@ -1149,7 +1149,7 @@ namespace myscript
 		std::vector<Token> tokens;
 		Tokenize(tokens, str);
 		// for (auto& token : tokens)
-		// 	printf("[%d] %s\n", token.type, token.str.c_str());
+		// 	printf("[%d] %s\n", token.type, token.str.c_str());std::cout << buffer << std::endl;
 		size_t index = 0;
 		while (tokens[index].type != Token::EOT)
 		{

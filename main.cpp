@@ -28,6 +28,7 @@ int main(int argc, char** argv) {
 	in.read(buffer, size);
 	buffer[size] = 0;
 	in.close();
+	std::cout << buffer << std::endl;
 	#else
 	FILE* fp = fopen("D:\\script.txt", "r"); // C:\\Users\\Administrator\\Desktop\\script.txt
 	if (!fp)
@@ -49,6 +50,7 @@ int main(int argc, char** argv) {
 	fread(buffer, buf_size, 1, fp);
 	buffer[buf_size] = 0;
 	fclose(fp);
+	printf("%s\n", buffer);
 	#endif
 	SyntaxTree code;
 	cdesc.RegistCFunc("clock", [](VirtualThread* thread) {
