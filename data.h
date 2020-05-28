@@ -203,6 +203,7 @@ namespace myscript
 				size_t scope_depth = scope_size - depth - 1;
 				size_t id_size = scope[scope_depth].idlist.size();
 				for (size_t index = 0; index < id_size; ++index)
+				{
 					if (scope[scope_depth].idlist[index].name == id)
 					{
 						size_t total = 0;
@@ -210,6 +211,7 @@ namespace myscript
 							total += scope[scope_index].idlist.size();
 						return total + index;
 					}
+				}
 			}
 			return -1;
 		}

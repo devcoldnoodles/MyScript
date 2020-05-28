@@ -17,18 +17,19 @@ int main(int argc, char** argv) {
 		return EXIT_FAILURE;
 	}
 	in.seekg(0, std::ios::end);
-    std::streampos size = in.tellg();
+    size_t size = in.tellg();
 	char* buffer = new char[size + 1];
 	if (!buffer)
 	{
 		printf("Failed to allocate buffer");
 		return EXIT_FAILURE;
 	}
+	memset(buffer, 0, size + 1);
 	in.seekg(0, std::ios::beg);
 	in.read(buffer, size);
 	buffer[size] = 0;
 	in.close();
-	std::cout << buffer << std::endl;
+	//std::cout << buffer << std::endl;
 	#else
 	FILE* fp = fopen("D:\\script.txt", "r"); // C:\\Users\\Administrator\\Desktop\\script.txt
 	if (!fp)
@@ -37,20 +38,21 @@ int main(int argc, char** argv) {
 		return EXIT_FAILURE;
 	}
 	char* buffer;
-	long buf_size;	
+	long size;	
 	fseek(fp, 0, SEEK_END);
-	buf_size = ftell(fp);
-	buffer = (char*)malloc(buf_size + 1);
+	size = ftell(fp);
+	buffer = (char*)malloc(size + 1);
 	if (!buffer)
 	{
 		printf("Failed to allocate buffer");
 		return EXIT_FAILURE;
 	}
+	memset(buffer, 0, size + 1);
 	fseek(fp, 0, SEEK_SET);
-	fread(buffer, buf_size, 1, fp);
-	buffer[buf_size] = 0;
+	fread(buffer, size, 1, fp);
+	buffer[size] = 0;
 	fclose(fp);
-	printf("%s\n", buffer);
+	//printf("%s\n", buffer);
 	#endif
 	SyntaxTree code;
 	cdesc.RegistCFunc("clock", [](VirtualThread* thread) {
@@ -76,7 +78,9 @@ int main(int argc, char** argv) {
 	cdesc.RegistCFunc("scan", [](VirtualThread *thread) {
 		char buf[2048];
 		fgets(buf, 2047, stdin);
-		return thread->CreateString(buf, strlen(buf));
+		size_t size = strlen(buf);
+		buf[size - 1] = '\0';
+		return thread->CreateString(buf, size - 1);
 	});
 	cdesc.RegistCFunc("copy", [](VirtualThread *thread) {
 		Object* source = thread->GetParameters()[0];
@@ -85,9 +89,9 @@ int main(int argc, char** argv) {
 		return dest;
 	});
 	cdesc.RegistCFunc("size", [](VirtualThread *thread) {
-		return thread->CreateNumber(double(thread->GetParameters()[0]->size - sizeof(Object*)));
+		return thread->CreateNumber(thread->GetParameters()[0]->size);
 	});
-	if (!SyntaxTree::ParseText(code, std::string(buffer)))
+	if (!SyntaxTree::ParseText(code, buffer))
 	{
 		printf("[parsing error]\n");
 		std::string temp;

@@ -110,7 +110,7 @@ namespace myscript
 			addr->type = _type;
 			addr->size = _size;
 			addr->adinf = _adinf;
-			memcpy_s(addr->content, _size, _content, _size);
+			memcpy(addr->content, _content, _size);
 			return addr;
 		}
 		std::string Report()
@@ -211,7 +211,9 @@ namespace myscript
 		}
 		inline Object* CreateString(const char* str, const size_t str_size)
 		{
-			return machine->CreateHeader(Object::STRING, str_size + 1, 0, str);
+			Object* alloc = machine->CreateHeader(Object::STRING, str_size + 1, 0, str);
+			alloc->content[str_size] = '\0';
+			return alloc;
 		}
 		inline Object* CreateString(const char* str, const size_t str_size, const char* addit, const size_t addit_size)
 		{
@@ -221,7 +223,7 @@ namespace myscript
 				char *content = (char *)alloc->content;
 				memmove(content, str, str_size);
 				memmove(content + str_size, addit, addit_size);
-				content[str_size + addit_size] = 0;
+				content[str_size + addit_size] = '\0';
 			}
 			return alloc;
 		}

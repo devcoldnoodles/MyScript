@@ -5,7 +5,6 @@
 namespace myscript 
 {
 	static short* float1 = (short*)new float(1);
-	static short* double1 = (short*)new double(1);
 	
 	struct SyntaxNode
 	{
@@ -131,14 +130,14 @@ namespace myscript
 				}
 				if (cd->global[findex].option & VarDesc::CONST)
 				{
-					cd->errors.push_back({"'" + id + "' is constants value", line});
+					cd->errors.push_back({"'" + id + "' is  value", line});
 					return false;
 				}
 				cd->code.push_back(OpCode::STORE);
 				cd->code.push_back(findex);
 				return true;
 			}
-			if(cd->GetScopeVariable(value)->option & VarDesc::CONST)
+			if( cd->GetScopeVariable(value)->option & VarDesc::CONST)
 			{
 				cd->errors.push_back({"'" + id + "' is constants value", line});
 				return false;
@@ -562,10 +561,7 @@ namespace myscript
 			cd->code.push_back(float1[1]);
 			cd->code.push_back(OpCode::ADD);
 			if (!expr->CreateLCode(cd))
-			{
-				cd->errors.push_back({"Incorrect left-expression", expr->line});
 				return false;
-			}
 			cd->code.push_back(OpCode::POP);
 			return true;
 		}
@@ -578,10 +574,7 @@ namespace myscript
 			cd->code.push_back(float1[1]);
 			cd->code.push_back(OpCode::ADD);
 			if (!expr->CreateLCode(cd))
-			{
-				cd->errors.push_back({"Incorrect left-expression", expr->line});
 				return false;
-			}
 			return true;
 		}
 	};
@@ -601,10 +594,7 @@ namespace myscript
 			cd->code.push_back(float1[1]);
 			cd->code.push_back(OpCode::ADD);
 			if (!expr->CreateLCode(cd))
-			{
-				cd->errors.push_back({"Incorrect left-expression", expr->line});
 				return false;
-			}
 			cd->code.push_back(OpCode::POP);
 			return true;
 		}
@@ -617,10 +607,7 @@ namespace myscript
 			cd->code.push_back(float1[1]);
 			cd->code.push_back(OpCode::ADD);
 			if (!expr->CreateLCode(cd))
-			{
-				cd->errors.push_back({"Incorrect left-expression", expr->line});
 				return false;
-			}
 			cd->code.push_back(OpCode::PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
@@ -644,10 +631,7 @@ namespace myscript
 			cd->code.push_back(float1[1]);
 			cd->code.push_back(OpCode::SUB);
 			if (!expr->CreateLCode(cd))
-			{
-				cd->errors.push_back({"Incorrect left-expression", expr->line});
 				return false;
-			}
 			cd->code.push_back(OpCode::POP);
 			return true;
 		}
@@ -660,10 +644,7 @@ namespace myscript
 			cd->code.push_back(float1[1]);
 			cd->code.push_back(OpCode::SUB);
 			if (!expr->CreateLCode(cd))
-			{
-				cd->errors.push_back({"Incorrect left-expression", expr->line});
 				return false;
-			}
 			return true;
 		}
 	};
@@ -683,10 +664,7 @@ namespace myscript
 			cd->code.push_back(float1[1]);
 			cd->code.push_back(OpCode::SUB);
 			if (!expr->CreateLCode(cd))
-			{
-				cd->errors.push_back({"Incorrect left-expression", expr->line});
 				return false;
-			}
 			cd->code.push_back(OpCode::POP);
 			return true;
 		}
@@ -699,10 +677,7 @@ namespace myscript
 			cd->code.push_back(float1[1]);
 			cd->code.push_back(OpCode::SUB);
 			if (!expr->CreateLCode(cd))
-			{
-				cd->errors.push_back({"Incorrect left-expression", expr->line});
 				return false;
-			}
 			cd->code.push_back(OpCode::PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
@@ -1040,7 +1015,7 @@ namespace myscript
 			cd->scope.push_back(LocalScope());
 			size_t param_size = params.size();
 			for (size_t index = 0; index < param_size; ++index)
-				cd->scope.back().idlist.push_back({params[index]});
+				cd->scope.back().idlist.push_back({params[index], VarDesc::VAR});
 			cd->code.push_back(OpCode::PUSHFUNC);
 			cd->code.push_back(OpCode::NONE);
 			size_t delta = cd->code.size();
@@ -1121,10 +1096,7 @@ namespace myscript
 			if (init != nullptr)
 			{
 				if (!init->CreateCode(cd))
-				{
-					cd->errors.push_back({"Incorrect expression", init->line});
 					return false;
-				}
 			}
 			cd->code.push_back(OpCode::FJMP);
 			cd->code.push_back(OpCode::NONE);
@@ -1132,19 +1104,13 @@ namespace myscript
 			if (loop != nullptr)
 			{
 				if (!loop->CreateCode(cd))
-				{
-					cd->errors.push_back({"Incorrect expression", loop->line});
 					return false;
-				}
 				cd->code[delta - 1] = cd->code.size() - delta;
 			}
 			if (prefix_condition != nullptr)
 			{
 				if (!prefix_condition->CreateRCode(cd))
-				{
-					cd->errors.push_back({"Incorrect expression", prefix_condition->line});
 					return false;
-				}
 				cd->code.push_back(OpCode::CFJMP);
 				cd->scope.back().endpoint.push_back(cd->code.size());
 				cd->code.push_back(OpCode::NONE);
@@ -1152,10 +1118,7 @@ namespace myscript
 			if (postfix_condition != nullptr)
 			{
 				if (!postfix_condition->CreateRCode(cd))
-				{
-					cd->errors.push_back({"Incorrect expression", prefix_condition->line});
 					return false;
-				}
 				cd->code.push_back(OpCode::CFJMP);
 				cd->scope.back().endpoint.push_back(cd->code.size());
 				cd->code.push_back(OpCode::NONE);
@@ -1200,10 +1163,7 @@ namespace myscript
 			if (value)
 			{
 				if (!value->CreateRCode(cd))
-				{
-					cd->errors.push_back({"Incorrect expression", value->line});
 					return false;
-				}
 				cd->code.push_back(OpCode::RETURN);
 			}
 			else

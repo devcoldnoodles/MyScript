@@ -633,7 +633,7 @@ namespace myscript
 		}
 		if (tokens[temp++].type != Token::RPARAM)
 		{
-			errors.push_back({"Expected }", tokens[--temp].line});
+			errors.push_back({"Expected )", tokens[--temp].line});
 			goto ErrorHandle;
 		}
 		if ((expr->sents = ParseBlock(tokens, temp, errors)) == nullptr)
@@ -744,6 +744,7 @@ namespace myscript
 		size_t temp = index;
 		SyntaxDeclare* expr = new SyntaxDeclare();
 		VarDesc desc;
+		desc.option = VarDesc::VAR;
 		expr->line = tokens[temp].line;
 		switch (tokens[temp++].type)
 		{
@@ -1149,7 +1150,7 @@ namespace myscript
 		std::vector<Token> tokens;
 		Tokenize(tokens, str);
 		// for (auto& token : tokens)
-		// 	printf("[%d] %s\n", token.type, token.str.c_str());std::cout << buffer << std::endl;
+		// 	printf("[%d] %s\n", token.type, token.str.c_str());
 		size_t index = 0;
 		while (tokens[index].type != Token::EOT)
 		{

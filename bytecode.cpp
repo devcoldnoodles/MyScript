@@ -370,11 +370,41 @@ namespace myscript
 		switch (l->type)
 		{
 		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+			switch (r->type)
+			{
+			case Object::NUMBER:
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
 				addr = CreateNumber(*lvalue - *rvalue);
+			}
+			break;
+			case Object::STRING:
+			{
+				double* lvalue = (double*)l->content;
+				addr = CreateNumber(*lvalue - atof(r->content));
+			}
+			break;
+			default:
+				break;
+			}
+			break;
+		case Object::STRING:
+			switch (r->type)
+			{
+			case Object::NUMBER:
+			{
+				double* rvalue = (double*)r->content;
+				addr = CreateNumber(atof(l->content) - *rvalue);
+			}
+			break;
+			case Object::STRING:
+			{
+				addr = CreateNumber(atof(l->content) - atof(r->content));
+			}
+			break;
+			default:
+				break;
 			}
 			break;
 		}
