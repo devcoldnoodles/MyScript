@@ -86,8 +86,7 @@ namespace myscript
 			SELF, // this
 			IS, // is
 			AS, // as
-		};
-		Type type;
+		} type;
 		std::string str;
 		size_t line;
 	};
