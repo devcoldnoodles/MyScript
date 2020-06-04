@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
 	cdesc.RegistCFunc("copy", [](VirtualThread *thread) {
 		Object* source = thread->GetParameters()[0];
 		Object* dest = thread->CreateHeader(source->type, source->size, source->adinf);
-		memcpy_s(dest->content, dest->size, source->content, source->size);
+		memcpy(dest->content, source->content, source->size);
 		return dest;
 	});
 	cdesc.RegistCFunc("size", [](VirtualThread *thread) {
