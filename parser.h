@@ -912,7 +912,7 @@ namespace myscript
 				{
 					uint16_t index = cd->Identify(element.first.name);
 					if (index == 0xFFFF)
-						cd->scope.back().idlist.push_back({element.first});
+						cd->scope.back().variables.push_back({element.first});
 					if (element.second)
 					{
 						if (!element.second->CreateRCode(cd))
@@ -937,7 +937,7 @@ namespace myscript
 				}
 				uint16_t index = cd->Identify(element.first.name);
 				if (index == 0xFFFF)
-					cd->scope.back().idlist.push_back({element.first});
+					cd->scope.back().variables.push_back({element.first});
 				if (element.second)
 				{
 					if (!element.second->CreateRCode(cd))
@@ -951,7 +951,7 @@ namespace myscript
 					cd->code.push_back(index);
 				}
 				cd->code.push_back(OpCode::READ);
-				cd->code.push_back(cd->scope.back().idlist.size() - 1);
+				cd->code.push_back(cd->scope.back().variables.size() - 1);
 			}
 			return true;
 		}
@@ -968,7 +968,7 @@ namespace myscript
 			for (size_t index = 0; index < sents_size; ++index)
 				if (sents[index]->CreateCode(cd) == false)
 					return false;
-			size_t list_size = cd->scope.back().idlist.size();
+			size_t list_size = cd->scope.back().variables.size();
 			if (list_size > 0)
 			{
 				cd->code.push_back(OpCode::POPTO);
@@ -1015,7 +1015,7 @@ namespace myscript
 			cd->scope.push_back(LocalScope());
 			size_t param_size = params.size();
 			for (size_t index = 0; index < param_size; ++index)
-				cd->scope.back().idlist.push_back({params[index], VarDesc::VAR});
+				cd->scope.back().variables.push_back({params[index], VarDesc::VAR});
 			cd->code.push_back(OpCode::PUSHFUNC);
 			cd->code.push_back(OpCode::NONE);
 			size_t delta = cd->code.size();
@@ -1137,7 +1137,7 @@ namespace myscript
 			{
 				cd->code[index] = cd->code.size() - index - 1;
 			}
-			size_t list_size = cd->scope.back().idlist.size();
+			size_t list_size = cd->scope.back().variables.size();
 			if (list_size > 0)
 			{
 				cd->code.push_back(OpCode::POPTO);

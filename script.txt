@@ -1,0 +1,61 @@
+const a = function(n) {
+    const n_size = size(n);
+    var ret = 0;
+    loop(var idx = 0; idx < n_size - 1; ++idx)
+    {
+        ret *= 10; 
+        ret += n[idx] - "0";
+    }
+    return ret;
+}(scan());
+loop(var i = 0; i < a; ++i)
+    print(i, "\n");
+
+
+class signed<byte size, byte defualt = 0>
+{
+    byte[] binary = alloc(size > defualt ? size : defualt);
+
+    static signed<A, B> operator+(signed<A> a, signed<B>);
+    static signed<A, B> operator+(signed<A> a, unsigned<B>);
+    static signed<A, B> operator-(signed<A> a, signed<B>);
+    static signed<A, B> operator-(signed<A> a, unsigned<B>);
+    static signed<A, B> operator*(signed<A> a, signed<B>);
+    static signed<A, B> operator*(signed<A> a, unsigned<B>);
+    static signed<A, B> operator/(signed<A> a, signed<B>);
+    static signed<A, B> operator/(signed<A> a, unsigned<B>);
+}
+
+class unsigned<byte size, byte defualt = 0>
+{
+    byte[] binary = alloc(size > defualt ? size : defualt);
+
+    static unsigned<A, B> operator+(unsigned<A> a, unsigned<B>);
+    static unsigned<A, B> operator+(unsigned<A> a, signed<B>);
+    static unsigned<A, B> operator-(unsigned<A> a, unsigned<B>);
+    static unsigned<A, B> operator-(unsigned<A> a, signed<B>);
+    static unsigned<A, B> operator*(unsigned<A> a, unsigned<B>);
+    static unsigned<A, B> operator*(unsigned<A> a, signed<B>);
+    static unsigned<A, B> operator/(unsigned<A> a, unsigned<B>);
+    static unsigned<A, B> operator/(unsigned<A> a, signed<B>);
+}
+
+class basic_string<t>
+{
+    t[] src;
+    
+    static operator[](basic_string<t> str, int index)
+    {
+        return str.src[index];
+    }
+}
+
+typedef signed<8>       int8;
+typedef signed<16>      int16;
+typedef signed<32>      int32;
+typedef signed<64>      int64;
+typedef unsigned<8>     uint8;
+typedef unsigned<16>    uint16;
+typedef unsigned<32>    uint32;
+typedef unsigned<64>    uint64;
+typedef basic_string<byte>  string;

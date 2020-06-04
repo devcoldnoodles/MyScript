@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
 	CompliationDesc cdesc;
 	VirtualMachine* vm;
 	#ifdef __cplusplus
-	std::ifstream in("D:\\script.txt");
+	std::ifstream in("script.txt");
 	if(!in.is_open())
 	{
 		printf("Failed to find script");
@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
 	in.close();
 	//std::cout << buffer << std::endl;
 	#else
-	FILE* fp = fopen("D:\\script.txt", "r"); // C:\\Users\\Administrator\\Desktop\\script.txt
+	FILE* fp = fopen("script.txt", "r"); // C:\\Users\\Administrator\\Desktop\\script.txt
 	if (!fp)
 	{
 		printf("Failed to find script");
@@ -55,6 +55,17 @@ int main(int argc, char** argv) {
 	//printf("%s\n", buffer);
 	#endif
 	SyntaxTree code;
+	// cdesc.globals[{"clock", VarDesc::CONST}] = myscript::CreateCFunction([&](int argc, MetaObject* args){
+	// 	return CreateNumber(clock());
+	// });
+	// cdesc.globals[{"typeof", VarDesc::CONST}] = myscript::CreateCFunction([&](int argc, MetaObject* args){
+	// 	if(argc != 1)
+	// 		return CreateMetaNull();
+	// 	std::string tpyeinfo = ToString(MetaObject::Type(args[0].type));
+	// 	return CreateString(tpyeinfo.c_str(), tpyeinfo.size());
+	// });
+
+
 	cdesc.RegistCFunc("clock", [](VirtualThread* thread) {
 		return thread->CreateNumber(clock());
 	});
@@ -62,7 +73,7 @@ int main(int argc, char** argv) {
 		auto params = thread->GetParameters();
 		if (params.size() == 1)
 		{
-			std::string tpyeinfo = ToString(Object::Type(params[0]->type));
+			std::string tpyeinfo = ToString(MetaObject::Type(params[0]->type));
 			return thread->CreateString(tpyeinfo.c_str(), tpyeinfo.size());
 		}
 		return thread->CreateNull();
@@ -83,8 +94,8 @@ int main(int argc, char** argv) {
 		return thread->CreateString(buf, size - 1);
 	});
 	cdesc.RegistCFunc("copy", [](VirtualThread *thread) {
-		Object* source = thread->GetParameters()[0];
-		Object* dest = thread->CreateHeader(source->type, source->size, source->adinf);
+		MetaObject* source = thread->GetParameters()[0];
+		MetaObject* dest = thread->CreateHeader(source->type, source->size, source->adinf);
 		memcpy(dest->content, source->content, source->size);
 		return dest;
 	});
@@ -133,6 +144,7 @@ int main(int argc, char** argv) {
 	// 	tr = vm->GetMainThread();
 	// 	tr->Run();
 	// }
+	printf("\n");
 	delete buffer;
 	delete vm;
 	return EXIT_SUCCESS;

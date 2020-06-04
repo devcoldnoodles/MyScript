@@ -1,13 +1,13 @@
 #ifndef __BYTECODE_H__
 #define __BYTECODE_H__
 
-#include"pch.h"
-#include"data.h"
+#include "pch.h"
+#include "data.h"
 
 namespace myscript
 {
 	constexpr auto FORMATSIZE = 64;
-	struct Object
+	struct MetaObject
 	{
 		enum Type : uint16_t
 		{
@@ -28,8 +28,70 @@ namespace myscript
 		uint32_t size;
 		char content[0];
 	};
-	const std::string ToString(Object::Type);
-	const std::string ToString(Object*);
+	// MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size)
+	// {
+	// 	MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + _size);
+	// 	alloc->type = _type;
+	// 	alloc->adinf = _adinf;
+	// 	alloc->size = _size;
+	// 	return alloc;
+	// }
+	// MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size, const void* _content)
+	// {
+	// 	MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + _size);
+	// 	alloc->type = _type;
+	// 	alloc->adinf = _adinf;
+	// 	alloc->size = _size;
+	// 	memcpy(alloc->content, _content, _size);
+	// 	return alloc;
+	// }
+	// MetaObject* CreateMetaNull(void)
+	// {
+	// 	return CreateMetaObject(MetaObject::NULLPTR, 0, 0);
+	// }
+	// MetaObject* CreateMetaBool(const bool boolean)
+	// {
+	// 	return CreateMetaObject(MetaObject::NULLPTR, boolean, 0);
+	// }
+	// MetaObject* CreateMetaNumber(const double number)
+	// {
+	// 	return CreateMetaObject(MetaObject::NUMBER, 0, sizeof(double), &number);
+	// }
+	// MetaObject* CreateMetaString(const char* str, const size_t size)
+	// {
+	// 	MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + size + 1);
+	// 	alloc->type = MetaObject::STRING;
+	// 	alloc->adinf = 0;
+	// 	alloc->size = size;
+	// 	memcpy(alloc->content, str, size);
+	// 	alloc->content[size] = '\0';
+	// 	return alloc;
+	// }
+	// MetaObject* CreateMetaString(const char* str, const size_t str_size, const char* addit, const size_t addit_size)
+	// {
+	// 	MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + str_size + addit_size + 1);
+	// 	alloc->type = MetaObject::STRING;
+	// 	alloc->adinf = 0;
+	// 	alloc->size = str_size + addit_size;
+	// 	memcpy(alloc->content, str, str_size);
+	// 	memcpy(alloc->content + str_size, addit, addit_size);
+	// 	alloc->content[str_size + addit_size] = '\0';
+	// 	return alloc;
+	// }
+	// MetaObject* CreateMetaFunction(const OpCode *src, const size_t size)
+	// {
+	// 	return CreateMetaObject(MetaObject::FUNCTION, 0, sizeof(OpCode) * size, src);
+	// }
+	// MetaObject* CreateMetaCFunction(CFunc func)
+	// {
+	// 	return CreateMetaObject(MetaObject::CFUNCTION, 0, sizeof(CFunc), &func);
+	// }
+	// MetaObject* CreateMetaCObject(const void *addr, const size_t size)
+	// {
+	// 	return CreateMetaObject(MetaObject::COBJECT, 0, size, addr);
+	// }
+	const std::string ToString(MetaObject::Type);
+	const std::string ToString(MetaObject*);
 	const std::string ToString(Error);
 
 	class VirtualMachine
@@ -37,58 +99,58 @@ namespace myscript
 	private:
 		char* memory;
 		size_t capacity;
-		std::multiset<Object*> allocs;
-		std::vector<Object*> global;
-		std::map<std::string, Object*> glob;
+		std::multiset<MetaObject*> allocs;
+		std::vector<MetaObject*> global;
+		std::map<std::string, MetaObject*> glob;
 		std::vector<std::string> names;
 		std::vector<uint16_t> codes;
-		Object* p_null;
-		Object* p_true;
-		Object* p_false;
+		MetaObject* p_null;
+		MetaObject* p_true;
+		MetaObject* p_false;
 		std::vector<VirtualThread*> threads;
 	public:
 		friend class VirtualThread;
 		VirtualMachine(CompliationDesc* data);
 		~VirtualMachine();
 		void Execute();
-		inline void Lock(Object* index)
+		inline void Lock(MetaObject* index)
 		{
 			allocs.insert(index);
 		}
-		inline void UnLock(Object* index)
+		inline void UnLock(MetaObject* index)
 		{
 			auto iter = allocs.find(index);
 			if (iter != allocs.end())
 			{
-				if (allocs.count(*iter) <= 1 && (*iter)->type == Object::ARRAY)
+				if (allocs.count(*iter) <= 1 && (*iter)->type == MetaObject::ARRAY)
 				{
-					Object** content = (Object**)(*iter)->content;
-					size_t size = (*iter)->size / sizeof(Object*);
+					MetaObject** content = (MetaObject**)(*iter)->content;
+					size_t size = (*iter)->size / sizeof(MetaObject*);
 					for (size_t index = 0; index < size; ++index)
 						UnLock(content[index]);
 				}
 				allocs.erase(iter);
 			}
 		}
-		inline Object* Allocate(const size_t alloc_size)
+		inline MetaObject* Allocate(const size_t alloc_size)
 		{
 			if (capacity <= alloc_size)
 				return nullptr;
 			if (allocs.size() == 0)
-				return (Object*)memory;
-			Object* rear_index = (Object*)memory;
+				return (MetaObject*)memory;
+			MetaObject* rear_index = (MetaObject*)memory;
 			auto allocs_end = allocs.end();
 			for (auto iter = allocs.begin(); iter != allocs_end; iter = allocs.upper_bound(*iter))
 			{
-				if (*iter - rear_index >= alloc_size + sizeof(Object))
+				if (*iter - rear_index >= alloc_size + sizeof(MetaObject))
 					return rear_index;
-				rear_index = *iter + (*iter)->size + sizeof(Object);
+				rear_index = *iter + (*iter)->size + sizeof(MetaObject);
 			}
 			return rear_index;
 		}
 		inline size_t GetGlobalIndex(const std::string& id) { return distance(names.begin(), find(names.begin(), names.end(), id)); }
-		inline Object* GetGlobalValue(const std::string& id) { return global[GetGlobalIndex(id)]; }
-		inline void SetGlobalValue(const size_t id, Object* ref)
+		inline MetaObject* GetGlobalValue(const std::string& id) { return global[GetGlobalIndex(id)]; }
+		inline void SetGlobalValue(const size_t id, MetaObject* ref)
 		{
 			if (global[id] != ref)
 			{
@@ -96,17 +158,17 @@ namespace myscript
 				Lock(global[id] = ref);
 			}
 		}
-		inline Object* CreateHeader(const uint16_t _type, const uint32_t _size, const uint16_t _adinf = 0)
+		inline MetaObject* CreateHeader(const uint16_t _type, const uint32_t _size, const uint16_t _adinf = 0)
 		{
-			Object* addr = Allocate(_size);
+			MetaObject* addr = Allocate(_size);
 			addr->type = _type;
 			addr->size = _size;
 			addr->adinf = _adinf;
 			return addr;
 		}
-		inline Object* CreateHeader(const uint16_t _type, const uint32_t _size, const uint16_t _adinf, const void* _content)
+		inline MetaObject* CreateHeader(const uint16_t _type, const uint32_t _size, const uint16_t _adinf, const void* _content)
 		{
-			Object* addr = Allocate(_size);
+			MetaObject* addr = Allocate(_size);
 			addr->type = _type;
 			addr->size = _size;
 			addr->adinf = _adinf;
@@ -130,30 +192,30 @@ namespace myscript
 	private:
 		VirtualMachine* machine;
 		uint16_t* cursor;
-		std::vector<Object*> stack;
+		std::vector<MetaObject*> stack;
 		std::vector<uint16_t*> callstack;
 		std::vector<size_t> basestack;
 		std::vector<Error> errors;
 		bool state;
-		Object* OperateEQ(Object* l, Object* r);
-		Object* OperateNEQ(Object* l, Object* r);
-		Object* OperateGT(Object* l, Object* r);
-		Object* OperateGE(Object* l, Object* r);
-		Object* OperateLT(Object* l, Object* r);
-		Object* OperateLE(Object* l, Object* r);
-		Object* OperateNOT(Object* l);
-		Object* OperateAND(Object* l, Object* r);
-		Object* OperateOR(Object* l, Object* r);
-		Object* OperateXOR(Object* l, Object* r);
-		Object* OperateSIGN(Object* l);
-		Object* OperateADD(Object* l, Object* r);
-		Object* OperateSUB(Object* l, Object* r);
-		Object* OperateMUL(Object* l, Object* r);
-		Object* OperateDIV(Object* l, Object* r);
-		Object* OperateMOD(Object* l, Object* r);
-		Object* OperatePOW(Object* l, Object* r);
+		MetaObject* OperateEQ(MetaObject* l, MetaObject* r);
+		MetaObject* OperateNEQ(MetaObject* l, MetaObject* r);
+		MetaObject* OperateGT(MetaObject* l, MetaObject* r);
+		MetaObject* OperateGE(MetaObject* l, MetaObject* r);
+		MetaObject* OperateLT(MetaObject* l, MetaObject* r);
+		MetaObject* OperateLE(MetaObject* l, MetaObject* r);
+		MetaObject* OperateNOT(MetaObject* l);
+		MetaObject* OperateAND(MetaObject* l, MetaObject* r);
+		MetaObject* OperateOR(MetaObject* l, MetaObject* r);
+		MetaObject* OperateXOR(MetaObject* l, MetaObject* r);
+		MetaObject* OperateSIGN(MetaObject* l);
+		MetaObject* OperateADD(MetaObject* l, MetaObject* r);
+		MetaObject* OperateSUB(MetaObject* l, MetaObject* r);
+		MetaObject* OperateMUL(MetaObject* l, MetaObject* r);
+		MetaObject* OperateDIV(MetaObject* l, MetaObject* r);
+		MetaObject* OperateMOD(MetaObject* l, MetaObject* r);
+		MetaObject* OperatePOW(MetaObject* l, MetaObject* r);
 		
-		inline void StackPush(Object* operand)
+		inline void StackPush(MetaObject* operand)
 		{
 			machine->Lock(operand);
 			stack.push_back(operand);
@@ -166,14 +228,14 @@ namespace myscript
 				stack.pop_back();
 			}
 		}
-		inline Object* stack_pop()
+		inline MetaObject* stack_pop()
 		{
-			Object* temp = stack.back();
+			MetaObject* temp = stack.back();
 			machine->UnLock(temp);
 			stack.pop_back();
 			return temp;
 		}
-		inline Object* StackBack(size_t index)
+		inline MetaObject* StackBack(size_t index)
 		{
 			return stack[stack.size() - index - 1];
 		}
@@ -193,31 +255,31 @@ namespace myscript
 			basestack.reserve(256);
 			basestack.push_back(0);
 		}
-		inline Object* CreateHeader(const uint16_t _type, const uint32_t _size, const uint16_t _adinf = 0)
+		inline MetaObject* CreateHeader(const uint16_t _type, const uint32_t _size, const uint16_t _adinf = 0)
 		{
 			return machine->CreateHeader(_type, _size, _adinf);
 		}
-		inline Object* CreateNull(void)
+		inline MetaObject* CreateNull(void)
 		{
 			return machine->p_null;
 		}
-		inline Object* CreateBool(const bool boolean)
+		inline MetaObject* CreateBool(const bool boolean)
 		{
 			return boolean ? machine->p_true : machine->p_false;
 		}
-		inline Object* CreateNumber(const double number)
+		inline MetaObject* CreateNumber(const double number)
 		{
-			return machine->CreateHeader(Object::NUMBER, sizeof(double), 0, &number);
+			return machine->CreateHeader(MetaObject::NUMBER, sizeof(double), 0, &number);
 		}
-		inline Object* CreateString(const char* str, const size_t str_size)
+		inline MetaObject* CreateString(const char* str, const size_t str_size)
 		{
-			Object* alloc = machine->CreateHeader(Object::STRING, str_size + 1, 0, str);
+			MetaObject* alloc = machine->CreateHeader(MetaObject::STRING, str_size + 1, 0, str);
 			alloc->content[str_size] = '\0';
 			return alloc;
 		}
-		inline Object* CreateString(const char* str, const size_t str_size, const char* addit, const size_t addit_size)
+		inline MetaObject* CreateString(const char* str, const size_t str_size, const char* addit, const size_t addit_size)
 		{
-			Object* alloc = machine->CreateHeader(Object::STRING, str_size + addit_size + 1);
+			MetaObject* alloc = machine->CreateHeader(MetaObject::STRING, str_size + addit_size + 1);
 			if (alloc != nullptr)
 			{
 				char *content = (char *)alloc->content;
@@ -227,17 +289,17 @@ namespace myscript
 			}
 			return alloc;
 		}
-		inline Object* CreateFunction(const OpCode *opcode, const size_t size)
+		inline MetaObject* CreateFunction(const OpCode *opcode, const size_t size)
 		{
-			return machine->CreateHeader(Object::FUNCTION, sizeof(OpCode) * size, 0, opcode);
+			return machine->CreateHeader(MetaObject::FUNCTION, sizeof(OpCode) * size, 0, opcode);
 		}
-		inline Object* CreateObject(const void *addr, const size_t size)
+		inline MetaObject* CreateObject(const void *addr, const size_t size)
 		{
-			return machine->CreateHeader(Object::COBJECT, size, 0, addr);
+			return machine->CreateHeader(MetaObject::COBJECT, size, 0, addr);
 		}
-		inline std::vector<Object*> GetParameters()
+		inline std::vector<MetaObject*> GetParameters()
 		{
-			return std::vector<Object*>(stack.begin() + basestack.back(), stack.begin() + stack.size());
+			return std::vector<MetaObject*>(stack.begin() + basestack.back(), stack.begin() + stack.size());
 		}
 	};
 }

@@ -5,9 +5,10 @@
 namespace myscript 
 {
 	struct SyntaxLiteral;
-	struct Object;
+	struct MetaObject;
 	class VirtualThread;
-	typedef Object* (*CFunction)(VirtualThread*);
+	typedef MetaObject* (*CFunction)(VirtualThread*);
+	typedef MetaObject* (*CFunc)(int argc, MetaObject* args);
 
 	struct Token
 	{
@@ -175,15 +176,15 @@ namespace myscript
 	};
 	struct LocalScope
 	{
-		std::vector<VarDesc> idlist;
+		std::vector<VarDesc> variables;
 		std::vector<size_t> startpoint;
 		std::vector<size_t> endpoint;
+		std::map<std::string, std::vector<size_t>> labels;
 	};
 	struct ScriptState
 	{
 		std::vector<LocalScope> scope;
-		std::stack<LocalScope> scope_t;
-		std::map<VarDesc, Object*> variables;
+		std::map<VarDesc, MetaObject*> variables;
 	};
 	struct CompliationDesc
 	{
@@ -192,7 +193,7 @@ namespace myscript
 		std::vector<LocalScope> scope;
 		std::vector<VarDesc> global;
 		std::vector<Error> errors;
-		std::map<VarDesc, Object*> variables;
+		std::map<VarDesc, MetaObject*> globals;
 
 		const uint16_t Identify(const std::string& id) const
 		{
@@ -200,14 +201,14 @@ namespace myscript
 			for (size_t depth = 0; depth < scope_size; ++depth)
 			{
 				size_t scope_depth = scope_size - depth - 1;
-				size_t id_size = scope[scope_depth].idlist.size();
+				size_t id_size = scope[scope_depth].variables.size();
 				for (size_t index = 0; index < id_size; ++index)
 				{
-					if (scope[scope_depth].idlist[index].name == id)
+					if (scope[scope_depth].variables[index].name == id)
 					{
 						size_t total = 0;
 						for (size_t scope_index = 0; scope_index < scope_depth; ++scope_index)
-							total += scope[scope_index].idlist.size();
+							total += scope[scope_index].variables.size();
 						return total + index;
 					}
 				}
@@ -218,10 +219,11 @@ namespace myscript
 		{
 			int32_t unique = id;
 			for (size_t index = 0; index < scope.size(); ++index)
-				if((unique -= scope[index].idlist.size()) < 0)
-					return &scope[index].idlist[unique + scope[index].idlist.size()];
+				if((unique -= scope[index].variables.size()) < 0)
+					return &scope[index].variables[unique + scope[index].variables.size()];
 			return nullptr;
 		}
+
 		void RegistCFunc(std::string name, const CFunction& func)
 		{
 			regist_func[name] = func;

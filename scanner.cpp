@@ -48,7 +48,7 @@ short Scanner::GetSingleToken(TokenDesc* desc)
 }
 TokenDesc* Scanner::ScanString(TokenDesc* desc)
 {
-
+    
 }
 TokenDesc* Scanner::ScanNumber(TokenDesc* desc)
 {

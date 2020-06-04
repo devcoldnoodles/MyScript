@@ -1,59 +1,59 @@
-#include"pch.h"
-#include"bytecode.h"
+#include "pch.h"
+#include "bytecode.h"
 
 namespace myscript 
 {
-	const std::string ToString(Object::Type type)
+	const std::string ToString(MetaObject::Type type)
 	{
-		return type == Object::NULLPTR ? "null" :
-			type == Object::BOOLEAN ? "boolean" :
-			type == Object::NUMBER ? "number" :
-			type == Object::STRING ? "string" :
-			type == Object::FUNCTION ? "function" :
-			type == Object::ARRAY ? "array" :
-			type == Object::OBJECT ? "object" :
-			type == Object::COBJECT ? "cobject" :
-			type == Object::CFUNCTION ? "cfunction" : "error";
+		return type == MetaObject::NULLPTR ? "null" :
+			type == MetaObject::BOOLEAN ? "boolean" :
+			type == MetaObject::NUMBER ? "number" :
+			type == MetaObject::STRING ? "string" :
+			type == MetaObject::FUNCTION ? "function" :
+			type == MetaObject::ARRAY ? "array" :
+			type == MetaObject::OBJECT ? "object" :
+			type == MetaObject::COBJECT ? "cobject" :
+			type == MetaObject::CFUNCTION ? "cfunction" : "error";
 	}
-	const std::string ToString(Object* object)
+	const std::string ToString(MetaObject* object)
 	{
 		switch (object->type)
 		{
-		case Object::NULLPTR:
+		case MetaObject::NULLPTR:
 			return "null";
-		case Object::BOOLEAN:
+		case MetaObject::BOOLEAN:
 			return object->adinf ? "true" : "false";
-		case Object::NUMBER:
+		case MetaObject::NUMBER:
 			char nbuf[FORMATSIZE];
-			sprintf_s(nbuf, FORMATSIZE - 1, "%g", *(double*)object->content);
+			sprintf(nbuf, "%g", *(double*)object->content);
 			return nbuf;
-		case Object::STRING:
+		case MetaObject::STRING:
 			return object->content;
-		case Object::FUNCTION:
+		case MetaObject::FUNCTION:
 			return "function";
-		case Object::CFUNCTION:
+		case MetaObject::CFUNCTION:
 			return "cfunction";
-		case Object::ARRAY:
+		case MetaObject::ARRAY:
 		{
 			std::string temp = "array [ ";
-			Object** element_content = (Object**)object->content;
-			size_t count = object->size / sizeof(Object*);
+			MetaObject** element_content = (MetaObject**)object->content;
+			size_t count = object->size / sizeof(MetaObject*);
 			for (size_t index = 0; index < count; ++index)
 				temp += "(" + ToString(element_content[index]) + ") ";
 			temp += "]";
 			return temp;
 		}
-		case Object::OBJECT:
+		case MetaObject::OBJECT:
 		{
 			std::string temp = "object { \n";
-			Object** element_content = (Object**)object->content;
-			size_t count = object->size / sizeof(Object*) / 2;
+			MetaObject** element_content = (MetaObject**)object->content;
+			size_t count = object->size / sizeof(MetaObject*) / 2;
 			for (size_t index = 0; index < count; ++index)
 				temp += ToString(element_content[index * 2]) + " : " + ToString(element_content[index * 2 + 1]) + "\n";
 			temp += "}";
 			return temp;
 		}
-		case Object::COBJECT:
+		case MetaObject::COBJECT:
 			return "wrapping cbject";
 		default:
 			return "error";
@@ -61,9 +61,9 @@ namespace myscript
 	}
 	const std::string ToString(Error err)
 	{
-		constexpr unsigned int buf_size = 64;
+		constexpr auto buf_size = 64;
 		char temp[buf_size];
-		sprintf_s(temp, buf_size, "[%llu lines] %s", err.line, err.inf.c_str());
+		sprintf(temp, "[%lu lines] %s", err.line, err.inf.c_str());
 		return temp;
 	}
 	void VirtualMachine::Execute()
@@ -75,9 +75,9 @@ namespace myscript
 	VirtualMachine::VirtualMachine(CompliationDesc* data) : codes(data->code)
 	{
 		memory = (char*)malloc(capacity = 1024 * 1024);
-		Lock(p_null = CreateHeader(Object::NULLPTR, 0));
-		Lock(p_true = CreateHeader(Object::BOOLEAN, 0, 1));
-		Lock(p_false = CreateHeader(Object::BOOLEAN, 0));
+		Lock(p_null = CreateHeader(MetaObject::NULLPTR, 0));
+		Lock(p_true = CreateHeader(MetaObject::BOOLEAN, 0, 1));
+		Lock(p_false = CreateHeader(MetaObject::BOOLEAN, 0));
 		for(auto iter : data->global)
 		{
 			names.push_back(iter.name);
@@ -85,35 +85,35 @@ namespace myscript
 			Lock(p_null);
 		}
 		for (auto iter : data->regist_func)
-			SetGlobalValue(GetGlobalIndex(iter.first), CreateHeader(Object::CFUNCTION, sizeof(CFunction), 0, &iter.second));
+			SetGlobalValue(GetGlobalIndex(iter.first), CreateHeader(MetaObject::CFUNCTION, sizeof(CFunction), 0, &iter.second));
 	}
 	VirtualMachine::~VirtualMachine()
 	{
 		free(memory);
 	}
-	Object* VirtualThread::OperateEQ(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateEQ(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+		case MetaObject::NUMBER:
+			if (r->type == MetaObject::NUMBER)
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
 				addr = *lvalue == *rvalue ? machine->p_true : machine->p_false;
 			}
 			break;
-		case Object::STRING:
-			if (r->type == Object::STRING)
+		case MetaObject::STRING:
+			if (r->type == MetaObject::STRING)
 			{
 				char* lvalue = (char*)l->content;
 				char* rvalue = (char*)r->content;
 				addr = strcmp(lvalue, rvalue) == 0 ? machine->p_true : machine->p_false;
 			}
 			break;
-		case Object::BOOLEAN:
-			if (r->type == Object::BOOLEAN)
+		case MetaObject::BOOLEAN:
+			if (r->type == MetaObject::BOOLEAN)
 			{
 				addr = l == r ? machine->p_true : machine->p_false;
 			}
@@ -124,29 +124,29 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateNEQ(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateNEQ(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+		case MetaObject::NUMBER:
+			if (r->type == MetaObject::NUMBER)
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
 				addr = *lvalue != *rvalue ? machine->p_true : machine->p_false;
 			}
 			break;
-		case Object::STRING:
-			if (r->type == Object::STRING)
+		case MetaObject::STRING:
+			if (r->type == MetaObject::STRING)
 			{
 				char* lvalue = (char*)l->content;
 				char* rvalue = (char*)r->content;
 				addr = strcmp(lvalue, rvalue) != 0 ? machine->p_true : machine->p_false;
 			}
 			break;
-		case Object::BOOLEAN:
-			if (r->type == Object::BOOLEAN)
+		case MetaObject::BOOLEAN:
+			if (r->type == MetaObject::BOOLEAN)
 			{
 				addr = l != r ? machine->p_true : machine->p_false;
 			}
@@ -157,21 +157,21 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateGT(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateGT(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+		case MetaObject::NUMBER:
+			if (r->type == MetaObject::NUMBER)
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
 				addr = *lvalue > * rvalue ? machine->p_true : machine->p_false;
 			}
 			break;
-		case Object::STRING:
-			if (r->type == Object::STRING)
+		case MetaObject::STRING:
+			if (r->type == MetaObject::STRING)
 			{
 				char* lvalue = (char*)l->content;
 				char* rvalue = (char*)r->content;
@@ -181,21 +181,21 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateGE(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateGE(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+		case MetaObject::NUMBER:
+			if (r->type == MetaObject::NUMBER)
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
 				addr = *lvalue >= *rvalue ? machine->p_true : machine->p_false;
 			}
 			break;
-		case Object::STRING:
-			if (r->type == Object::STRING)
+		case MetaObject::STRING:
+			if (r->type == MetaObject::STRING)
 			{
 				char* lvalue = (char*)l->content;
 				char* rvalue = (char*)r->content;
@@ -205,21 +205,21 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateLT(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateLT(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+		case MetaObject::NUMBER:
+			if (r->type == MetaObject::NUMBER)
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
 				addr = *lvalue < *rvalue ? machine->p_true : machine->p_false;
 			}
 			break;
-		case Object::STRING:
-			if (r->type == Object::STRING)
+		case MetaObject::STRING:
+			if (r->type == MetaObject::STRING)
 			{
 				char* lvalue = (char*)l->content;
 				char* rvalue = (char*)r->content;
@@ -229,21 +229,21 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateLE(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateLE(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+		case MetaObject::NUMBER:
+			if (r->type == MetaObject::NUMBER)
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
 				addr = *lvalue <= *rvalue ? machine->p_true : machine->p_false;
 			}
 			break;
-		case Object::STRING:
-			if (r->type == Object::STRING)
+		case MetaObject::STRING:
+			if (r->type == MetaObject::STRING)
 			{
 				char* lvalue = (char*)l->content;
 				char* rvalue = (char*)r->content;
@@ -253,24 +253,24 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateNOT(Object* l)
+	MetaObject* VirtualThread::OperateNOT(MetaObject* l)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::BOOLEAN:
+		case MetaObject::BOOLEAN:
 			addr = l->adinf ? machine->p_true : machine->p_false;
 			break;
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateAND(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateAND(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::BOOLEAN:
-			if (r->type == Object::BOOLEAN)
+		case MetaObject::BOOLEAN:
+			if (r->type == MetaObject::BOOLEAN)
 			{
 				addr = l->adinf && r->adinf ? machine->p_true : machine->p_false;
 			}
@@ -278,13 +278,13 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateOR(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateOR(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::BOOLEAN:
-			if (r->type == Object::BOOLEAN)
+		case MetaObject::BOOLEAN:
+			if (r->type == MetaObject::BOOLEAN)
 			{
 				addr = l->adinf || r->adinf ? machine->p_true : machine->p_false;
 			}
@@ -292,9 +292,9 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateXOR(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateXOR(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		/*
 		switch (l->type)
 		{
@@ -308,31 +308,31 @@ namespace myscript
 		*/
 		return addr;
 	}
-	Object* VirtualThread::OperateSIGN(Object* l)
+	MetaObject* VirtualThread::OperateSIGN(MetaObject* l)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
+		case MetaObject::NUMBER:
 			double* lvalue = (double*)l->content;
 			addr = CreateNumber(-*lvalue);
 			break;
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateADD(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateADD(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+		case MetaObject::NUMBER:
+			if (r->type == MetaObject::NUMBER)
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
 				addr = CreateNumber(*lvalue + *rvalue);
 			}
-			else if (r->type == Object::STRING)
+			else if (r->type == MetaObject::STRING)
 			{
 				double* lvalue = (double*)l->content;
 				char* rvalue = (char*)r->content;
@@ -343,8 +343,8 @@ namespace myscript
 					addr = CreateString(fmt, sprintf(fmt, "%g", *lvalue), rvalue, r->size - 1);
 			}
 			break;
-		case Object::STRING:
-			if (r->type == Object::NUMBER)
+		case MetaObject::STRING:
+			if (r->type == MetaObject::NUMBER)
 			{
 				char* lvalue = (char*)l->content;
 				double* rvalue = (double*)r->content;
@@ -354,7 +354,7 @@ namespace myscript
 				else
 					addr = CreateString(lvalue, l->size - 1, fmt, sprintf(fmt, "%g", *rvalue));
 			}
-			else if (r->type == Object::STRING)
+			else if (r->type == MetaObject::STRING)
 			{
 				char* lvalue = (char*)l->content;
 				char* rvalue = (char*)r->content;
@@ -364,22 +364,22 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateSUB(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateSUB(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
+		case MetaObject::NUMBER:
 			switch (r->type)
 			{
-			case Object::NUMBER:
+			case MetaObject::NUMBER:
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
 				addr = CreateNumber(*lvalue - *rvalue);
 			}
 			break;
-			case Object::STRING:
+			case MetaObject::STRING:
 			{
 				double* lvalue = (double*)l->content;
 				addr = CreateNumber(*lvalue - atof(r->content));
@@ -389,16 +389,16 @@ namespace myscript
 				break;
 			}
 			break;
-		case Object::STRING:
+		case MetaObject::STRING:
 			switch (r->type)
 			{
-			case Object::NUMBER:
+			case MetaObject::NUMBER:
 			{
 				double* rvalue = (double*)r->content;
 				addr = CreateNumber(atof(l->content) - *rvalue);
 			}
 			break;
-			case Object::STRING:
+			case MetaObject::STRING:
 			{
 				addr = CreateNumber(atof(l->content) - atof(r->content));
 			}
@@ -410,13 +410,13 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateMUL(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateMUL(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+		case MetaObject::NUMBER:
+			if (r->type == MetaObject::NUMBER)
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
@@ -426,13 +426,13 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateDIV(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateDIV(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+		case MetaObject::NUMBER:
+			if (r->type == MetaObject::NUMBER)
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
@@ -442,13 +442,13 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperateMOD(Object* l, Object* r)
+	MetaObject* VirtualThread::OperateMOD(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+		case MetaObject::NUMBER:
+			if (r->type == MetaObject::NUMBER)
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
@@ -458,13 +458,13 @@ namespace myscript
 		}
 		return addr;
 	}
-	Object* VirtualThread::OperatePOW(Object* l, Object* r)
+	MetaObject* VirtualThread::OperatePOW(MetaObject* l, MetaObject* r)
 	{
-		Object* addr = machine->p_null;
+		MetaObject* addr = machine->p_null;
 		switch (l->type)
 		{
-		case Object::NUMBER:
-			if (r->type == Object::NUMBER)
+		case MetaObject::NUMBER:
+			if (r->type == MetaObject::NUMBER)
 			{
 				double* lvalue = (double*)l->content;
 				double* rvalue = (double*)r->content;
@@ -561,7 +561,7 @@ namespace myscript
 			case OpCode::CFJMP:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				Object* cond = stack.back();
+				MetaObject* cond = stack.back();
 				if (cond == machine->p_false || cond == machine->p_null)
 					cursor += operand;
 				StackPop();
@@ -576,7 +576,7 @@ namespace myscript
 			case OpCode::CBJMP:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				Object* cond = stack.back();
+				MetaObject* cond = stack.back();
 				if (cond == machine->p_false || cond == machine->p_null)
 					cursor -= operand;
 				StackPop();
@@ -616,16 +616,16 @@ namespace myscript
 			case OpCode::CALL:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				Object* inf = stack[stack.size() - operand - 1];
+				MetaObject* inf = stack[stack.size() - operand - 1];
 				basestack.push_back(stack.size() - operand);
 				switch (inf->type)
 				{
-				case Object::FUNCTION:
+				case MetaObject::FUNCTION:
 					callstack.push_back(cursor);
 					cursor = (uint16_t*)inf->content;
 					break;
-				case Object::CFUNCTION:
-					StackPush((*(CFunction *)inf->content)(this));
+				case MetaObject::CFUNCTION:
+					StackPush((*(CFunction*)inf->content)(this));
 					StackErase(basestack.back() - 1, stack.size() - 1);
 					basestack.pop_back();
 				}
@@ -673,15 +673,15 @@ namespace myscript
 			case OpCode::NEW:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				Object* target = machine->global[operand];
-				if(target->type != Object::METADATA)
+				MetaObject* target = machine->global[operand];
+				if(target->type != MetaObject::METADATA)
 				{
 					errors.push_back({"invalid operation"});
 					callback = 0;
 					break;
 				}
-				Object* dest = machine->CreateHeader(Object::OBJECT, sizeof(Object*) * (stack.size() - basestack.back() -1), operand);
-				Object** content = (Object**)dest->content;
+				MetaObject* dest = machine->CreateHeader(MetaObject::OBJECT, sizeof(MetaObject*) * (stack.size() - basestack.back() -1), operand);
+				MetaObject** content = (MetaObject**)dest->content;
 				StackErase(basestack.back() - 1, stack.size());
 				StackPush(dest);
 			}
@@ -689,8 +689,8 @@ namespace myscript
 			case OpCode::INSTARR:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				Object* addr = machine->CreateHeader(Object::ARRAY, operand * sizeof(Object* ));
-				Object**content = (Object**)addr->content;
+				MetaObject* addr = machine->CreateHeader(MetaObject::ARRAY, operand * sizeof(MetaObject* ));
+				MetaObject**content = (MetaObject**)addr->content;
 				for (size_t index = 0; index < operand; ++index)
 				{
 					content[index] = stack.back();
@@ -702,8 +702,8 @@ namespace myscript
 			case OpCode::INSTDIC:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				Object* addr = machine->CreateHeader(Object::OBJECT, operand * sizeof(Object* ) * 2);
-				Object**content = (Object**)addr->content;
+				MetaObject* addr = machine->CreateHeader(MetaObject::OBJECT, operand * sizeof(MetaObject* ) * 2);
+				MetaObject**content = (MetaObject**)addr->content;
 				for (size_t index = 0; index < operand; ++index)
 				{
 					content[index * 2] = stack.back();
@@ -717,7 +717,7 @@ namespace myscript
 			case OpCode::DEF:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				StackPush(machine->CreateHeader(Object::METADATA, operand * sizeof(OpCode), 0, cursor));
+				StackPush(machine->CreateHeader(MetaObject::METADATA, operand * sizeof(OpCode), 0, cursor));
 				cursor += operand;
 			}
 			break;
@@ -729,35 +729,35 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* arr = StackBack(0);
-				Object* key = StackBack(1);
-				Object* value = StackBack(2);
-				if (arr->type == Object::ARRAY)
+				MetaObject* arr = StackBack(0);
+				MetaObject* key = StackBack(1);
+				MetaObject* value = StackBack(2);
+				if (arr->type == MetaObject::ARRAY)
 				{
-					if (key->type != Object::NUMBER)
+					if (key->type != MetaObject::NUMBER)
 					{
 						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
 						callback = 0;
 						break;
 					}
 					size_t index = static_cast<size_t>(*(double *)key->content);
-					size_t size = arr->size / sizeof(Object* );
+					size_t size = arr->size / sizeof(MetaObject* );
 					if (index >= size)
 					{
 						errors.push_back({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
 						callback = 0;
 						break;
 					}
-					Object** elements = (Object**)arr->content;
+					MetaObject** elements = (MetaObject**)arr->content;
 					machine->UnLock(elements[index]);
 					machine->Lock(value);
 					elements[index] = value;
 					StackPop(3);
 					StackPush(elements[index]);
 				}
-				else if (arr->type == Object::STRING)
+				else if (arr->type == MetaObject::STRING)
 				{
-					if (key->type != Object::NUMBER)
+					if (key->type != MetaObject::NUMBER)
 					{
 						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
 						callback = 0;
@@ -770,7 +770,7 @@ namespace myscript
 						callback = 0;
 						break;
 					}
-					if (value->type != Object::STRING)
+					if (value->type != MetaObject::STRING)
 					{
 						errors.push_back({"문자만 대입가능합니다.", 0});
 						callback = 0;
@@ -796,31 +796,31 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* arr = StackBack(0);
-				Object* key = StackBack(1);
-				if (arr->type == Object::ARRAY)
+				MetaObject* arr = StackBack(0);
+				MetaObject* key = StackBack(1);
+				if (arr->type == MetaObject::ARRAY)
 				{
-					if (key->type != Object::NUMBER)
+					if (key->type != MetaObject::NUMBER)
 					{
 						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
 						callback = 0;
 						break;
 					}
 					size_t index = static_cast<size_t>(*(double *)key->content);
-					size_t size = arr->size / sizeof(Object* );
+					size_t size = arr->size / sizeof(MetaObject* );
 					if (index >= size)
 					{
 						errors.push_back({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
 						callback = 0;
 						break;
 					}
-					Object** elements = (Object**)arr->content;
+					MetaObject** elements = (MetaObject**)arr->content;
 					StackPop(2);
 					StackPush(elements[index]);
 				}
-				else if (arr->type == Object::STRING)
+				else if (arr->type == MetaObject::STRING)
 				{
-					if (key->type != Object::NUMBER)
+					if (key->type != MetaObject::NUMBER)
 					{
 						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
 						callback = 0;
@@ -852,17 +852,17 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* arr = StackBack(0);
-				Object* key = StackBack(1);
-				Object* value = StackBack(2);
-				if (arr->type != Object::OBJECT)
+				MetaObject* arr = StackBack(0);
+				MetaObject* key = StackBack(1);
+				MetaObject* value = StackBack(2);
+				if (arr->type != MetaObject::OBJECT)
 				{
 					errors.push_back({"참조할 수 없는 객체입니다.", 0});
 					callback = 0;
 					break;
 				}
-				Object** elements = (Object**)arr->content;
-				size_t size = arr->size / sizeof(Object* ) / 2;
+				MetaObject** elements = (MetaObject**)arr->content;
+				size_t size = arr->size / sizeof(MetaObject* ) / 2;
 				size_t index = 0;
 				while (index < size)
 				{
@@ -893,16 +893,16 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* arr = StackBack(0);
-				Object* key = StackBack(1);
-				if (arr->type != Object::OBJECT)
+				MetaObject* arr = StackBack(0);
+				MetaObject* key = StackBack(1);
+				if (arr->type != MetaObject::OBJECT)
 				{
 					errors.push_back({"참조할 수 없는 객체입니다.", 0});
 					callback = 0;
 					break;
 				}
-				Object** elements = (Object**)arr->content;
-				size_t size = arr->size / sizeof(Object* ) / 2;
+				MetaObject** elements = (MetaObject**)arr->content;
+				size_t size = arr->size / sizeof(MetaObject* ) / 2;
 				size_t index = 0;
 				while (index < size)
 				{
@@ -929,7 +929,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateNOT(stack.back());
+				MetaObject* operand = OperateNOT(stack.back());
 				StackPop();
 				StackPush(operand);
 			}
@@ -942,7 +942,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateEQ(StackBack(1), StackBack(0));
+				MetaObject* operand = OperateEQ(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
@@ -955,29 +955,29 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = machine->p_null;
-				Object* r = stack_pop();
-				Object* l = stack_pop();
+				MetaObject* operand = machine->p_null;
+				MetaObject* r = stack_pop();
+				MetaObject* l = stack_pop();
 				switch (l->type)
 				{
-				case Object::NUMBER:
-					if (r->type == Object::NUMBER)
+				case MetaObject::NUMBER:
+					if (r->type == MetaObject::NUMBER)
 					{
 						double *lvalue = (double *)l->content;
 						double *rvalue = (double *)r->content;
 						operand = *lvalue != *rvalue ? machine->p_true : machine->p_false;
 					}
 					break;
-				case Object::STRING:
-					if (r->type == Object::STRING)
+				case MetaObject::STRING:
+					if (r->type == MetaObject::STRING)
 					{
 						char *lvalue = (char *)l->content;
 						char *rvalue = (char *)r->content;
 						operand = strcmp(lvalue, rvalue) != 0 ? machine->p_true : machine->p_false;
 					}
 					break;
-				case Object::BOOLEAN:
-					if (r->type == Object::BOOLEAN)
+				case MetaObject::BOOLEAN:
+					if (r->type == MetaObject::BOOLEAN)
 					{
 						operand = l != r ? machine->p_true : machine->p_false;
 					}
@@ -997,21 +997,21 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = machine->p_null;
-				Object* r = stack_pop();
-				Object* l = stack_pop();
+				MetaObject* operand = machine->p_null;
+				MetaObject* r = stack_pop();
+				MetaObject* l = stack_pop();
 				switch (l->type)
 				{
-				case Object::NUMBER:
-					if (r->type == Object::NUMBER)
+				case MetaObject::NUMBER:
+					if (r->type == MetaObject::NUMBER)
 					{
 						double *lvalue = (double *)l->content;
 						double *rvalue = (double *)r->content;
 						operand = *lvalue > *rvalue ? machine->p_true : machine->p_false;
 					}
 					break;
-				case Object::STRING:
-					if (r->type == Object::STRING)
+				case MetaObject::STRING:
+					if (r->type == MetaObject::STRING)
 					{
 						char *lvalue = (char *)l->content;
 						char *rvalue = (char *)r->content;
@@ -1030,7 +1030,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateGE(StackBack(1), StackBack(0));
+				MetaObject* operand = OperateGE(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
@@ -1043,7 +1043,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateLT(StackBack(1), StackBack(0));
+				MetaObject* operand = OperateLT(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
@@ -1056,7 +1056,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateLE(StackBack(1), StackBack(0));
+				MetaObject* operand = OperateLE(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
@@ -1069,7 +1069,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateOR(StackBack(1), StackBack(0));
+				MetaObject* operand = OperateOR(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
@@ -1082,7 +1082,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateAND(StackBack(1), StackBack(0));
+				MetaObject* operand = OperateAND(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
@@ -1095,7 +1095,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateSIGN(stack.back());
+				MetaObject* operand = OperateSIGN(stack.back());
 				StackPop();
 				StackPush(operand);
 			}
@@ -1108,7 +1108,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateADD(StackBack(1), StackBack(0));
+				MetaObject* operand = OperateADD(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
@@ -1121,7 +1121,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateSUB(StackBack(1), StackBack(0));
+				MetaObject* operand = OperateSUB(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
@@ -1134,7 +1134,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateMUL(StackBack(1), StackBack(0));
+				MetaObject* operand = OperateMUL(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
@@ -1147,7 +1147,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateDIV(StackBack(1), StackBack(0));
+				MetaObject* operand = OperateDIV(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
@@ -1160,7 +1160,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperateMOD(StackBack(1), StackBack(0));
+				MetaObject* operand = OperateMOD(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
@@ -1173,7 +1173,7 @@ namespace myscript
 					callback = 0;
 					break;
 				}
-				Object* operand = OperatePOW(StackBack(1), StackBack(0));
+				MetaObject* operand = OperatePOW(StackBack(1), StackBack(0));
 				StackPop(2);
 				StackPush(operand);
 			}
