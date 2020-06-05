@@ -55,53 +55,42 @@ int main(int argc, char** argv) {
 	//printf("%s\n", buffer);
 	#endif
 	SyntaxTree code;
-	// cdesc.globals[{"clock", VarDesc::CONST}] = myscript::CreateCFunction([&](int argc, MetaObject* args){
-	// 	return CreateNumber(clock());
-	// });
-	// cdesc.globals[{"typeof", VarDesc::CONST}] = myscript::CreateCFunction([&](int argc, MetaObject* args){
-	// 	if(argc != 1)
-	// 		return CreateMetaNull();
-	// 	std::string tpyeinfo = ToString(MetaObject::Type(args[0].type));
-	// 	return CreateString(tpyeinfo.c_str(), tpyeinfo.size());
-	// });
+	cdesc.Insert({"clock", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args){
+		return CreateMetaNumber(clock());
+	}));
+	cdesc.Insert({"typeof", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args){
+		if(args.size() != 1)
+			return CreateMetaNull();
+		std::string tpyeinfo = ToString(MetaObject::Type(args[0]->type));
+		return CreateMetaString(tpyeinfo.c_str(), tpyeinfo.size());
+	}));
 
-
-	cdesc.RegistCFunc("clock", [](VirtualThread* thread) {
-		return thread->CreateNumber(clock());
-	});
-	cdesc.RegistCFunc("typeof", [](VirtualThread *thread) {
-		auto params = thread->GetParameters();
-		if (params.size() == 1)
-		{
-			std::string tpyeinfo = ToString(MetaObject::Type(params[0]->type));
-			return thread->CreateString(tpyeinfo.c_str(), tpyeinfo.size());
-		}
-		return thread->CreateNull();
-	});
-	cdesc.RegistCFunc("print", [](VirtualThread *thread) {
-		auto params = thread->GetParameters();
-		for (auto iter : params)
-		{
-			printf("%s", ToString(iter).c_str());
-		}
-		return thread->CreateNumber(params.size());
-	});
-	cdesc.RegistCFunc("scan", [](VirtualThread *thread) {
+	cdesc.Insert({"print", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
+		for (int index = 0; index < args.size(); ++index)
+			printf("%s", ToString(args[index]).c_str());
+		return CreateMetaNull();
+	}));
+	cdesc.Insert({"scan", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
 		char buf[2048];
-		fgets(buf, 2047, stdin);
+		if(buf != fgets(buf, 2047, stdin))
+			return CreateMetaNull();
 		size_t size = strlen(buf);
 		buf[size - 1] = '\0';
-		return thread->CreateString(buf, size - 1);
-	});
-	cdesc.RegistCFunc("copy", [](VirtualThread *thread) {
-		MetaObject* source = thread->GetParameters()[0];
-		MetaObject* dest = thread->CreateHeader(source->type, source->size, source->adinf);
-		memcpy(dest->content, source->content, source->size);
-		return dest;
-	});
-	cdesc.RegistCFunc("size", [](VirtualThread *thread) {
-		return thread->CreateNumber(thread->GetParameters()[0]->size);
-	});
+		return CreateMetaString(buf, size - 1);
+	}));
+	cdesc.Insert({"copy", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
+		if(args.size() != 1)
+			return CreateMetaNull();
+		// MetaObject* source = thread->GetParameters()[0];
+		// MetaObject* dest = thread->CreateHeader(source->type, source->size, source->adinf);
+		// memcpy(dest->content, source->content, source->size);
+		return args[0];
+	}));
+	cdesc.Insert({"size", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
+		if(args.size() != 1)
+			return CreateMetaNull();
+		return CreateMetaNumber(args[0]->size);
+	}));
 	if (!SyntaxTree::ParseText(code, buffer))
 	{
 		printf("[parsing error]\n");

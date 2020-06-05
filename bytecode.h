@@ -6,6 +6,7 @@
 
 namespace myscript
 {
+
 	constexpr auto FORMATSIZE = 64;
 	struct MetaObject
 	{
@@ -28,72 +29,21 @@ namespace myscript
 		uint32_t size;
 		char content[0];
 	};
-	// MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size)
-	// {
-	// 	MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + _size);
-	// 	alloc->type = _type;
-	// 	alloc->adinf = _adinf;
-	// 	alloc->size = _size;
-	// 	return alloc;
-	// }
-	// MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size, const void* _content)
-	// {
-	// 	MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + _size);
-	// 	alloc->type = _type;
-	// 	alloc->adinf = _adinf;
-	// 	alloc->size = _size;
-	// 	memcpy(alloc->content, _content, _size);
-	// 	return alloc;
-	// }
-	// MetaObject* CreateMetaNull(void)
-	// {
-	// 	return CreateMetaObject(MetaObject::NULLPTR, 0, 0);
-	// }
-	// MetaObject* CreateMetaBool(const bool boolean)
-	// {
-	// 	return CreateMetaObject(MetaObject::NULLPTR, boolean, 0);
-	// }
-	// MetaObject* CreateMetaNumber(const double number)
-	// {
-	// 	return CreateMetaObject(MetaObject::NUMBER, 0, sizeof(double), &number);
-	// }
-	// MetaObject* CreateMetaString(const char* str, const size_t size)
-	// {
-	// 	MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + size + 1);
-	// 	alloc->type = MetaObject::STRING;
-	// 	alloc->adinf = 0;
-	// 	alloc->size = size;
-	// 	memcpy(alloc->content, str, size);
-	// 	alloc->content[size] = '\0';
-	// 	return alloc;
-	// }
-	// MetaObject* CreateMetaString(const char* str, const size_t str_size, const char* addit, const size_t addit_size)
-	// {
-	// 	MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + str_size + addit_size + 1);
-	// 	alloc->type = MetaObject::STRING;
-	// 	alloc->adinf = 0;
-	// 	alloc->size = str_size + addit_size;
-	// 	memcpy(alloc->content, str, str_size);
-	// 	memcpy(alloc->content + str_size, addit, addit_size);
-	// 	alloc->content[str_size + addit_size] = '\0';
-	// 	return alloc;
-	// }
-	// MetaObject* CreateMetaFunction(const OpCode *src, const size_t size)
-	// {
-	// 	return CreateMetaObject(MetaObject::FUNCTION, 0, sizeof(OpCode) * size, src);
-	// }
-	// MetaObject* CreateMetaCFunction(CFunc func)
-	// {
-	// 	return CreateMetaObject(MetaObject::CFUNCTION, 0, sizeof(CFunc), &func);
-	// }
-	// MetaObject* CreateMetaCObject(const void *addr, const size_t size)
-	// {
-	// 	return CreateMetaObject(MetaObject::COBJECT, 0, size, addr);
-	// }
+	MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size);
+	MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size, const void* _content);
+	MetaObject* CreateMetaNull(void);
+	MetaObject* CreateMetaBool(const bool boolean);
+	MetaObject* CreateMetaNumber(const double number);
+	MetaObject* CreateMetaString(const char* str, const size_t size);
+	MetaObject* CreateMetaString(const char* str, const size_t str_size, const char* addit, const size_t addit_size);
+	MetaObject* CreateMetaFunction(const OpCode *src, const size_t size);
+	MetaObject* CreateMetaCFunction(CFunc func);
+	MetaObject* CreateMetaCObject(const void *addr, const size_t size);
 	const std::string ToString(MetaObject::Type);
 	const std::string ToString(MetaObject*);
 	const std::string ToString(Error);
 
+	class VirtualThread;
 	class VirtualMachine
 	{
 	private:
@@ -101,7 +51,7 @@ namespace myscript
 		size_t capacity;
 		std::multiset<MetaObject*> allocs;
 		std::vector<MetaObject*> global;
-		std::map<std::string, MetaObject*> glob;
+		std::map<VarDesc, MetaObject*, VarDescCompare> glob;
 		std::vector<std::string> names;
 		std::vector<uint16_t> codes;
 		MetaObject* p_null;
@@ -174,6 +124,10 @@ namespace myscript
 			addr->adinf = _adinf;
 			memcpy(addr->content, _content, _size);
 			return addr;
+		}
+		inline MetaObject* CopyObject(MetaObject* src)
+		{
+			return CreateHeader(src->type, src->size, src->adinf, src->content);
 		}
 		std::string Report()
 		{
@@ -296,6 +250,10 @@ namespace myscript
 		inline MetaObject* CreateObject(const void *addr, const size_t size)
 		{
 			return machine->CreateHeader(MetaObject::COBJECT, size, 0, addr);
+		}
+		inline MetaObject* CopyObject(MetaObject* src)
+		{
+			return machine->CreateHeader(src->type, src->size, src->adinf, src->content);
 		}
 		inline std::vector<MetaObject*> GetParameters()
 		{

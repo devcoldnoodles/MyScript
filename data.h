@@ -4,11 +4,9 @@
 
 namespace myscript 
 {
-	struct SyntaxLiteral;
 	struct MetaObject;
-	class VirtualThread;
-	typedef MetaObject* (*CFunction)(VirtualThread*);
-	typedef MetaObject* (*CFunc)(int argc, MetaObject* args);
+	typedef MetaObject* (*CTestFunc)(int argc, MetaObject* args);
+	typedef MetaObject* (*CFunc)(std::vector<MetaObject*> args);
 
 	struct Token
 	{
@@ -164,16 +162,16 @@ namespace myscript
 			PRIVATE = 8,
 			INTERNAL = 16,
 		} option;
+	};
 
-		bool operator==(VarDesc desc)
+	struct VarDescCompare
+	{
+		bool operator()(const VarDesc& a, const VarDesc& b) const
 		{
-			return desc.name == name;
-		}
-		bool operator==(std::string desc)
-		{
-			return name == desc;
+			return a.name < b.name;
 		}
 	};
+
 	struct LocalScope
 	{
 		std::vector<VarDesc> variables;
@@ -189,11 +187,10 @@ namespace myscript
 	struct CompliationDesc
 	{
 		std::vector<uint16_t> code;
-		std::map<std::string, CFunction> regist_func;
 		std::vector<LocalScope> scope;
 		std::vector<VarDesc> global;
 		std::vector<Error> errors;
-		std::map<VarDesc, MetaObject*> globals;
+		std::map<VarDesc, MetaObject*, VarDescCompare> globals;
 
 		const uint16_t Identify(const std::string& id) const
 		{
@@ -224,10 +221,10 @@ namespace myscript
 			return nullptr;
 		}
 
-		void RegistCFunc(std::string name, const CFunction& func)
+		void Insert(VarDesc desc, MetaObject* object)
 		{
-			regist_func[name] = func;
-			global.push_back({name, VarDesc::CONST});
+			globals[desc] = object;
+			global.push_back(desc);
 		}
 	};
 }

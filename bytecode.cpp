@@ -3,6 +3,68 @@
 
 namespace myscript 
 {
+	MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size)
+	{
+		MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + _size);
+		alloc->type = _type;
+		alloc->adinf = _adinf;
+		alloc->size = _size;
+		return alloc;
+	}
+	MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size, const void* _content)
+	{
+		MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + _size);
+		alloc->type = _type;
+		alloc->adinf = _adinf;
+		alloc->size = _size;
+		memcpy(alloc->content, _content, _size);
+		return alloc;
+	}
+	MetaObject* CreateMetaNull(void)
+	{
+		return CreateMetaObject(MetaObject::NULLPTR, 0, 0);
+	}
+	MetaObject* CreateMetaBool(const bool boolean)
+	{
+		return CreateMetaObject(MetaObject::NULLPTR, boolean, 0);
+	}
+	MetaObject* CreateMetaNumber(const double number)
+	{
+		return CreateMetaObject(MetaObject::NUMBER, 0, sizeof(double), &number);
+	}
+	MetaObject* CreateMetaString(const char* str, const size_t size)
+	{
+		MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + size + 1);
+		alloc->type = MetaObject::STRING;
+		alloc->adinf = 0;
+		alloc->size = size;
+		memcpy(alloc->content, str, size);
+		alloc->content[size] = '\0';
+		return alloc;
+	}
+	MetaObject* CreateMetaString(const char* str, const size_t str_size, const char* addit, const size_t addit_size)
+	{
+		MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + str_size + addit_size + 1);
+		alloc->type = MetaObject::STRING;
+		alloc->adinf = 0;
+		alloc->size = str_size + addit_size;
+		memcpy(alloc->content, str, str_size);
+		memcpy(alloc->content + str_size, addit, addit_size);
+		alloc->content[str_size + addit_size] = '\0';
+		return alloc;
+	}
+	MetaObject* CreateMetaFunction(const OpCode *src, const size_t size)
+	{
+		return CreateMetaObject(MetaObject::FUNCTION, 0, sizeof(OpCode) * size, src);
+	}
+	MetaObject* CreateMetaCFunction(CFunc func)
+	{
+		return CreateMetaObject(MetaObject::CFUNCTION, 0, sizeof(CFunc), &func);
+	}
+	MetaObject* CreateMetaCObject(const void *addr, const size_t size)
+	{
+		return CreateMetaObject(MetaObject::COBJECT, 0, size, addr);
+	}
 	const std::string ToString(MetaObject::Type type)
 	{
 		return type == MetaObject::NULLPTR ? "null" :
@@ -84,8 +146,12 @@ namespace myscript
 			global.push_back(p_null);
 			Lock(p_null);
 		}
-		for (auto iter : data->regist_func)
-			SetGlobalValue(GetGlobalIndex(iter.first), CreateHeader(MetaObject::CFUNCTION, sizeof(CFunction), 0, &iter.second));
+		for(auto iter : data->globals)
+		{
+			// glob.insert({iter.first, CopyObject(iter.second)});
+			SetGlobalValue(GetGlobalIndex(iter.first.name), CopyObject(iter.second));
+			free(iter.second);
+		}
 	}
 	VirtualMachine::~VirtualMachine()
 	{
@@ -625,7 +691,9 @@ namespace myscript
 					cursor = (uint16_t*)inf->content;
 					break;
 				case MetaObject::CFUNCTION:
-					StackPush((*(CFunction*)inf->content)(this));
+					auto value = (*(CFunc*)inf->content)(std::vector<MetaObject*>(stack.begin() + basestack.back(), stack.begin() + stack.size()));
+					StackPush(CopyObject(value));
+					free(value);
 					StackErase(basestack.back() - 1, stack.size() - 1);
 					basestack.pop_back();
 				}
