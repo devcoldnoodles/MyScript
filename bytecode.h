@@ -36,9 +36,11 @@ namespace myscript
 	MetaObject* CreateMetaNumber(const double number);
 	MetaObject* CreateMetaString(const char* str, const size_t size);
 	MetaObject* CreateMetaString(const char* str, const size_t str_size, const char* addit, const size_t addit_size);
-	MetaObject* CreateMetaFunction(const OpCode *src, const size_t size);
+	MetaObject* CreateMetaFunction(const OpCode* src, const size_t size);
 	MetaObject* CreateMetaCFunction(CFunc func);
-	MetaObject* CreateMetaCObject(const void *addr, const size_t size);
+	MetaObject* CreateMetaCObject(const void* addr, const size_t size);
+	MetaObject* CreateMetaData(const void* data, const size_t size);
+	MetaObject* CreateInstance();
 	const std::string ToString(MetaObject::Type);
 	const std::string ToString(MetaObject*);
 	const std::string ToString(Error);
@@ -225,13 +227,13 @@ namespace myscript
 		{
 			return machine->CreateHeader(MetaObject::NUMBER, sizeof(double), 0, &number);
 		}
-		inline MetaObject* CreateString(const char* str, const size_t str_size)
+		inline MetaObject* CreateString(const void* str, const size_t str_size)
 		{
 			MetaObject* alloc = machine->CreateHeader(MetaObject::STRING, str_size + 1, 0, str);
 			alloc->content[str_size] = '\0';
 			return alloc;
 		}
-		inline MetaObject* CreateString(const char* str, const size_t str_size, const char* addit, const size_t addit_size)
+		inline MetaObject* CreateString(const void* str, const size_t str_size, const char* addit, const size_t addit_size)
 		{
 			MetaObject* alloc = machine->CreateHeader(MetaObject::STRING, str_size + addit_size + 1);
 			if (alloc != nullptr)
@@ -243,11 +245,11 @@ namespace myscript
 			}
 			return alloc;
 		}
-		inline MetaObject* CreateFunction(const OpCode *opcode, const size_t size)
+		inline MetaObject* CreateFunction(const void* opcode, const size_t size)
 		{
 			return machine->CreateHeader(MetaObject::FUNCTION, sizeof(OpCode) * size, 0, opcode);
 		}
-		inline MetaObject* CreateObject(const void *addr, const size_t size)
+		inline MetaObject* CreateObject(const void* addr, const size_t size)
 		{
 			return machine->CreateHeader(MetaObject::COBJECT, size, 0, addr);
 		}

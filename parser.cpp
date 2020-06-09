@@ -29,10 +29,34 @@ namespace myscript
 		index = temp;
 		return lexp;
 	}
-	SyntaxExpr* ParseAssign(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
+	SyntaxExpr* ParseTernaryOperator(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
+		SyntaxTernaryOperator* ternary = new SyntaxTernaryOperator();
+		if ((ternary->lexpr = ParseAssign(tokens, temp, errors)) == nullptr)
+			goto ErrorHandle;
+		if (tokens[temp].type == Token::QUESTION)
+		{
+			if ((ternary->expr = ParseTernaryOperator(tokens, ++temp, errors)) == nullptr)
+				goto ErrorHandle;
+			if (tokens[temp].type != Token::COLON)
+			{
+				errors.push_back({"Expected colon(:)", tokens[temp].line});
+				return nullptr;
+			}
+			if ((ternary->rexpr = ParseTernaryOperator(tokens, ++temp, errors)) == nullptr)
+				goto ErrorHandle;
+		}
+		index = temp;
+		return ternary;
+	ErrorHandle:
+		delete ternary;
+		return nullptr;
+	}
+	SyntaxExpr* ParseAssign(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
+	{
 		SyntaxExpr* lexp = nullptr;
+		size_t temp = index;
 		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParseOr(tokens, temp, errors)) == nullptr)
 			return nullptr;

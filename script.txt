@@ -3,6 +3,9 @@ function recur(n) {
         return recur(n - 1) + recur(n - 2);
     return n;
 }
+
 const begin = clock();
-print(recur(35));
+//print(recur(30));
+loop(var cnt=0;cnt < 1000; ++cnt)
+    print(cnt, "\n");
 print("\nusing time = ", clock() - begin);

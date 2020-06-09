@@ -53,7 +53,7 @@ namespace myscript
 		alloc->content[str_size + addit_size] = '\0';
 		return alloc;
 	}
-	MetaObject* CreateMetaFunction(const OpCode *src, const size_t size)
+	MetaObject* CreateMetaFunction(const OpCode* src, const size_t size)
 	{
 		return CreateMetaObject(MetaObject::FUNCTION, 0, sizeof(OpCode) * size, src);
 	}
@@ -61,9 +61,15 @@ namespace myscript
 	{
 		return CreateMetaObject(MetaObject::CFUNCTION, 0, sizeof(CFunc), &func);
 	}
-	MetaObject* CreateMetaCObject(const void *addr, const size_t size)
+	MetaObject* CreateMetaCObject(const void* addr, const size_t size)
 	{
 		return CreateMetaObject(MetaObject::COBJECT, 0, size, addr);
+	}
+	MetaObject* CreateMetaData(const void* data, const size_t size)
+	{
+		MetaObject* alloc = CreateMetaObject(MetaObject::METADATA, 0, size);
+		//memcpy(alloc->content)
+		return alloc;
 	}
 	const std::string ToString(MetaObject::Type type)
 	{
@@ -159,232 +165,81 @@ namespace myscript
 	}
 	MetaObject* VirtualThread::OperateEQ(MetaObject* l, MetaObject* r)
 	{
-		MetaObject* addr = machine->p_null;
-		switch (l->type)
-		{
-		case MetaObject::NUMBER:
-			if (r->type == MetaObject::NUMBER)
-			{
-				double* lvalue = (double*)l->content;
-				double* rvalue = (double*)r->content;
-				addr = *lvalue == *rvalue ? machine->p_true : machine->p_false;
-			}
-			break;
-		case MetaObject::STRING:
-			if (r->type == MetaObject::STRING)
-			{
-				char* lvalue = (char*)l->content;
-				char* rvalue = (char*)r->content;
-				addr = strcmp(lvalue, rvalue) == 0 ? machine->p_true : machine->p_false;
-			}
-			break;
-		case MetaObject::BOOLEAN:
-			if (r->type == MetaObject::BOOLEAN)
-			{
-				addr = l == r ? machine->p_true : machine->p_false;
-			}
-			break;
-		default:
-			addr = l == r ? machine->p_true : machine->p_false;
-			break;
-		}
-		return addr;
+		if(l->type == MetaObject::NUMBER && r->type == MetaObject::NUMBER)
+			return *((double*)l->content) == *((double*)r->content) ? machine->p_true : machine->p_false;
+		if(l->type == MetaObject::STRING && r->type == MetaObject::STRING)
+			return strcmp(l->content, r->content) == 0 ? machine->p_true : machine->p_false;
+		return l == r ? machine->p_true : machine->p_false;
 	}
 	MetaObject* VirtualThread::OperateNEQ(MetaObject* l, MetaObject* r)
 	{
-		MetaObject* addr = machine->p_null;
-		switch (l->type)
-		{
-		case MetaObject::NUMBER:
-			if (r->type == MetaObject::NUMBER)
-			{
-				double* lvalue = (double*)l->content;
-				double* rvalue = (double*)r->content;
-				addr = *lvalue != *rvalue ? machine->p_true : machine->p_false;
-			}
-			break;
-		case MetaObject::STRING:
-			if (r->type == MetaObject::STRING)
-			{
-				char* lvalue = (char*)l->content;
-				char* rvalue = (char*)r->content;
-				addr = strcmp(lvalue, rvalue) != 0 ? machine->p_true : machine->p_false;
-			}
-			break;
-		case MetaObject::BOOLEAN:
-			if (r->type == MetaObject::BOOLEAN)
-			{
-				addr = l != r ? machine->p_true : machine->p_false;
-			}
-			break;
-		default:
-			addr = l != r ? machine->p_true : machine->p_false;
-			break;
-		}
-		return addr;
+		if(l->type == MetaObject::NUMBER && r->type == MetaObject::NUMBER)
+			return *((double*)l->content) != *((double*)r->content) ? machine->p_true : machine->p_false;
+		if(l->type == MetaObject::STRING && r->type == MetaObject::STRING)
+			return strcmp(l->content, r->content) != 0 ? machine->p_true : machine->p_false;
+		return l != r ? machine->p_true : machine->p_false;
 	}
 	MetaObject* VirtualThread::OperateGT(MetaObject* l, MetaObject* r)
 	{
-		MetaObject* addr = machine->p_null;
-		switch (l->type)
-		{
-		case MetaObject::NUMBER:
-			if (r->type == MetaObject::NUMBER)
-			{
-				double* lvalue = (double*)l->content;
-				double* rvalue = (double*)r->content;
-				addr = *lvalue > * rvalue ? machine->p_true : machine->p_false;
-			}
-			break;
-		case MetaObject::STRING:
-			if (r->type == MetaObject::STRING)
-			{
-				char* lvalue = (char*)l->content;
-				char* rvalue = (char*)r->content;
-				addr = strcmp(lvalue, rvalue) > 0 ? machine->p_true : machine->p_false;
-			}
-			break;
-		}
-		return addr;
+		if(l->type == MetaObject::NUMBER && r->type == MetaObject::NUMBER)
+			return *((double*)l->content) >= *((double*)r->content) ? machine->p_true : machine->p_false;
+		if(l->type == MetaObject::STRING && r->type == MetaObject::STRING)
+			return strcmp(l->content, r->content) >= 0 ? machine->p_true : machine->p_false;
+		return machine->p_null;
 	}
 	MetaObject* VirtualThread::OperateGE(MetaObject* l, MetaObject* r)
 	{
-		MetaObject* addr = machine->p_null;
-		switch (l->type)
-		{
-		case MetaObject::NUMBER:
-			if (r->type == MetaObject::NUMBER)
-			{
-				double* lvalue = (double*)l->content;
-				double* rvalue = (double*)r->content;
-				addr = *lvalue >= *rvalue ? machine->p_true : machine->p_false;
-			}
-			break;
-		case MetaObject::STRING:
-			if (r->type == MetaObject::STRING)
-			{
-				char* lvalue = (char*)l->content;
-				char* rvalue = (char*)r->content;
-				addr = strcmp(lvalue, rvalue) >= 0 ? machine->p_true : machine->p_false;
-			}
-			break;
-		}
-		return addr;
+		if(l->type == MetaObject::NUMBER && r->type == MetaObject::NUMBER)
+			return *((double*)l->content) >= *((double*)r->content) ? machine->p_true : machine->p_false;
+		if(l->type == MetaObject::STRING && r->type == MetaObject::STRING)
+			return strcmp(l->content, r->content) >= 0 ? machine->p_true : machine->p_false;
+		return machine->p_null;
 	}
 	MetaObject* VirtualThread::OperateLT(MetaObject* l, MetaObject* r)
 	{
-		MetaObject* addr = machine->p_null;
-		switch (l->type)
-		{
-		case MetaObject::NUMBER:
-			if (r->type == MetaObject::NUMBER)
-			{
-				double* lvalue = (double*)l->content;
-				double* rvalue = (double*)r->content;
-				addr = *lvalue < *rvalue ? machine->p_true : machine->p_false;
-			}
-			break;
-		case MetaObject::STRING:
-			if (r->type == MetaObject::STRING)
-			{
-				char* lvalue = (char*)l->content;
-				char* rvalue = (char*)r->content;
-				addr = strcmp(lvalue, rvalue) < 0 ? machine->p_true : machine->p_false;
-			}
-			break;
-		}
-		return addr;
+		if(l->type == MetaObject::NUMBER && r->type == MetaObject::NUMBER)
+			return *((double*)l->content) < *((double*)r->content) ? machine->p_true : machine->p_false;
+		if(l->type == MetaObject::STRING && r->type == MetaObject::STRING)
+			return strcmp(l->content, r->content) < 0 ? machine->p_true : machine->p_false;
+		return machine->p_null;
 	}
 	MetaObject* VirtualThread::OperateLE(MetaObject* l, MetaObject* r)
 	{
-		MetaObject* addr = machine->p_null;
-		switch (l->type)
-		{
-		case MetaObject::NUMBER:
-			if (r->type == MetaObject::NUMBER)
-			{
-				double* lvalue = (double*)l->content;
-				double* rvalue = (double*)r->content;
-				addr = *lvalue <= *rvalue ? machine->p_true : machine->p_false;
-			}
-			break;
-		case MetaObject::STRING:
-			if (r->type == MetaObject::STRING)
-			{
-				char* lvalue = (char*)l->content;
-				char* rvalue = (char*)r->content;
-				addr = strcmp(lvalue, rvalue) <= 0 ? machine->p_true : machine->p_false;
-			}
-			break;
-		}
-		return addr;
+		if(l->type == MetaObject::NUMBER && r->type == MetaObject::NUMBER)
+			return *((double*)l->content) <= *((double*)r->content) ? machine->p_true : machine->p_false;
+		if(l->type == MetaObject::STRING && r->type == MetaObject::STRING)
+			return strcmp(l->content, r->content) <= 0 ? machine->p_true : machine->p_false;
+		return machine->p_null;
 	}
 	MetaObject* VirtualThread::OperateNOT(MetaObject* l)
 	{
-		MetaObject* addr = machine->p_null;
-		switch (l->type)
-		{
-		case MetaObject::BOOLEAN:
-			addr = l->adinf ? machine->p_true : machine->p_false;
-			break;
-		}
-		return addr;
+		if(l->type == MetaObject::BOOLEAN)
+			return l->adinf ? machine->p_false : machine->p_true;
+		return machine->p_null;
 	}
 	MetaObject* VirtualThread::OperateAND(MetaObject* l, MetaObject* r)
 	{
-		MetaObject* addr = machine->p_null;
-		switch (l->type)
-		{
-		case MetaObject::BOOLEAN:
-			if (r->type == MetaObject::BOOLEAN)
-			{
-				addr = l->adinf && r->adinf ? machine->p_true : machine->p_false;
-			}
-			break;
-		}
-		return addr;
+		if(l->type == MetaObject::BOOLEAN && r->type && MetaObject::BOOLEAN)
+			return l->adinf && r->adinf ? machine->p_true : machine->p_false;
+		return machine->p_null;
 	}
 	MetaObject* VirtualThread::OperateOR(MetaObject* l, MetaObject* r)
 	{
-		MetaObject* addr = machine->p_null;
-		switch (l->type)
-		{
-		case MetaObject::BOOLEAN:
-			if (r->type == MetaObject::BOOLEAN)
-			{
-				addr = l->adinf || r->adinf ? machine->p_true : machine->p_false;
-			}
-			break;
-		}
-		return addr;
+		if(l->type == MetaObject::BOOLEAN && r->type && MetaObject::BOOLEAN)
+			return l->adinf || r->adinf ? machine->p_true : machine->p_false;
+		return machine->p_null;
 	}
 	MetaObject* VirtualThread::OperateXOR(MetaObject* l, MetaObject* r)
 	{
-		MetaObject* addr = machine->p_null;
-		/*
-		switch (l->type)
-		{
-		case Object::boolean:
-			if (r->type == Object::boolean)
-			{
-				addr = l->adinf || r->adinf ? machine->p_true : machine->p_false;
-			}
-			break;
-		}
-		*/
-		return addr;
+		if(l->type == MetaObject::BOOLEAN && r->type && MetaObject::BOOLEAN)
+			return l->adinf != r->adinf ? machine->p_true : machine->p_false;
+		return machine->p_null;
 	}
 	MetaObject* VirtualThread::OperateSIGN(MetaObject* l)
 	{
-		MetaObject* addr = machine->p_null;
-		switch (l->type)
-		{
-		case MetaObject::NUMBER:
-			double* lvalue = (double*)l->content;
-			addr = CreateNumber(-*lvalue);
-			break;
-		}
-		return addr;
+		if(l->type == MetaObject::NUMBER)
+			return CreateNumber(*((double*)l->content));
+		return machine->p_null;
 	}
 	MetaObject* VirtualThread::OperateADD(MetaObject* l, MetaObject* r)
 	{
@@ -567,27 +422,27 @@ namespace myscript
 			break;
 			case OpCode::PUSHDWORD:
 			{
-				StackPush(CreateNumber(*(float *)cursor));
+				StackPush(CreateNumber(*(float*)cursor));
 				cursor += 2;
 			}
 			break;
 			case OpCode::PUSHQWORD:
 			{
-				StackPush(CreateNumber(*(double *)cursor));
+				StackPush(CreateNumber(*(double*)cursor));
 				cursor += 4;
 			}
 			break;
 			case OpCode::PUSHSTR:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				StackPush(CreateString((char *)cursor, operand));
+				StackPush(CreateString(cursor, operand));
 				cursor += operand / 2 + 1;
 			}
 			break;
 			case OpCode::PUSHFUNC:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				StackPush(CreateFunction((OpCode *)cursor, operand));
+				StackPush(CreateFunction(cursor, operand));
 				cursor += operand;
 			}
 			break;

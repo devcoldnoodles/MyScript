@@ -376,13 +376,26 @@ namespace myscript
 		SyntaxExpr* expr;
 		SyntaxExpr* rexpr;
 		OpCode operation;
-		
+		SyntaxTernaryOperator() {}
+		SyntaxTernaryOperator(SyntaxExpr* _lexpr, SyntaxExpr* _expr, SyntaxExpr* _rexpr) : lexpr(_lexpr), expr(_expr), rexpr(_rexpr) {}
+		~SyntaxTernaryOperator() {if(lexpr) delete lexpr; if(expr) delete expr; if(rexpr) delete rexpr; }
+
 		bool CreateRCode(CompliationDesc* cd)
 		{
-			if(!lexpr->CreateRCode(cd))
+			if (!lexpr->CreateRCode(cd))
 				return false;
 			cd->code.push_back(OpCode::CFJMP);
-			cd->scope.back().endpoint.push_back(cd->code.size());
+			cd->code.push_back(OpCode::NONE);
+			size_t tdelta = cd->code.size();
+			if (!expr->CreateRCode(cd))
+				return false;
+			cd->code.push_back(OpCode::FJMP);
+			cd->code.push_back(OpCode::NONE);
+			cd->code[tdelta - 1] = cd->code.size() - tdelta;
+			size_t fdelta = cd->code.size();
+			if (!rexpr->CreateRCode(cd))
+				return false;
+			cd->code[fdelta - 1] = cd->code.size() - fdelta;
 			return true;
 		}
 	};
@@ -1223,6 +1236,7 @@ namespace myscript
 	};
 	SyntaxExpr* ParseExpr(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
 	SyntaxExpr* ParseComma(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseTernaryOperator(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
 	SyntaxExpr* ParseAssign(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
 	SyntaxExpr* ParseOr(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
 	SyntaxExpr* ParseAnd(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);

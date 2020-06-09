@@ -6,8 +6,9 @@ void Scanner::Scan(TokenDesc* desc)
 {
     while(src[pos])
     {
-        desc->value = GetSingleToken(desc);
-        desc = desc->next = new TokenDesc;
+        // desc->value = GetSingleToken(desc);
+        // desc = desc->next;
+        // desc = desc->next = new TokenDesc;
     }
 }
 
@@ -48,7 +49,54 @@ short Scanner::GetSingleToken(TokenDesc* desc)
 }
 TokenDesc* Scanner::ScanString(TokenDesc* desc)
 {
-    
+    std::string temp;
+    while(src[++pos])
+    {
+        switch(src[pos])
+        {
+            case '\n':
+                ++lines;
+                break;
+            case '\\':
+                switch (src[++pos])
+                {
+                case '\\':
+                    temp += '\\';
+                    break;
+                case 't':
+                    temp += '\t';
+                    break;
+                case 'r':
+                    temp += '\r';
+                    break;
+                case 'n':
+                    temp += '\n';
+                    break;
+                case '\'':
+                    temp += '\'';
+                    break;
+                case '\"':
+                    temp += '\"';
+                    break;
+                case '\f': 
+                    temp += '\f';
+                    break;
+                case '\t': 
+                    temp += '\t';
+                    break;
+                case '\v':
+                    temp += '\v';
+                    break;
+                }
+                break;
+            case '\"':
+                desc->next = new TokenDesc{Token::LITERAL, temp};
+                return desc->next;
+            default:
+                temp += src[pos];
+                break;
+        }
+    }
 }
 TokenDesc* Scanner::ScanNumber(TokenDesc* desc)
 {
