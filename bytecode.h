@@ -34,6 +34,7 @@ namespace myscript
 	MetaObject* CreateMetaNull(void);
 	MetaObject* CreateMetaBool(const bool boolean);
 	MetaObject* CreateMetaNumber(const double number);
+	MetaObject* CreateMetaString(std::string str);
 	MetaObject* CreateMetaString(const char* str, const size_t size);
 	MetaObject* CreateMetaString(const char* str, const size_t str_size, const char* addit, const size_t addit_size);
 	MetaObject* CreateMetaFunction(const OpCode* src, const size_t size);

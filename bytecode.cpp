@@ -26,11 +26,21 @@ namespace myscript
 	}
 	MetaObject* CreateMetaBool(const bool boolean)
 	{
-		return CreateMetaObject(MetaObject::NULLPTR, boolean, 0);
+		return CreateMetaObject(MetaObject::BOOLEAN, boolean, 0);
 	}
 	MetaObject* CreateMetaNumber(const double number)
 	{
 		return CreateMetaObject(MetaObject::NUMBER, 0, sizeof(double), &number);
+	}
+	MetaObject* CreateMetaString(std::string str)
+	{
+		MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + str.size() + 1);
+		alloc->type = MetaObject::STRING;
+		alloc->adinf = 0;
+		alloc->size = str.size();
+		memcpy(alloc->content, str.c_str(), str.size());
+		alloc->content[str.size()] = '\0';
+		return alloc;
 	}
 	MetaObject* CreateMetaString(const char* str, const size_t size)
 	{

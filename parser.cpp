@@ -29,36 +29,12 @@ namespace myscript
 		index = temp;
 		return lexp;
 	}
-	SyntaxExpr* ParseTernaryOperator(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
-	{
-		size_t temp = index;
-		SyntaxTernaryOperator* ternary = new SyntaxTernaryOperator();
-		if ((ternary->lexpr = ParseAssign(tokens, temp, errors)) == nullptr)
-			goto ErrorHandle;
-		if (tokens[temp].type == Token::QUESTION)
-		{
-			if ((ternary->expr = ParseTernaryOperator(tokens, ++temp, errors)) == nullptr)
-				goto ErrorHandle;
-			if (tokens[temp].type != Token::COLON)
-			{
-				errors.push_back({"Expected colon(:)", tokens[temp].line});
-				return nullptr;
-			}
-			if ((ternary->rexpr = ParseTernaryOperator(tokens, ++temp, errors)) == nullptr)
-				goto ErrorHandle;
-		}
-		index = temp;
-		return ternary;
-	ErrorHandle:
-		delete ternary;
-		return nullptr;
-	}
 	SyntaxExpr* ParseAssign(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		SyntaxExpr* lexp = nullptr;
 		size_t temp = index;
 		SyntaxExpr* rexp = nullptr;
-		if ((lexp = ParseOr(tokens, temp, errors)) == nullptr)
+		if ((lexp = ParseTernaryOperator(tokens, temp, errors)) == nullptr)
 			return nullptr;
 		switch (tokens[temp].type)
 		{
@@ -115,6 +91,34 @@ namespace myscript
 		return lexp;
 	ErrorHandle:
 		delete lexp;
+		return nullptr;
+	}
+	SyntaxExpr* ParseTernaryOperator(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
+	{
+		size_t temp = index;
+		SyntaxExpr *lexpr, *expr, *rexpr;
+		if ((lexpr = ParseOr(tokens, temp, errors)) == nullptr)
+			return nullptr;
+		if (tokens[temp].type == Token::QUESTION)
+		{
+			if ((expr = ParseTernaryOperator(tokens, ++temp, errors)) == nullptr)
+				goto ErrorHandle;
+			if (tokens[temp].type != Token::COLON)
+			{
+				errors.push_back({"Expected colon(:)", tokens[temp].line});
+				return nullptr;
+			}
+			if ((rexpr = ParseTernaryOperator(tokens, ++temp, errors)) == nullptr)
+			{
+				delete expr;
+				goto ErrorHandle;
+			}
+			lexpr = new SyntaxTernaryOperator(lexpr, expr, rexpr);
+		}
+		index = temp;
+		return lexpr;
+	ErrorHandle:
+		delete lexpr;
 		return nullptr;
 	}
 	SyntaxExpr* ParseOr(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
@@ -1186,4 +1190,3 @@ namespace myscript
 		return true;
 	}
 }
-

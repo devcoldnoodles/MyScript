@@ -61,8 +61,7 @@ int main(int argc, char** argv) {
 	cdesc.Insert({"typeof", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args){
 		if(args.size() != 1)
 			return CreateMetaNull();
-		std::string tpyeinfo = ToString(MetaObject::Type(args[0]->type));
-		return CreateMetaString(tpyeinfo.c_str(), tpyeinfo.size());
+		return CreateMetaString(ToString(MetaObject::Type(args[0]->type)));
 	}));
 
 	cdesc.Insert({"print", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
@@ -111,6 +110,7 @@ int main(int argc, char** argv) {
 	}
 	vm = new VirtualMachine(&cdesc);
 	vm->Execute();
+	
 	// while (script_loop)
 	// {
 	// 	fgets(buffer, buf_size - 1, stdin);

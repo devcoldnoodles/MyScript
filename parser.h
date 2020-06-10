@@ -1231,7 +1231,7 @@ namespace myscript
 				iter->CreateCode(cd);
 			cd->code.push_back(OpCode::DEF);
 			cd->code.push_back(cd->code.size() - delta);
-			return false;
+			return true;
 		}
 	};
 	SyntaxExpr* ParseExpr(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
