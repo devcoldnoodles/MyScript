@@ -6,7 +6,7 @@
 
 namespace myscript
 {
-
+	
 	constexpr auto FORMATSIZE = 64;
 	struct MetaObject
 	{

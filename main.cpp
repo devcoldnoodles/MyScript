@@ -59,14 +59,12 @@ int main(int argc, char** argv) {
 		return CreateMetaNumber(clock());
 	}));
 	cdesc.Insert({"typeof", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args){
-		if(args.size() != 1)
-			return CreateMetaNull();
-		return CreateMetaString(ToString(MetaObject::Type(args[0]->type)));
+		return args.size() == 1 ? CreateMetaString(ToString(MetaObject::Type(args[0]->type))) : CreateMetaNull();
 	}));
 
 	cdesc.Insert({"print", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
-		for (int index = 0; index < args.size(); ++index)
-			printf("%s", ToString(args[index]).c_str());
+		for (auto arg : args)
+			printf("%s", ToString(arg).c_str());
 		return CreateMetaNull();
 	}));
 	cdesc.Insert({"scan", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
@@ -94,8 +92,8 @@ int main(int argc, char** argv) {
 	{
 		printf("[parsing error]\n");
 		std::string temp;
-		for (size_t index = 0; index < code.errors.size(); ++index)
-			temp += ToString(code.errors[index]) + "\n";
+		for (auto error : code.errors)
+			temp += ToString(error) + '\n';
 		printf("%s", temp.c_str());
 		goto ErrorHandle;
 	}
@@ -103,36 +101,14 @@ int main(int argc, char** argv) {
 	{
 		printf("[code generate error]\n");
 		std::string temp;
-		for (size_t index = 0; index < cdesc.errors.size(); ++index)
-			temp += ToString(cdesc.errors[index]) + "\n";
+		for (auto error : cdesc.errors)
+			temp += ToString(error) + '\n';
 		printf("%s", temp.c_str());
 		goto ErrorHandle;
 	}
 	vm = new VirtualMachine(&cdesc);
 	vm->Execute();
 	
-	// while (script_loop)
-	// {
-	// 	fgets(buffer, buf_size - 1, stdin);
-	// 	code.sents.clear();
-	// 	cdata.Reset();
-	// 	if (!SyntaxTree::ParseText(code, string(buffer)))
-	// 	{
-	// 		printf("%s\n", code.ErrorLog().c_str());
-	// 		continue;
-	// 	}
-	// 	if (!code.CreateCode(cdata))
-	// 	{
-	// 		for (auto& error : cdata.errors)
-	// 			printf("%s\n", error.ToString().c_str());
-	// 		continue;
-	// 	}
-	// 	delete vm;
-	// 	delete tr;
-	// 	vm = new ADRMemory(cdata);
-	// 	tr = vm->GetMainThread();
-	// 	tr->Run();
-	// }
 	printf("\n");
 	delete buffer;
 	delete vm;

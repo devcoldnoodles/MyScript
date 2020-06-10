@@ -75,7 +75,7 @@ struct TokenDesc
 {
 	short value;
 	std::string literal;
-	TokenDesc* next;
+	struct TokenDesc* next;
 };
 #undef TOKEN
 } // namespace script
