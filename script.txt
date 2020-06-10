@@ -2,8 +2,6 @@ function recur(n) {
     return n > 1 ? recur(n - 1) + recur(n-2) : n;
 }
 
-
-
 const begin = clock();
 print(recur(35));
 /*loop(var cnt=0;cnt < 1000; ++cnt)
