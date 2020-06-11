@@ -58,7 +58,7 @@ static struct Token
     const enum Type {TOKEN(T)EOT} type;
 #undef T
 	const int precedence;
-	const char str[10];
+	const char str[12];
 #define T(SIGN, STR, PREC) {SIGN, PREC, STR},
 } tokens[] = {TOKEN(T){EOT}};
 #undef T

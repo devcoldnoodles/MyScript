@@ -78,10 +78,7 @@ int main(int argc, char** argv) {
 	cdesc.Insert({"copy", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
 		if(args.size() != 1)
 			return CreateMetaNull();
-		// MetaObject* source = thread->GetParameters()[0];
-		// MetaObject* dest = thread->CreateHeader(source->type, source->size, source->adinf);
-		// memcpy(dest->content, source->content, source->size);
-		return args[0];
+		return CreateMetaObject((MetaObject::Type)args.front()->type, args.front()->adinf, args.front()->size, (void*)args.front()->content);
 	}));
 	cdesc.Insert({"size", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
 		if(args.size() != 1)

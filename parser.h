@@ -57,6 +57,7 @@ namespace myscript
 				}
 			}
 			break;
+			case Token::IDENTIFIER:
 			case Token::STRING:
 			{
 				std::string& str = data.str;
@@ -751,42 +752,26 @@ namespace myscript
 	};
 	struct SyntaxDot : SyntaxExpr // .
 	{
-		SyntaxExpr* expr;
-		std::string str;
-		SyntaxDot(SyntaxExpr* _expr, std::string _str) : expr(_expr), str(_str) {}
-		~SyntaxDot() { delete expr; }
+		SyntaxExpr* lexpr;
+		SyntaxExpr* rexpr;
+		SyntaxDot(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		~SyntaxDot() { delete lexpr; }
 		
 		std::string GetType() const { return "dot"; }
 		bool CreateLCode(CompliationDesc* cd)
 		{
-			size_t str_size = str.size();
-			size_t index = 0;
-			cd->code.push_back(OpCode::PUSHSTR);
-			cd->code.push_back(str_size);
-			while (index + 2 <= str_size)
-				cd->code.push_back(str[index++] << 8 | str[index++]);
-			if (index == str_size)
-				cd->code.push_back(0);
-			else
-				cd->code.push_back(str[index] << 8);
-			if (!expr->CreateRCode(cd))
+			if (!rexpr->CreateRCode(cd))
+				return false;
+			if (!lexpr->CreateRCode(cd))
 				return false;
 			cd->code.push_back(OpCode::REFSET);
 			return true;
 		}
 		bool CreateRCode(CompliationDesc* cd)
 		{
-			size_t str_size = str.size();
-			size_t index = 0;
-			cd->code.push_back(OpCode::PUSHSTR);
-			cd->code.push_back(str_size);
-			while (index + 2 <= str_size)
-				cd->code.push_back(str[index++] << 8 | str[index++]);
-			if (index == str_size)
-				cd->code.push_back(0);
-			else
-				cd->code.push_back(str[index] << 8);
-			if (!expr->CreateRCode(cd))
+			if (!rexpr->CreateRCode(cd))
+				return false;
+			if (!lexpr->CreateRCode(cd))
 				return false;
 			cd->code.push_back(OpCode::REFGET);
 			return true;

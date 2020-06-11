@@ -3,6 +3,7 @@
 
 #include "pch.h"
 #include "data.h"
+#include <iostream>
 
 namespace myscript
 {
@@ -171,6 +172,10 @@ namespace myscript
 		MetaObject* OperateDIV(MetaObject* l, MetaObject* r);
 		MetaObject* OperateMOD(MetaObject* l, MetaObject* r);
 		MetaObject* OperatePOW(MetaObject* l, MetaObject* r);
+		void (*OnError)(Error) = [](Error error)
+		{
+			std::cout << ToString(error).c_str() << std::endl;
+		};
 		
 		inline void StackPush(MetaObject* operand)
 		{

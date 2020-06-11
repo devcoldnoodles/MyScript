@@ -123,11 +123,11 @@ namespace myscript
 		}
 		case MetaObject::OBJECT:
 		{
-			std::string temp = "object { \n";
+			std::string temp = "object { ";
 			MetaObject** element_content = (MetaObject**)object->content;
 			size_t count = object->size / sizeof(MetaObject*) / 2;
 			for (size_t index = 0; index < count; ++index)
-				temp += ToString(element_content[index * 2]) + " : " + ToString(element_content[index * 2 + 1]) + "\n";
+				temp += "(" + ToString(element_content[index * 2]) + " : " + ToString(element_content[index * 2 + 1]) + ") ";
 			temp += "}";
 			return temp;
 		}
@@ -609,7 +609,7 @@ namespace myscript
 				MetaObject* target = machine->global[operand];
 				if(target->type != MetaObject::METADATA)
 				{
-					errors.push_back({"invalid operation"});
+					OnError({"invalid operation"});
 					callback = 0;
 					break;
 				}
@@ -658,7 +658,7 @@ namespace myscript
 			{
 				if (stack.size() < 3)
 				{
-					errors.push_back({"잘못된 호출", 0});
+					OnError({"잘못된 호출", 0});
 					callback = 0;
 					break;
 				}
@@ -669,7 +669,7 @@ namespace myscript
 				{
 					if (key->type != MetaObject::NUMBER)
 					{
-						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
+						OnError({"인덱스 참조는 숫자만 가능합니다.", 0});
 						callback = 0;
 						break;
 					}
@@ -677,7 +677,7 @@ namespace myscript
 					size_t size = arr->size / sizeof(MetaObject* );
 					if (index >= size)
 					{
-						errors.push_back({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
+						OnError({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
 						callback = 0;
 						break;
 					}
@@ -692,20 +692,20 @@ namespace myscript
 				{
 					if (key->type != MetaObject::NUMBER)
 					{
-						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
+						OnError({"인덱스 참조는 숫자만 가능합니다.", 0});
 						callback = 0;
 						break;
 					}
 					size_t index = static_cast<size_t>(*(double *)key->content);
 					if (index >= arr->size)
 					{
-						errors.push_back({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
+						OnError({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
 						callback = 0;
 						break;
 					}
 					if (value->type != MetaObject::STRING)
 					{
-						errors.push_back({"문자만 대입가능합니다.", 0});
+						OnError({"문자만 대입가능합니다.", 0});
 						callback = 0;
 						break;
 					}
@@ -715,7 +715,7 @@ namespace myscript
 				}
 				else
 				{
-					errors.push_back({"왼쪽 표현식은 인덱스 참조가 불가능합니다.", 0});
+					OnError({"왼쪽 표현식은 인덱스 참조가 불가능합니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -725,7 +725,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 호출.", 0});
+					OnError({"잘못된 호출.", 0});
 					callback = 0;
 					break;
 				}
@@ -735,7 +735,7 @@ namespace myscript
 				{
 					if (key->type != MetaObject::NUMBER)
 					{
-						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
+						OnError({"인덱스 참조는 숫자만 가능합니다.", 0});
 						callback = 0;
 						break;
 					}
@@ -743,7 +743,7 @@ namespace myscript
 					size_t size = arr->size / sizeof(MetaObject* );
 					if (index >= size)
 					{
-						errors.push_back({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
+						OnError({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
 						callback = 0;
 						break;
 					}
@@ -755,14 +755,14 @@ namespace myscript
 				{
 					if (key->type != MetaObject::NUMBER)
 					{
-						errors.push_back({"인덱스 참조는 숫자만 가능합니다.", 0});
+						OnError({"인덱스 참조는 숫자만 가능합니다.", 0});
 						callback = 0;
 						break;
 					}
 					size_t index = static_cast<size_t>(*(double *)key->content);
 					if (index >= arr->size)
 					{
-						errors.push_back({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
+						OnError({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
 						callback = 0;
 						break;
 					}
@@ -771,7 +771,7 @@ namespace myscript
 				}
 				else
 				{
-					errors.push_back({"왼쪽 표현식은 인덱스 참조가 불가능합니다.", 0});
+					OnError({"왼쪽 표현식은 인덱스 참조가 불가능합니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -781,7 +781,7 @@ namespace myscript
 			{
 				if (stack.size() < 3)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -790,7 +790,7 @@ namespace myscript
 				MetaObject* value = StackBack(2);
 				if (arr->type != MetaObject::OBJECT)
 				{
-					errors.push_back({"참조할 수 없는 객체입니다.", 0});
+					OnError({"참조할 수 없는 객체입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -805,10 +805,9 @@ namespace myscript
 				}
 				if (index >= size)
 				{
-					errors.push_back({"잘못된 멤버를 참조하였습니다.", 0});
+					OnError({"잘못된 멤버를 참조하였습니다.", 0});
 					StackPop(3);
 					StackPush(machine->p_null);
-
 					break;
 				}
 				machine->UnLock(elements[index * 2 + 1]);
@@ -822,7 +821,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -830,7 +829,7 @@ namespace myscript
 				MetaObject* key = StackBack(1);
 				if (arr->type != MetaObject::OBJECT)
 				{
-					errors.push_back({"참조할 수 없는 객체입니다.", 0});
+					OnError({"참조할 수 없는 객체입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -858,7 +857,7 @@ namespace myscript
 			{
 				if (stack.size() < 1)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -871,7 +870,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -884,7 +883,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -926,7 +925,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -959,7 +958,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -972,7 +971,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -985,7 +984,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -998,7 +997,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -1011,7 +1010,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -1024,7 +1023,7 @@ namespace myscript
 			{
 				if (stack.size() < 1)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -1037,7 +1036,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -1050,7 +1049,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -1063,7 +1062,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -1076,7 +1075,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -1089,7 +1088,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}
@@ -1102,7 +1101,7 @@ namespace myscript
 			{
 				if (stack.size() < 2)
 				{
-					errors.push_back({"잘못된 바이트코드입니다.", 0});
+					OnError({"잘못된 바이트코드입니다.", 0});
 					callback = 0;
 					break;
 				}

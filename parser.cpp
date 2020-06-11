@@ -414,7 +414,7 @@ namespace myscript
 				errors.push_back({"Expected identifier", tokens[temp + 1].line});
 				goto ErrorHandle;
 			}
-			lexp = new SyntaxDot(lexp, tokens[temp++].str);
+			lexp = new SyntaxDot(lexp, new SyntaxLiteral(tokens[temp++]));
 			goto _loop_;
 		case Token::LSUBRACKET:
 			if ((rexp = ParseAssign(tokens, ++temp, errors)) == nullptr)
