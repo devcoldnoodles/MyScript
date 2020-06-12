@@ -137,11 +137,12 @@ namespace myscript
 			return "error";
 		}
 	}
-	const std::string ToString(Error err)
+	const std::string ToString(Error error)
 	{
 		constexpr auto buf_size = 64;
 		char temp[buf_size];
-		sprintf(temp, "[%lu lines] %s", err.line, err.inf.c_str());
+		if(error.line)	sprintf(temp, "[%lu lines] %s", error.line, error.inf.c_str());
+		else			sprintf(temp, "%s", error.inf.c_str());
 		return temp;
 	}
 	void VirtualMachine::Execute()

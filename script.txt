@@ -6,12 +6,9 @@ const node = {
     },
     c : 6
 };
-
-print(node, "\n");
-
 var temp = copy(node);
 temp.a = "123";
-
+temp.c = "123";
 print(node,"\n", temp);
 /*
 function recur(n) {
