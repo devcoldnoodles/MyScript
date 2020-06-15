@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
 			return CreateMetaNull();
 		size_t size = strlen(buf);
 		buf[size - 1] = '\0';
-		return CreateMetaString(buf, size - 1);
+		return CreateMetaString(buf, size);
 	}));
 	cdesc.Insert({"copy", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
 		if(args.size() != 1)

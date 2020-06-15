@@ -131,7 +131,7 @@ namespace myscript
 				}
 				if (cd->global[findex].option & VarDesc::CONST)
 				{
-					cd->errors.push_back({"'" + id + "' is  value", line});
+					cd->errors.push_back({"'" + id + "' is constants value", line});
 					return false;
 				}
 				cd->code.push_back(OpCode::STORE);
@@ -972,7 +972,12 @@ namespace myscript
 				cd->code.push_back(OpCode::POPTO);
 				cd->code.push_back(list_size);
 			}
+			auto temp = cd->scope.back();
 			cd->scope.pop_back();
+			for (auto point : temp.startpoint)
+				cd->scope.back().startpoint.push_back(point);
+			for (auto point : temp.endpoint)
+				cd->scope.back().endpoint.push_back(point);
 			return true;
 		}
 	};
