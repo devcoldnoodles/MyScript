@@ -568,7 +568,7 @@ namespace myscript
 			case OpCode::PARAMSET:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				short delta = stack.size() - basestack.back() - operand;
+				int delta = stack.size() - basestack.back() - operand;
 				if (delta > 0)
 					for (short index = 0; index < delta; ++index)
 						StackPop();
@@ -623,7 +623,7 @@ namespace myscript
 			case OpCode::INSTARR:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				MetaObject* addr = machine->CreateHeader(MetaObject::ARRAY, operand * sizeof(MetaObject* ));
+				MetaObject* addr = machine->CreateHeader(MetaObject::ARRAY, operand * sizeof(MetaObject*));
 				MetaObject**content = (MetaObject**)addr->content;
 				for (size_t index = 0; index < operand; ++index)
 				{
@@ -636,7 +636,7 @@ namespace myscript
 			case OpCode::INSTDIC:
 			{
 				uint16_t operand = (uint16_t)*cursor++;
-				MetaObject* addr = machine->CreateHeader(MetaObject::OBJECT, operand * sizeof(MetaObject* ) * 2);
+				MetaObject* addr = machine->CreateHeader(MetaObject::OBJECT, operand * sizeof(MetaObject*) * 2);
 				MetaObject**content = (MetaObject**)addr->content;
 				for (size_t index = 0; index < operand; ++index)
 				{
@@ -675,7 +675,7 @@ namespace myscript
 						break;
 					}
 					size_t index = static_cast<size_t>(*(double *)key->content);
-					size_t size = arr->size / sizeof(MetaObject* );
+					size_t size = arr->size / sizeof(MetaObject*);
 					if (index >= size)
 					{
 						OnError({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
@@ -741,7 +741,7 @@ namespace myscript
 						break;
 					}
 					size_t index = static_cast<size_t>(*(double *)key->content);
-					size_t size = arr->size / sizeof(MetaObject* );
+					size_t size = arr->size / sizeof(MetaObject*);
 					if (index >= size)
 					{
 						OnError({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
@@ -796,7 +796,7 @@ namespace myscript
 					break;
 				}
 				MetaObject** elements = (MetaObject**)arr->content;
-				size_t size = arr->size / sizeof(MetaObject* ) / 2;
+				size_t size = arr->size / sizeof(MetaObject*) / 2;
 				size_t index = 0;
 				while (index < size)
 				{
@@ -835,7 +835,7 @@ namespace myscript
 					break;
 				}
 				MetaObject** elements = (MetaObject**)arr->content;
-				size_t size = arr->size / sizeof(MetaObject* ) / 2;
+				size_t size = arr->size / sizeof(MetaObject*) / 2;
 				size_t index = 0;
 				while (index < size)
 				{

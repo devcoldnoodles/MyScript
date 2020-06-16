@@ -105,7 +105,6 @@ int main(int argc, char** argv) {
 	}
 	vm = new VirtualMachine(&cdesc);
 	vm->Execute();
-	
 	printf("\n");
 	delete buffer;
 	delete vm;

@@ -1,37 +1,7 @@
-
-const node = {
-    value : null,
-    next : null
-};
-
-function create_node(value, next) {
-    var temp = copy(node);
-    temp.value = value;
-    temp.next = next;
-    return temp;
+function recur(n) {
+    return n > 1 ? recur(n-1) + recur(n-2) : n;
 }
 
-function create_node2(value, next) {
-    return {
-        value : value,
-        next : next
-    };
-}
-
-var head = create_node("head");
-var cursor = head;
-var temp;
-
-loop{
-    var data = scan();
-    print(size(data), "\n");
-    if(data == "exit")
-        break;
-    cursor.next = create_node(data);
-    cursor = cursor.next;
-}
-
-loop(head != null) {
-    print("value is ", head.value, "\n");
-    head = head.next;
-}
+const begin = clock();
+print(recur(35));
+print("\nusing time = ", clock() - begin);
