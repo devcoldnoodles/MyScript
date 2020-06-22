@@ -3,5 +3,5 @@ function recur(n) {
 }
 
 const begin = clock();
-print(recur(35));
+print(recur(30));
 print("\nusing time = ", clock() - begin);

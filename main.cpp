@@ -76,14 +76,13 @@ int main(int argc, char** argv) {
 		return CreateMetaString(buf, size);
 	}));
 	cdesc.Insert({"copy", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
-		if(args.size() != 1)
-			return CreateMetaNull();
-		return CreateMetaObject((MetaObject::Type)args.front()->type, args.front()->adinf, args.front()->size, (void*)args.front()->content);
+		return args.size() == 1 ? CreateMetaObject((MetaObject::Type)args.front()->type, args.front()->adinf, args.front()->size, (void*)args.front()->content) : CreateMetaNull();
 	}));
 	cdesc.Insert({"size", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
-		if(args.size() != 1)
-			return CreateMetaNull();
-		return CreateMetaNumber(args[0]->size);
+		return args.size() == 1 ? CreateMetaNumber(args.front()->size) :  CreateMetaNull();
+	}));
+	cdesc.Insert({"strlen", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args) {
+		return args.size() == 1 ? args.front()->type == MetaObject::STRING ? CreateMetaNumber(args.front()->size - 1) : CreateMetaNull() : CreateMetaNull();
 	}));
 	if (!SyntaxTree::ParseText(code, buffer))
 	{

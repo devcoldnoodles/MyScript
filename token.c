@@ -1,61 +1,9 @@
 #include "token.h"
 
-#define TOKEN(_ELEM_)                	\
-	/* category : symbols */          	\
-	_ELEM_(LBRACE, "{", 0)            	\
-	_ELEM_(LBRACKET, "[", 0)          	\
-	_ELEM_(LPAREN, "(", 0)            	\
-	_ELEM_(RBRACE, "}", 0)            	\
-	_ELEM_(RBRACKET, "]", 0)          	\
-	_ELEM_(RPAREN, ")", 0)            	\
-	_ELEM_(PERIOD, ".", 0)            	\
-	_ELEM_(COMMA, ",", 1)             	\
-	_ELEM_(COLON, ":", 0)             	\
-	_ELEM_(SEMICOLON, ";", 0)         	\
-	/* unary operator */              	\
-	_ELEM_(NOT, "!", 0)               	\
-	_ELEM_(BNOT, "~", 0)              	\
-	_ELEM_(INC, "++", 0)              	\
-	_ELEM_(DEC, "--", 0)              	\
-	/* binary operator */             	\
-	_ELEM_(ARROW, "=>", 0)            	\
-	_ELEM_(ASSIGN, "=", 2)            	\
-	_ELEM_(ADD, "+", 12)              	\
-	_ELEM_(SUB, "-", 12)              	\
-	_ELEM_(MUL, "*", 11)              	\
-	_ELEM_(DIV, "/", 11)              	\
-	_ELEM_(MOD, "%", 11)              	\
-	_ELEM_(BOR, "|", 6)               	\
-	_ELEM_(BAND, "&", 8)              	\
-	_ELEM_(BXOR, "^", 7)              	\
-	_ELEM_(OR, "||", 4)               	\
-	_ELEM_(AND, "&&", 5)              	\
-	/* tarnery operator */            	\
-	_ELEM_(CONDITIONAL, "?", 3)       	\
-	/* keywords */          			\
-	_ELEM_(BYTE, "byte", 0)           	\
-	_ELEM_(IF, "if", 0)               	\
-	_ELEM_(ELSE, "else", 0)           	\
-	_ELEM_(MATCH, "match", 0)         	\
-	_ELEM_(LOOP, "loop", 0)           	\
-	_ELEM_(DEFAULT, "default", 0)     	\
-	_ELEM_(RETURN, "return", 0)       	\
-	_ELEM_(SELF, "self", 0)           	\
-	_ELEM_(CONST, "const", 0)         	\
-	_ELEM_(STATIC, "static", 0)       	\
-	_ELEM_(ENUM, "enum", 0)           	\
-	_ELEM_(STRUCT, "struct", 0)       	\
-	_ELEM_(OPERATOR, "operator", 0)   	\
-	_ELEM_(GET, "get", 0)             	\
-	_ELEM_(SET, "set", 0)             	\
-	_ELEM_(NAMESPACE, "namespace", 0) 	\
-	/* literals */						\
-	_ELEM_(LITERAL, "", 0)				\
-
 static struct Token
 {
 #define T(SIGN, STR, PREC) SIGN,
-    const enum Type {TOKEN(T)EOT} type;
+    const enum {TOKEN(T)EOT} type;
 #undef T
 	const int precedence;
 	const char str[12];
@@ -63,13 +11,33 @@ static struct Token
 } tokens[] = {TOKEN(T){EOT}};
 #undef T
 
+const char* GetString(TokenDesc* desc)
+{
+	return tokens[desc->value].str;
+}
+
+int GetPrecedence(TokenDesc* desc)
+{
+	return tokens[desc->value].precedence;
+}
+
+TokenDesc* InitTokenDesc(short value, TokenDesc* next, const char* literal)
+{
+    TokenDesc* temp = (TokenDesc*)malloc(sizeof(TokenDesc));
+    if(!temp)
+        return NULL;
+    temp->value = value;
+    temp->next = next;
+    temp->literal = literal;
+    return temp;
+}
+ 
 TokenDesc* Scan(const char* src)
 {
     #define CAPACITY 1024
     char temp[CAPACITY];
     size_t size = 0, pos = 0, lines = 0;
-    TokenDesc* head = (TokenDesc*)malloc(sizeof(TokenDesc));
-    TokenDesc* pointer = head;
+    TokenDesc* pointer;
     while(*src)
     {
         switch (src[pos])
@@ -81,22 +49,168 @@ TokenDesc* Scan(const char* src)
             ++pos;
             break;
         case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
+            if(src[pos] == '0' && src[pos + 1] == 'x')
+            {
+                
+            }
+            else
+            {
+                while(src[pos] >= '0' && src[pos] <= '9')
+                {
+                    
+                }
+            }
 			break;
         case '\"':
             break;
         case '\'':
+            break;
+        case ':':
+            pointer = InitTokenDesc(COLON, NULL, NULL);
+            tokens.push_back({Token::COLON, ":", lines});
+            marker = index + 1;
+            break;
+        case ';':
+            tokens.push_back({Token::SEMICOLON, ";", lines});
+            marker = index + 1;
+            break;
+        case '.':
+            tokens.push_back({Token::DOT, ".", lines});
+            marker = index + 1;
+            break;
+        case ',':
+            tokens.push_back({Token::COMMA, ",", lines});
+            marker = index + 1;
+            break;
+        case '?':
+            tokens.push_back({Token::QUESTION, "?", lines});
+            marker = index + 1;
+            break;
+        case '(':
+            tokens.push_back({Token::LPARAM, "(", lines});
+            marker = index + 1;
+            break;
+        case ')':
+            tokens.push_back({Token::RPARAM, ")", lines});
+            marker = index + 1;
+            break;
+        case '{':
+            tokens.push_back({Token::LBRACKET, "{", lines});
+            marker = index + 1;
+            break;
+        case '}':
+            tokens.push_back({Token::RBRACKET, "}", lines});
+            marker = index + 1;
+            break;
+        case '[':
+            tokens.push_back({Token::LSUBRACKET, "[", lines});
+            marker = index + 1;
+            break;
+        case ']':
+            tokens.push_back({Token::RSUBRACKET, "]", lines});
+            marker = index + 1;
+            break;
+        case '<':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::LE, "<=", lines}), ++index;
+            else
+                tokens.push_back({Token::LT, "<", lines});
+            marker = index + 1;
+            break;
+        case '>':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::GE, ">=", lines}), ++index;
+            else
+                tokens.push_back({Token::GT, ">", lines});
+            marker = index + 1;
+            break;
+        case '!':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::NEQ, "!=", lines}), ++index;
+            else
+                tokens.push_back({Token::NOT, "!", lines});
+            marker = index + 1;
+            break;
+        case '=':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::EQ, "==", lines}), ++index;
+            else
+                tokens.push_back({Token::ASSIGN, "=", lines});
+            marker = index + 1;
+            break;
+        case '+':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::ASSIGN_ADD, "+=", lines}), ++index;
+            else if (str[index + 1] == '+')
+                tokens.push_back({Token::INC, "++", lines}), ++index;
+            else
+                tokens.push_back({Token::ADD, "+", lines});
+            marker = index + 1;
+            break;
+        case '-':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::ASSIGN_SUB, "-=", lines}), ++index;
+            else if (str[index + 1] == '-')
+                tokens.push_back({Token::DEC, "--", lines}), ++index;
+            else
+                tokens.push_back({Token::SUB, "-", lines});
+            marker = index + 1;
+            break;
+        case '*':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::ASSIGN_MUL, "*=", lines}), ++index;
+            else if (str[index + 1] == '*')
+                tokens.push_back({Token::POW, "**", lines}), ++index;
+            else
+                tokens.push_back({Token::MUL, "*", lines});
+            marker = index + 1;
+            break;
+        case '/':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::ASSIGN_DIV, "/=", lines}), ++index;
+            else if (str[index + 1] == '*')
+                predicted = Token::COMMENTBLOCK;
+            else if (str[index + 1] == '/')
+                predicted = Token::COMMENTLINE;
+            else
+                tokens.push_back({Token::DIV, "/", lines});
+            marker = index + 1;
+            break;
+        case '|':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::ASSIGN_BOR, "|=", lines}), ++index;
+            else if (str[index + 1] == '|')
+                tokens.push_back({Token::OR, "||", lines}), ++index;
+            else
+                tokens.push_back({Token::BOR, "|", lines});
+            marker = index + 1;
+            break;
+        case '&':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::ASSIGN_BAND, "&=", lines}), ++index;
+            else if (str[index + 1] == '&')
+                tokens.push_back({Token::AND, "&&", lines}), ++index;
+            else
+                tokens.push_back({Token::BAND, "&", lines});
+            marker = index + 1;
+            break;
+        case '^':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::ASSIGNXOR, "^=", lines}), ++index;
+            else
+                tokens.push_back({Token::XOR, "^", lines});
+            marker = index + 1;
+            break;
+        case '%':
+            if (str[index + 1] == '=')
+                tokens.push_back({Token::ASSIGN_MOD, "%=", lines}), ++index;
+            else
+                tokens.push_back({Token::MOD, "%", lines});
+            marker = index + 1;
             break;
         default:
             break;
         }
     }
     return head;
-}
-
-int ScanNumber(const char* src, int* index)
-{
-    while(1)
-    {
-        
-    }
 }
