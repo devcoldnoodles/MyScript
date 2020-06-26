@@ -28,11 +28,26 @@
 	_ELEM_(MUL, "*", 11)              	\
 	_ELEM_(DIV, "/", 11)              	\
 	_ELEM_(MOD, "%", 11)              	\
+	_ELEM_(ASSIGN_ADD, "+=", 3)			\
+	_ELEM_(ASSIGN_SUB, "-=", 3)			\
+	_ELEM_(ASSIGN_MUL, "*=", 3)			\
+	_ELEM_(ASSIGN_DIV, "/=", 3)			\
+	_ELEM_(ASSIGN_MOD, "%=", 3)			\
+	_ELEM_(POW, "**", 11)				\
 	_ELEM_(BOR, "|", 6)               	\
 	_ELEM_(BAND, "&", 8)              	\
 	_ELEM_(BXOR, "^", 7)              	\
+	_ELEM_(ASSIGN_BOR, "|=", 3)			\
+	_ELEM_(ASSIGN_BAND, "&=", 3)		\
+	_ELEM_(ASSIGN_BXOR, "^=", 3)		\
 	_ELEM_(OR, "||", 4)               	\
 	_ELEM_(AND, "&&", 5)              	\
+	_ELEM_(EQ, "==", 5)              	\
+	_ELEM_(NEQ, "!=", 5)              	\
+	_ELEM_(LT, "<", 5)              	\
+	_ELEM_(LE, "<=", 5)              	\
+	_ELEM_(GT, ">", 5)              	\
+	_ELEM_(GE, ">=", 5)              	\
 	/* tarnery operator */            	\
 	_ELEM_(CONDITIONAL, "?", 3)       	\
 	/* keywords */          			\
@@ -54,16 +69,27 @@
 	_ELEM_(NAMESPACE, "namespace", 0) 	\
 	/* literals */						\
 	_ELEM_(LITERAL, "", 0)				\
+	_ELEM_(LITERAL_INTEGER, "", 0)		\
+	_ELEM_(LITERAL_FLOAT, "", 0)		\
+	_ELEM_(LITERAL_STRING, "", 0)		\
 
 typedef struct TokenDesc
 {
 	short value;
 	struct TokenDesc* next;
-	const char* literal;
+	union {
+		const char* s;
+		int64_t i;
+		double f;
+	} literal;
 } TokenDesc;
 
 TokenDesc* Scan(const char* src);
 const char* GetString(TokenDesc* desc);
 int GetPrecedence(TokenDesc* desc);
+
+// #define T(SIGN, STR, PREC) SIGN,
+// enum  {TOKEN(T)EOT} GetTokenValue(short value) { return value;}
+// #undef T
 
 #endif

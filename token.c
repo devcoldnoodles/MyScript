@@ -21,14 +21,14 @@ int GetPrecedence(TokenDesc* desc)
 	return tokens[desc->value].precedence;
 }
 
-TokenDesc* InitTokenDesc(short value, TokenDesc* next, const char* literal)
+
+TokenDesc* tokendesc(short value, void* literal)
 {
     TokenDesc* temp = (TokenDesc*)malloc(sizeof(TokenDesc));
     if(!temp)
         return NULL;
     temp->value = value;
-    temp->next = next;
-    temp->literal = literal;
+    temp->literal.s = (const char*)literal;
     return temp;
 }
  
@@ -36,181 +36,176 @@ TokenDesc* Scan(const char* src)
 {
     #define CAPACITY 1024
     char temp[CAPACITY];
-    size_t size = 0, pos = 0, lines = 0;
-    TokenDesc* pointer;
+    size_t lines = 0;
+    TokenDesc head;
+    TokenDesc* desc = &head;
     while(*src)
     {
-        switch (src[pos])
+        switch (*src)
         {
         case '\n':
-            ++pos, ++lines;
+            ++lines;  
             break;
         case '\r':case ' ': case '\f': case '\t': case '\v':
-            ++pos;
             break;
-        case '0':case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
-            if(src[pos] == '0' && src[pos + 1] == 'x')
+        case '0':
+        if(*(src + 1) == 'x')
+        {
+            int temp = 0;
+            src += 2;
+            while(*src)
             {
-                
-            }
-            else
-            {
-                while(src[pos] >= '0' && src[pos] <= '9')
+                if (*src >= '0' && *src <= '9')
                 {
-                    
+                    temp *= 16;
+                    temp += *src - '0';
                 }
+                else if (src >= 'A' && src <= 'F')
+                {
+                    temp *= 16;
+                    temp += *src - '0';
+                }
+                else
+                    break;
+                ++src;
             }
-			break;
+            desc->next = tokendesc(LITERAL_INTEGER, temp);
+            desc = desc->next;
+            break;
+        }
+        case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
+        {
+            int temp = 0;
+            while (*src >= '0' && *src <= '9')
+            {
+                temp *= 16;
+                temp += *src - '0';
+                ++src;
+            }
+            desc->next = tokendesc(LITERAL_INTEGER, temp);
+            desc = desc->next;
+        }
+        break;
         case '\"':
             break;
         case '\'':
             break;
         case ':':
-            pointer = InitTokenDesc(COLON, NULL, NULL);
-            tokens.push_back({Token::COLON, ":", lines});
-            marker = index + 1;
+            desc->next = tokendesc(COLON, NULL);
+            desc = desc->next;
             break;
         case ';':
-            tokens.push_back({Token::SEMICOLON, ";", lines});
-            marker = index + 1;
+            desc->next = tokendesc(SEMICOLON, NULL);
+            desc = desc->next;
             break;
         case '.':
-            tokens.push_back({Token::DOT, ".", lines});
-            marker = index + 1;
+            desc->next = tokendesc(PERIOD, NULL);
+            desc = desc->next;
             break;
         case ',':
-            tokens.push_back({Token::COMMA, ",", lines});
-            marker = index + 1;
+            desc->next = tokendesc(COMMA, NULL);
+            desc = desc->next;
             break;
         case '?':
-            tokens.push_back({Token::QUESTION, "?", lines});
-            marker = index + 1;
+            desc->next = tokendesc(CONDITIONAL, NULL);
+            desc = desc->next;
             break;
         case '(':
-            tokens.push_back({Token::LPARAM, "(", lines});
-            marker = index + 1;
+            desc->next = tokendesc(LPAREN, NULL);
+            desc = desc->next;
             break;
         case ')':
-            tokens.push_back({Token::RPARAM, ")", lines});
-            marker = index + 1;
+            desc->next = tokendesc(RPAREN, NULL);
+            desc = desc->next;
             break;
         case '{':
-            tokens.push_back({Token::LBRACKET, "{", lines});
-            marker = index + 1;
+            desc->next = tokendesc(LBRACE, NULL);
+            desc = desc->next;
             break;
         case '}':
-            tokens.push_back({Token::RBRACKET, "}", lines});
-            marker = index + 1;
+            desc->next = tokendesc(RBRACE, NULL);
+            desc = desc->next;
             break;
         case '[':
-            tokens.push_back({Token::LSUBRACKET, "[", lines});
-            marker = index + 1;
+            desc->next = tokendesc(LBRACKET, NULL);
+            desc = desc->next;
             break;
         case ']':
-            tokens.push_back({Token::RSUBRACKET, "]", lines});
-            marker = index + 1;
+            desc->next = tokendesc(RBRACKET, NULL);
+            desc = desc->next;
             break;
         case '<':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::LE, "<=", lines}), ++index;
-            else
-                tokens.push_back({Token::LT, "<", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(LE, NULL), ++src;
+            else                        desc->next = tokendesc(RBRACKET, NULL);
+            desc = desc->next;
             break;
         case '>':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::GE, ">=", lines}), ++index;
-            else
-                tokens.push_back({Token::GT, ">", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(GE, NULL), ++src;
+            else                        desc->next = tokendesc(GT, NULL);
+            desc = desc->next;
             break;
         case '!':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::NEQ, "!=", lines}), ++index;
-            else
-                tokens.push_back({Token::NOT, "!", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(NEQ, NULL), ++src;
+            else                        desc->next = tokendesc(NOT, NULL);
+            desc = desc->next;
             break;
         case '=':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::EQ, "==", lines}), ++index;
-            else
-                tokens.push_back({Token::ASSIGN, "=", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(EQ, NULL), ++src;
+            else                        desc->next = tokendesc(ASSIGN, NULL);
+            desc = desc->next;
             break;
         case '+':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::ASSIGN_ADD, "+=", lines}), ++index;
-            else if (str[index + 1] == '+')
-                tokens.push_back({Token::INC, "++", lines}), ++index;
-            else
-                tokens.push_back({Token::ADD, "+", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(ASSIGN_ADD, NULL), ++src;
+            else if(*(src + 1) == '+')  desc->next = tokendesc(INC, NULL), ++src;
+            else                        desc->next = tokendesc(ADD, NULL);
+            desc = desc->next;
             break;
         case '-':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::ASSIGN_SUB, "-=", lines}), ++index;
-            else if (str[index + 1] == '-')
-                tokens.push_back({Token::DEC, "--", lines}), ++index;
-            else
-                tokens.push_back({Token::SUB, "-", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(ASSIGN_SUB, NULL), ++src;
+            else if(*(src + 1) == '-')  desc->next = tokendesc(DEC, NULL), ++src;
+            else                        desc->next = tokendesc(SUB, NULL);
+            desc = desc->next;
             break;
         case '*':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::ASSIGN_MUL, "*=", lines}), ++index;
-            else if (str[index + 1] == '*')
-                tokens.push_back({Token::POW, "**", lines}), ++index;
-            else
-                tokens.push_back({Token::MUL, "*", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(ASSIGN_MUL, NULL), ++src;
+            else if(*(src + 1) == '*')  desc->next = tokendesc(POW, NULL), ++src;
+            else                        desc->next = tokendesc(MUL, NULL);
+            desc = desc->next;
             break;
         case '/':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::ASSIGN_DIV, "/=", lines}), ++index;
-            else if (str[index + 1] == '*')
-                predicted = Token::COMMENTBLOCK;
-            else if (str[index + 1] == '/')
-                predicted = Token::COMMENTLINE;
-            else
-                tokens.push_back({Token::DIV, "/", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(ASSIGN_DIV, NULL), ++src;
+            else if(*(src + 1) == '*')  {src += 2; while(!(*src == '*' && *(src + 1) == "/") && *(src + 1) != NULL) ++src;}
+            else if(*(src + 1) == '/')  {src += 2; while(*src != '\n' && *src != NULL) ++src;}
+            else                        desc->next = tokendesc(DIV, NULL);
+            desc = desc->next;
             break;
         case '|':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::ASSIGN_BOR, "|=", lines}), ++index;
-            else if (str[index + 1] == '|')
-                tokens.push_back({Token::OR, "||", lines}), ++index;
-            else
-                tokens.push_back({Token::BOR, "|", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(ASSIGN_BOR, NULL), ++src;
+            else if(*(src + 1) == '*')  desc->next = tokendesc(OR, NULL), ++src;
+            else                        desc->next = tokendesc(BOR, NULL);
+            desc = desc->next;
             break;
         case '&':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::ASSIGN_BAND, "&=", lines}), ++index;
-            else if (str[index + 1] == '&')
-                tokens.push_back({Token::AND, "&&", lines}), ++index;
-            else
-                tokens.push_back({Token::BAND, "&", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(ASSIGN_BAND, NULL), ++src;
+            else if(*(src + 1) == '*')  desc->next = tokendesc(AND, NULL), ++src;
+            else                        desc->next = tokendesc(BAND, NULL);
+            desc = desc->next;
             break;
         case '^':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::ASSIGNXOR, "^=", lines}), ++index;
-            else
-                tokens.push_back({Token::XOR, "^", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(ASSIGN_BXOR, NULL), ++src;
+            else                        desc->next = tokendesc(BXOR, NULL);
+            desc = desc->next;
             break;
         case '%':
-            if (str[index + 1] == '=')
-                tokens.push_back({Token::ASSIGN_MOD, "%=", lines}), ++index;
-            else
-                tokens.push_back({Token::MOD, "%", lines});
-            marker = index + 1;
+            if(*(src + 1) == '=')       desc->next = tokendesc(ASSIGN_MOD, NULL), ++src;
+            else                        desc->next = tokendesc(MOD, NULL);
+            desc = desc->next;
             break;
         default:
+
             break;
         }
+        ++src;
     }
-    return head;
+    return head.next;
 }
