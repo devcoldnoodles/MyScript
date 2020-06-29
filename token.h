@@ -71,25 +71,21 @@
 	_ELEM_(LITERAL, "", 0)				\
 	_ELEM_(LITERAL_INTEGER, "", 0)		\
 	_ELEM_(LITERAL_FLOAT, "", 0)		\
+	_ELEM_(LITERAL_CHAR, "", 0)			\
 	_ELEM_(LITERAL_STRING, "", 0)		\
+	_ELEM_(IDENTIFIER, "", 0)			\
 
 typedef struct TokenDesc
 {
 	short value;
 	struct TokenDesc* next;
 	union {
+		char c;
 		const char* s;
-		int64_t i;
-		double f;
+		int i;
+		double d;
 	} literal;
 } TokenDesc;
 
 TokenDesc* Scan(const char* src);
-const char* GetString(TokenDesc* desc);
-int GetPrecedence(TokenDesc* desc);
-
-// #define T(SIGN, STR, PREC) SIGN,
-// enum  {TOKEN(T)EOT} GetTokenValue(short value) { return value;}
-// #undef T
-
 #endif

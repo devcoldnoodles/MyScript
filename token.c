@@ -11,18 +11,7 @@ static struct Token
 } tokens[] = {TOKEN(T){EOT}};
 #undef T
 
-const char* GetString(TokenDesc* desc)
-{
-	return tokens[desc->value].str;
-}
-
-int GetPrecedence(TokenDesc* desc)
-{
-	return tokens[desc->value].precedence;
-}
-
-
-TokenDesc* tokendesc(short value, void* literal)
+static TokenDesc* tokendesc(short value, void* literal)
 {
     TokenDesc* temp = (TokenDesc*)malloc(sizeof(TokenDesc));
     if(!temp)
@@ -34,8 +23,6 @@ TokenDesc* tokendesc(short value, void* literal)
  
 TokenDesc* Scan(const char* src)
 {
-    #define CAPACITY 1024
-    char temp[CAPACITY];
     size_t lines = 0;
     TokenDesc head;
     TokenDesc* desc = &head;
@@ -87,9 +74,45 @@ TokenDesc* Scan(const char* src)
         }
         break;
         case '\"':
-            break;
+        {
+            const int capcity = 1024;
+            char temp[capcity];
+            int pos = 0;
+        }
+        break;
         case '\'':
-            break;
+        {
+            char temp;
+            if (*(++src) == '\\')
+            {
+                switch (*(++src))
+                {
+                case '\\':
+                    temp = '\\';
+                    break;
+                case 't':
+                    temp = '\t';
+                    break;
+                case 'r':
+                    temp = '\r';
+                    break;
+                case 'n':
+                    temp = '\n';
+                    break;
+                case '\'':
+                    temp = '\'';
+                    break;
+                case '\"':
+                    temp = '\"';
+                    break;
+                }
+            }
+            else
+                temp = *src;
+            desc->next = tokendesc(LITERAL_CHAR, temp);
+            desc = desc->next;
+        }
+        break;
         case ':':
             desc->next = tokendesc(COLON, NULL);
             desc = desc->next;
@@ -202,8 +225,11 @@ TokenDesc* Scan(const char* src)
             desc = desc->next;
             break;
         default:
-
-            break;
+        {
+            while (!(*src >= 'a' && *src <= 'z') && !(*src >= 'A' && *src <= 'Z') && !(*src >= '0' && *src <= '9') && *src != '_')
+                ++src;
+        }
+        break;
         }
         ++src;
     }
