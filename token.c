@@ -63,7 +63,7 @@ TokenDesc* Scan(const char* src)
         case '1':case '2':case '3':case '4':case '5':case '6':case '7':case '8':case '9':
         {
             int temp = 0;
-            while (*src >= '0' && *src <= '9')
+            while (*src && *src >= '0' && *src <= '9')
             {
                 temp *= 16;
                 temp += *src - '0';
@@ -197,8 +197,8 @@ TokenDesc* Scan(const char* src)
             break;
         case '/':
             if(*(src + 1) == '=')       desc->next = tokendesc(ASSIGN_DIV, NULL), ++src;
-            else if(*(src + 1) == '*')  {src += 2; while(!(*src == '*' && *(src + 1) == "/") && *(src + 1) != NULL) ++src;}
-            else if(*(src + 1) == '/')  {src += 2; while(*src != '\n' && *src != NULL) ++src;}
+            else if(*(src + 1) == '*')  {src += 2; while(*(src + 1) && !(*src == '*' && *(src + 1) == "/")) ++src;}
+            else if(*(src + 1) == '/')  {src += 2; while(*src && *src != '\n') ++src;}
             else                        desc->next = tokendesc(DIV, NULL);
             desc = desc->next;
             break;
@@ -226,8 +226,11 @@ TokenDesc* Scan(const char* src)
             break;
         default:
         {
+            const char* temp = src;
             while (!(*src >= 'a' && *src <= 'z') && !(*src >= 'A' && *src <= 'Z') && !(*src >= '0' && *src <= '9') && *src != '_')
                 ++src;
+            desc->next = tokendesc(IDENTIFIER, temp);
+            desc = desc->next;
         }
         break;
         }
