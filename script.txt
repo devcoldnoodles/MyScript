@@ -11,14 +11,13 @@ print("\nusing time = ", clock() - begin);
 /*
 import stdlib
 import stdio
-	meta(expression) 
-	{ 
-		contents
-	}
-	If expression is true, the compiler puts the content into the source code.
-
-	meta += (macro`name) (macro`value)
-	meta -= (macro`name) 
+meta(expression) 
+{ 
+	contents
+}
+If expression is true, the compiler puts the content into the source code.
+meta += (macro`name) (macro`value)
+meta -= (macro`name) 
 
 meta(!CALCUL) 
 {
