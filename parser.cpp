@@ -31,8 +31,8 @@ namespace myscript
 	}
 	SyntaxExpr* ParseAssign(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors)
 	{
-		SyntaxExpr* lexp = nullptr;
 		size_t temp = index;
+		SyntaxExpr* lexp = nullptr;
 		SyntaxExpr* rexp = nullptr;
 		if ((lexp = ParseTernaryOperator(tokens, temp, errors)) == nullptr)
 			return nullptr;
