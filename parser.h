@@ -26,13 +26,13 @@ namespace myscript
 			switch (data.type)
 			{
 			case Token::NULLPTR:
-				cd->code.push_back(OpCode::PUSHNULL);
+				cd->code.push_back(PUSHNULL);
 				break;
 			case Token::TRUE:
-				cd->code.push_back(OpCode::PUSHTRUE);
+				cd->code.push_back(PUSHTRUE);
 				break;
 			case Token::FALSE:
-				cd->code.push_back(OpCode::PUSHFALSE);
+				cd->code.push_back(PUSHFALSE);
 				break;
 			case Token::NUMBER:
 			{
@@ -40,7 +40,7 @@ namespace myscript
 				if (value <= std::numeric_limits<float>::max())
 				{
 					short* fvalue = (short*)new float(value);
-					cd->code.push_back(OpCode::PUSHDWORD);
+					cd->code.push_back(PUSHDWORD);
 					cd->code.push_back(fvalue[0]);
 					cd->code.push_back(fvalue[1]);
 					delete fvalue;
@@ -48,7 +48,7 @@ namespace myscript
 				else
 				{
 					short* dvalue = (short*)new double(value);
-					cd->code.push_back(OpCode::PUSHQWORD);
+					cd->code.push_back(PUSHQWORD);
 					cd->code.push_back(dvalue[0]);
 					cd->code.push_back(dvalue[1]);
 					cd->code.push_back(dvalue[2]);
@@ -63,7 +63,7 @@ namespace myscript
 				std::string& str = data.str;
 				size_t str_size = str.size();
 				size_t index = 0;
-				cd->code.push_back(OpCode::PUSHSTR);
+				cd->code.push_back(PUSHSTR);
 				cd->code.push_back(str_size);
 				while (index + 2 <= str_size)
 					cd->code.push_back(str[index + 1] << 8 | str[index]), index += 2;
@@ -103,11 +103,11 @@ namespace myscript
 					cd->errors.push_back({"Undefined identifier " + id, line});
 					return false;
 				}
-				cd->code.push_back(OpCode::PUSH);
+				cd->code.push_back(PUSH);
 				cd->code.push_back(findex);
 				return true;
 			}
-			cd->code.push_back(OpCode::READ);
+			cd->code.push_back(READ);
 			cd->code.push_back(value);
 			return true;
 		}
@@ -134,7 +134,7 @@ namespace myscript
 					cd->errors.push_back({"'" + id + "' is constants value", line});
 					return false;
 				}
-				cd->code.push_back(OpCode::STORE);
+				cd->code.push_back(STORE);
 				cd->code.push_back(findex);
 				return true;
 			}
@@ -143,7 +143,7 @@ namespace myscript
 				cd->errors.push_back({"'" + id + "' is constants value", line});
 				return false;
 			}
-			cd->code.push_back(OpCode::WRITE);
+			cd->code.push_back(WRITE);
 			cd->code.push_back(value);
 			return true;
 		}
@@ -183,7 +183,7 @@ namespace myscript
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::NOT);
+			cd->code.push_back(NOT);
 			return true;
 		}
 	};
@@ -200,7 +200,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::OR);
+			cd->code.push_back(OR);
 			return true;
 		}
 	};
@@ -217,7 +217,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::AND);
+			cd->code.push_back(AND);
 			return true;
 		}
 	};
@@ -234,7 +234,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::XOR);
+			cd->code.push_back(XOR);
 			return true;
 		}
 	};
@@ -251,7 +251,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::EQ);
+			cd->code.push_back(EQ);
 			return true;
 		}
 	};
@@ -268,7 +268,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::NEQ);
+			cd->code.push_back(NEQ);
 			return true;
 		}
 	};
@@ -285,7 +285,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::GT);
+			cd->code.push_back(GT);
 			return true;
 		}
 	};
@@ -302,7 +302,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::GE);
+			cd->code.push_back(GE);
 			return true;
 		}
 	};
@@ -319,7 +319,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::LT);
+			cd->code.push_back(LT);
 			return true;
 		}
 	};
@@ -336,7 +336,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::LE);
+			cd->code.push_back(LE);
 			return true;
 		}
 	};
@@ -385,13 +385,13 @@ namespace myscript
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::CFJMP);
-			cd->code.push_back(OpCode::NONE);
+			cd->code.push_back(CFJMP);
+			cd->code.push_back(NONE);
 			size_t tdelta = cd->code.size();
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::FJMP);
-			cd->code.push_back(OpCode::NONE);
+			cd->code.push_back(FJMP);
+			cd->code.push_back(NONE);
 			cd->code[tdelta - 1] = cd->code.size() - tdelta;
 			size_t fdelta = cd->code.size();
 			if (!rexpr->CreateRCode(cd))
@@ -413,7 +413,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::ADD);
+			cd->code.push_back(ADD);
 			return true;
 		}
 	};
@@ -430,7 +430,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::SUB);
+			cd->code.push_back(SUB);
 			return true;
 		}
 	};
@@ -447,7 +447,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::MUL);
+			cd->code.push_back(MUL);
 			return true;
 		}
 	};
@@ -464,7 +464,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::DIV);
+			cd->code.push_back(DIV);
 			return true;
 		}
 	};
@@ -482,7 +482,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::MOD);
+			cd->code.push_back(MOD);
 			return true;
 		}
 	};
@@ -500,7 +500,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::POW);
+			cd->code.push_back(POW);
 			return true;
 		}
 	};
@@ -518,7 +518,7 @@ namespace myscript
 				return false;
 			if (!lexpr->CreateLCode(cd))
 				return false;
-			cd->code.push_back(OpCode::POP);
+			cd->code.push_back(POP);
 			return true;
 		}
 		bool CreateRCode(CompliationDesc* cd)
@@ -555,7 +555,7 @@ namespace myscript
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::SIGN);
+			cd->code.push_back(SIGN);
 			return true;
 		}
 	};
@@ -570,23 +570,23 @@ namespace myscript
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::PUSHDWORD);
+			cd->code.push_back(PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
-			cd->code.push_back(OpCode::ADD);
+			cd->code.push_back(ADD);
 			if (!expr->CreateLCode(cd))
 				return false;
-			cd->code.push_back(OpCode::POP);
+			cd->code.push_back(POP);
 			return true;
 		}
 		bool CreateRCode(CompliationDesc* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::PUSHDWORD);
+			cd->code.push_back(PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
-			cd->code.push_back(OpCode::ADD);
+			cd->code.push_back(ADD);
 			if (!expr->CreateLCode(cd))
 				return false;
 			return true;
@@ -603,29 +603,29 @@ namespace myscript
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::PUSHDWORD);
+			cd->code.push_back(PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
-			cd->code.push_back(OpCode::ADD);
+			cd->code.push_back(ADD);
 			if (!expr->CreateLCode(cd))
 				return false;
-			cd->code.push_back(OpCode::POP);
+			cd->code.push_back(POP);
 			return true;
 		}
 		bool CreateRCode(CompliationDesc* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::PUSHDWORD);
+			cd->code.push_back(PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
-			cd->code.push_back(OpCode::ADD);
+			cd->code.push_back(ADD);
 			if (!expr->CreateLCode(cd))
 				return false;
-			cd->code.push_back(OpCode::PUSHDWORD);
+			cd->code.push_back(PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
-			cd->code.push_back(OpCode::SUB);
+			cd->code.push_back(SUB);
 			return true;
 		}
 	};
@@ -640,23 +640,23 @@ namespace myscript
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::PUSHDWORD);
+			cd->code.push_back(PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
-			cd->code.push_back(OpCode::SUB);
+			cd->code.push_back(SUB);
 			if (!expr->CreateLCode(cd))
 				return false;
-			cd->code.push_back(OpCode::POP);
+			cd->code.push_back(POP);
 			return true;
 		}
 		bool CreateRCode(CompliationDesc* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::PUSHDWORD);
+			cd->code.push_back(PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
-			cd->code.push_back(OpCode::SUB);
+			cd->code.push_back(SUB);
 			if (!expr->CreateLCode(cd))
 				return false;
 			return true;
@@ -673,29 +673,29 @@ namespace myscript
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::PUSHDWORD);
+			cd->code.push_back(PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
-			cd->code.push_back(OpCode::SUB);
+			cd->code.push_back(SUB);
 			if (!expr->CreateLCode(cd))
 				return false;
-			cd->code.push_back(OpCode::POP);
+			cd->code.push_back(POP);
 			return true;
 		}
 		bool CreateRCode(CompliationDesc* cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::PUSHDWORD);
+			cd->code.push_back(PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
-			cd->code.push_back(OpCode::SUB);
+			cd->code.push_back(SUB);
 			if (!expr->CreateLCode(cd))
 				return false;
-			cd->code.push_back(OpCode::PUSHDWORD);
+			cd->code.push_back(PUSHDWORD);
 			cd->code.push_back(float1[0]);
 			cd->code.push_back(float1[1]);
-			cd->code.push_back(OpCode::ADD);
+			cd->code.push_back(ADD);
 			return true;
 		}
 	};
@@ -710,7 +710,7 @@ namespace myscript
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
-			cd->code.back() = OpCode::NEW;
+			cd->code.back() = NEW;
 			return true;
 		}
 	};
@@ -728,7 +728,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::AS);
+			cd->code.push_back(AS);
 			return true;
 		}
 	};
@@ -746,7 +746,7 @@ namespace myscript
 				return false;
 			if (!rexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::IS);
+			cd->code.push_back(IS);
 			return true;
 		}
 	};
@@ -764,7 +764,7 @@ namespace myscript
 				return false;
 			if (!lexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::REFSET);
+			cd->code.push_back(REFSET);
 			return true;
 		}
 		bool CreateRCode(CompliationDesc* cd)
@@ -773,7 +773,7 @@ namespace myscript
 				return false;
 			if (!lexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::REFGET);
+			cd->code.push_back(REFGET);
 			return true;
 		}
 	};
@@ -791,7 +791,9 @@ namespace myscript
 				return false;
 			if (!lexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::ARRSET);
+
+			
+			cd->code.push_back(ARRSET);
 			return true;
 		}
 		bool CreateRCode(CompliationDesc* cd)
@@ -800,7 +802,7 @@ namespace myscript
 				return false;
 			if (!lexpr->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::ARRGET);
+			cd->code.push_back(ARRGET);
 			return true;
 		}
 	};
@@ -820,9 +822,9 @@ namespace myscript
 			for (size_t index = 0; index < param_size; ++index)
 				if (!params[index]->CreateRCode(cd))
 					return false;
-			cd->code.push_back(OpCode::CALL);
+			cd->code.push_back(CALL);
 			cd->code.push_back(param_size);
-			cd->code.push_back(OpCode::POP);
+			cd->code.push_back(POP);
 			return true;
 		}
 		bool CreateRCode(CompliationDesc* cd)
@@ -833,7 +835,7 @@ namespace myscript
 			for (size_t index = 0; index < param_size; ++index)
 				if (!params[index]->CreateRCode(cd))
 					return false;
-			cd->code.push_back(OpCode::CALL);
+			cd->code.push_back(CALL);
 			cd->code.push_back(param_size);
 			return true;
 		}
@@ -851,7 +853,7 @@ namespace myscript
 			for (size_t index = 0; index < elements_size; ++index)
 				if (!elements[elements_size - index - 1]->CreateRCode(cd))
 					return false;
-			cd->code.push_back(OpCode::INSTARR);
+			cd->code.push_back(INSTARR);
 			cd->code.push_back(elements_size);
 			return true;
 		}
@@ -872,7 +874,7 @@ namespace myscript
 				if (!elements[elements_size - index - 1].first->CreateRCode(cd))
 					return false;
 			}
-			cd->code.push_back(OpCode::INSTDIC);
+			cd->code.push_back(INSTDIC);
 			cd->code.push_back(elements_size);
 			return true;
 		}
@@ -901,9 +903,9 @@ namespace myscript
 					{
 						if (!element.second->CreateRCode(cd))
 							return false;
-						cd->code.push_back(OpCode::STORE);
+						cd->code.push_back(STORE);
 						cd->code.push_back(global_size);
-						cd->code.push_back(OpCode::POP);
+						cd->code.push_back(POP);
 					}
 				}
 				else
@@ -917,9 +919,9 @@ namespace myscript
 							return false;
 					}
 					else
-						cd->code.push_back(OpCode::PUSHNULL);
+						cd->code.push_back(PUSHNULL);
 					if (index != 0xFFFF)
-						cd->code.push_back(OpCode::WRITE), cd->code.push_back(index);
+						cd->code.push_back(WRITE), cd->code.push_back(index);
 				}
 			}
 			return true;
@@ -942,13 +944,13 @@ namespace myscript
 						return false;
 				}
 				else
-					cd->code.push_back(OpCode::PUSHNULL);
+					cd->code.push_back(PUSHNULL);
 				if (index != 0xFFFF)
 				{
-					cd->code.push_back(OpCode::WRITE);
+					cd->code.push_back(WRITE);
 					cd->code.push_back(index);
 				}
-				cd->code.push_back(OpCode::READ);
+				cd->code.push_back(READ);
 				cd->code.push_back(cd->scope.back().variables.size() - 1);
 			}
 			return true;
@@ -969,7 +971,7 @@ namespace myscript
 			size_t list_size = cd->scope.back().variables.size();
 			if (list_size > 0)
 			{
-				cd->code.push_back(OpCode::POPTO);
+				cd->code.push_back(POPTO);
 				cd->code.push_back(list_size);
 			}
 			auto temp = cd->scope.back();
@@ -1000,9 +1002,9 @@ namespace myscript
 				if (sents[index]->CreateCode(cd) == false)
 					return false;
 			if (cd->code.empty())
-				cd->code.push_back(OpCode::RETURN);
-			else if (cd->code.back() != OpCode::RETURN)
-				cd->code.push_back(OpCode::RETURN);
+				cd->code.push_back(RETURN);
+			else if (cd->code.back() != RETURN)
+				cd->code.push_back(RETURN);
 			return true;
 		}
 	};
@@ -1019,20 +1021,20 @@ namespace myscript
 			size_t param_size = params.size();
 			for (size_t index = 0; index < param_size; ++index)
 				cd->scope.back().variables.push_back({params[index], VarDesc::VAR});
-			cd->code.push_back(OpCode::PUSHFUNC);
-			cd->code.push_back(OpCode::NONE);
+			cd->code.push_back(PUSHFUNC);
+			cd->code.push_back(NONE);
 			size_t delta = cd->code.size();
 			if(param_size > 0)
 			{
-				cd->code.push_back(OpCode::PARAMSET);
+				cd->code.push_back(PARAMSET);
 				cd->code.push_back(param_size);
 			}
 			size_t sents_size = sents->sents.size();
 			for (size_t index = 0; index < sents_size; ++index)
 				if (!sents->sents[index]->CreateCode(cd))
 					return false;
-			if (cd->code.back() != OpCode::RETURN)
-				cd->code.push_back(OpCode::RETURNNULL);
+			if (cd->code.back() != RETURN)
+				cd->code.push_back(RETURNNULL);
 			cd->code[delta - 1] = cd->code.size() - delta;
 			cd->scope.pop_back();
 			return true;
@@ -1063,15 +1065,15 @@ namespace myscript
 		{
 			if (!cond->CreateRCode(cd))
 				return false;
-			cd->code.push_back(OpCode::CFJMP);
-			cd->code.push_back(OpCode::NONE);
+			cd->code.push_back(CFJMP);
+			cd->code.push_back(NONE);
 			size_t tdelta = cd->code.size();
 			if (!truesents->CreateCode(cd))
 				return false;
 			if (falsesents != nullptr)
 			{
-				cd->code.push_back(OpCode::FJMP);
-				cd->code.push_back(OpCode::NONE);
+				cd->code.push_back(FJMP);
+				cd->code.push_back(NONE);
 				cd->code[tdelta - 1] = cd->code.size() - tdelta;
 				size_t fdelta = cd->code.size();
 				if (!falsesents->CreateCode(cd))
@@ -1101,8 +1103,8 @@ namespace myscript
 				if (!init->CreateCode(cd))
 					return false;
 			}
-			cd->code.push_back(OpCode::FJMP);
-			cd->code.push_back(OpCode::NONE);
+			cd->code.push_back(FJMP);
+			cd->code.push_back(NONE);
 			size_t delta = cd->code.size();
 			if (loop != nullptr)
 			{
@@ -1114,24 +1116,24 @@ namespace myscript
 			{
 				if (!prefix_condition->CreateRCode(cd))
 					return false;
-				cd->code.push_back(OpCode::CFJMP);
+				cd->code.push_back(CFJMP);
 				cd->scope.back().endpoint.push_back(cd->code.size());
-				cd->code.push_back(OpCode::NONE);
+				cd->code.push_back(NONE);
 			}
 			if (postfix_condition != nullptr)
 			{
 				if (!postfix_condition->CreateRCode(cd))
 					return false;
-				cd->code.push_back(OpCode::CFJMP);
+				cd->code.push_back(CFJMP);
 				cd->scope.back().endpoint.push_back(cd->code.size());
-				cd->code.push_back(OpCode::NONE);
+				cd->code.push_back(NONE);
 				cd->code[delta - 1] = cd->code.size() - delta;
 			}
 			if (!sents->CreateCode(cd))
 				return false;
-			cd->code.push_back(OpCode::BJMP);
+			cd->code.push_back(BJMP);
 			cd->scope.back().startpoint.push_back(cd->code.size());
-			cd->code.push_back(OpCode::NONE);
+			cd->code.push_back(NONE);
 			for (size_t index : cd->scope.back().startpoint)
 			{
 				cd->code[index] = index - delta + 1;
@@ -1143,7 +1145,7 @@ namespace myscript
 			size_t list_size = cd->scope.back().variables.size();
 			if (list_size > 0)
 			{
-				cd->code.push_back(OpCode::POPTO);
+				cd->code.push_back(POPTO);
 				cd->code.push_back(list_size);
 			}
 			cd->scope.pop_back();
@@ -1167,10 +1169,10 @@ namespace myscript
 			{
 				if (!value->CreateRCode(cd))
 					return false;
-				cd->code.push_back(OpCode::RETURN);
+				cd->code.push_back(RETURN);
 			}
 			else
-				cd->code.push_back(OpCode::RETURNNULL);
+				cd->code.push_back(RETURNNULL);
 			return true;
 		}
 	};
@@ -1185,9 +1187,9 @@ namespace myscript
 				cd->errors.push_back({"Incorrect scope", line});
 				return false;
 			}
-			cd->code.push_back(OpCode::BJMP);
+			cd->code.push_back(BJMP);
 			cd->scope.back().startpoint.push_back(cd->code.size());
-			cd->code.push_back(OpCode::NONE);
+			cd->code.push_back(NONE);
 			return true;
 		}
 	};
@@ -1202,9 +1204,9 @@ namespace myscript
 				cd->errors.push_back({"Incorrect scope", line});
 				return false;
 			}
-			cd->code.push_back(OpCode::FJMP);
+			cd->code.push_back(FJMP);
 			cd->scope.back().endpoint.push_back(cd->code.size());
-			cd->code.push_back(OpCode::NONE);
+			cd->code.push_back(NONE);
 			return true;
 		}
 	};
@@ -1219,7 +1221,7 @@ namespace myscript
 			cd->scope.push_back(LocalScope());
 			for(auto iter : member)
 				iter->CreateCode(cd);
-			cd->code.push_back(OpCode::DEF);
+			cd->code.push_back(DEF);
 			cd->code.push_back(cd->code.size() - delta);
 			return true;
 		}
