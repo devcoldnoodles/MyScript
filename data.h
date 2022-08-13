@@ -109,7 +109,7 @@ namespace myscript
 		std::vector<VarDesc> variables;
 		std::vector<size_t> startpoint;
 		std::vector<size_t> endpoint;
-		std::map<std::string, std::vector<size_t>> labels;
+		std::map<std::string, std::vector<size_t> > labels;
 	};
 	struct ScriptState
 	{

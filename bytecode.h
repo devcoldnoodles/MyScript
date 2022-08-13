@@ -5,6 +5,8 @@
 #include "data.h"
 #include <iostream>
 
+#define FORMATSIZE 64
+
 namespace myscript
 {
 	constexpr auto FORMATSIZE = 64;

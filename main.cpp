@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
 	#endif
 	SyntaxTree code;
 	cdesc.Insert({"clock", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args){
-		return CreateMetaNumber(clock());
+		return CreateMetaNumber((double)clock() / (double)CLOCKS_PER_SEC);
 	}));
 	cdesc.Insert({"typeof", VarDesc::CONST}, CreateMetaCFunction([](std::vector<MetaObject*> args){
 		return args.size() == 1 ? CreateMetaString(ToString(MetaObject::Type(args[0]->type))) : CreateMetaNull();
