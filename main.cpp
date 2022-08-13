@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "bytecode.h"
 #include "parser.h"
+#include "virtualmachine.h"
 #include <ctime>
 #include <fstream>
 
@@ -89,7 +90,7 @@ int main(int argc, char** argv) {
 		printf("[parsing error]\n");
 		std::string temp;
 		for (auto error : code.errors)
-			temp += ToString(error) + '\n';
+			temp += error.ToString() + '\n';
 		printf("%s", temp.c_str());
 		goto ErrorHandle;
 	}
@@ -98,7 +99,7 @@ int main(int argc, char** argv) {
 		printf("[code generate error]\n");
 		std::string temp;
 		for (auto error : cdesc.errors)
-			temp += ToString(error) + '\n';
+			temp += error.ToString() + '\n';
 		printf("%s", temp.c_str());
 		goto ErrorHandle;
 	}

@@ -1,99 +1,30 @@
 #ifndef __DATA_H__
 #define __DATA_H__
-#include"pch.h"
+#include "pch.h"
 
 namespace myscript 
 {
 	struct MetaObject;
-	typedef MetaObject* (*CTestFunc)(int argc, MetaObject* args);
 	typedef MetaObject* (*CFunc)(std::vector<MetaObject*> args);
 
-	struct Token
-	{
-		enum Type : uint16_t
-		{
-			NONE, // 
-			IDENTIFIER, // 
-			COMMENTLINE, // 
-			COMMENTBLOCK, // 
-			EOT, // 
-			ASSIGN, // =
-			EQ, // ==
-			NEQ, // !=
-			QUESTION, // ?
-			NOT, // !
-			BOR, // |
-			ASSIGN_BOR, // |=
-			OR, // ||
-			BAND, // &
-			ASSIGN_BAND, // &=
-			AND, // &&
-			ADD, // +
-			ASSIGN_ADD, // +=
-			INC, // ++
-			SUB, // -
-			ASSIGN_SUB, // -=
-			DEC, // --	
-			MUL, // *
-			ASSIGN_MUL, // *=
-			POW, // **
-			DIV, // /
-			ASSIGN_DIV, // /=
-			MOD, // %
-			ASSIGN_MOD, // %=
-			XOR, // ^
-			ASSIGNXOR, // ^=
-			GT, // >
-			GE, // >=
-			LT, // <
-			LE, // <=
-			LPARAM, // (
-			RPARAM, // )
-			LBRACKET, // {
-			RBRACKET, // }
-			LSUBRACKET, // [
-			RSUBRACKET, // ]
-			COMMA, // ,
-			DOT, // .
-			BACKSLASH, //
-			COLON, // :
-			SEMICOLON, // ;	
-			APOSTROPHE, // '
-			QUOTATION, // "
-			NUMBER, // literal of number
-			STRING, // literal of std::string
-			VAR, // var
-			CONST, // const
-			STATIC, // static
-			FUNCTION, // function
-			CLASS, // struct
-			PUBLIC, // public
-			PRIVATE, // private
-			PROTECT, // protect
-			IF, // if
-			ELSE, // else
-			MATCh, // match
-			DEFAULT, // default
-			LOOP, // loop
-			CONTINUE, // continue
-			BREAK, // break
-			RETURN, // return
-			TRUE, // true
-			FALSE, // false
-			NULLPTR, // null
-			NEW, // new
-			SELF, // this
-			IS, // is
-			AS, // as
-		} type;
-		std::string str;
-		size_t line;
-	};
 	struct Error
 	{
 		std::string inf;
 		size_t line;
+
+		Error(const std::string &_inf, const size_t &_line) : inf(_inf), line(_line) {}
+		const std::string ToString()
+		{
+			constexpr auto buf_size = 64;
+			char temp[buf_size];
+			if (line)
+				sprintf(temp, "[%lu lines] %s", line, inf.c_str());
+			else
+				sprintf(temp, "%s", inf.c_str());
+			return temp;
+		}
 	};
+
 	enum OpCode : uint16_t
 	{
 		NONE = 0, // unused value causes error
@@ -151,6 +82,7 @@ namespace myscript
 		MOD, // operator %
 		POW, // operator **
 	};
+
 	struct VarDesc
 	{
 		std::string name;

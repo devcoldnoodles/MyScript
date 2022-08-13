@@ -1,10 +1,12 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 #include "data.h"
+#include "scanner.h"
 
 namespace myscript 
 {
-	static short* float1 = (short*)new float(1);
+	static float tf1 = 1;
+	static short* float1 = (short*)&tf1;
 	
 	struct SyntaxNode
 	{
@@ -19,48 +21,68 @@ namespace myscript
 	};
 	struct SyntaxLiteral : SyntaxExpr
 	{
-		Token data;
-		SyntaxLiteral(const Token _data) : data(_data) { line = _data.line; }
+		TokenDesc *desc;
+		SyntaxLiteral(TokenDesc *_desc) : desc(_desc) { line = _desc->lines; }
 		bool CreateRCode(CompliationDesc* cd)
 		{
-			switch (data.type)
+			switch (desc->value)
 			{
-			case Token::NULLPTR:
+			case Token::LITERAL_NULL:
 				cd->code.push_back(OpCode::PUSHNULL);
 				break;
-			case Token::TRUE:
+			case Token::LITERAL_TRUE:
 				cd->code.push_back(OpCode::PUSHTRUE);
 				break;
-			case Token::FALSE:
+			case Token::LITERAL_FALSE:
 				cd->code.push_back(OpCode::PUSHFALSE);
 				break;
-			case Token::NUMBER:
+			case Token::LITERAL_FLOAT:
 			{
-				double value = stod(data.str);
+				double value = desc->literal.d;
 				if (value <= std::numeric_limits<float>::max())
 				{
-					short* fvalue = (short*)new float(value);
+					float temp = value;
+					short* fvalue = (short*)&temp;
 					cd->code.push_back(OpCode::PUSHDWORD);
 					cd->code.push_back(fvalue[0]);
 					cd->code.push_back(fvalue[1]);
-					delete fvalue;
 				}
 				else
 				{
-					short* dvalue = (short*)new double(value);
+					short* dvalue = (short*)&value;
 					cd->code.push_back(OpCode::PUSHQWORD);
 					cd->code.push_back(dvalue[0]);
 					cd->code.push_back(dvalue[1]);
 					cd->code.push_back(dvalue[2]);
 					cd->code.push_back(dvalue[3]);
-					delete dvalue;
 				}
 			}
 			break;
-			case Token::IDENTIFIER:
-			case Token::STRING:
+			case Token::LITERAL_INTEGER:
 			{
-				std::string& str = data.str;
+				double value = desc->literal.i;
+				if (value <= std::numeric_limits<float>::max())
+				{
+					float temp = value;
+					short* fvalue = (short*)&temp;
+					cd->code.push_back(OpCode::PUSHDWORD);
+					cd->code.push_back(fvalue[0]);
+					cd->code.push_back(fvalue[1]);
+				}
+				else
+				{
+					short* dvalue = (short*)&value;
+					cd->code.push_back(OpCode::PUSHQWORD);
+					cd->code.push_back(dvalue[0]);
+					cd->code.push_back(dvalue[1]);
+					cd->code.push_back(dvalue[2]);
+					cd->code.push_back(dvalue[3]);
+				}
+			} break;
+			case Token::IDENTIFIER:
+			case Token::LITERAL_STRING:
+			{
+				std::string str(desc->literal.s);
 				size_t str_size = str.size();
 				size_t index = 0;
 				cd->code.push_back(OpCode::PUSHSTR);
@@ -84,7 +106,7 @@ namespace myscript
 	{
 		std::string id;
 		
-		SyntaxIdentifier(const Token& _token) : id(_token.str) { line = _token.line; }
+		SyntaxIdentifier(const TokenDesc *_desc) : id(_desc->literal.s) { line = _desc->lines; }
 		bool CreateRCode(CompliationDesc* cd)
 		{
 			uint16_t value = cd->Identify(id);
@@ -1224,30 +1246,30 @@ namespace myscript
 			return true;
 		}
 	};
-	SyntaxExpr* ParseExpr(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseComma(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseTernaryOperator(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseAssign(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseOr(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseAnd(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseCmp(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseAdd(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseMul(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParsePow(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParsePrefix(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParsePostfix(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseElement(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseLiteral(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseSimpleLiteral(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseArray(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	std::pair<SyntaxExpr*, SyntaxExpr*>* ParseKeyVal(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseDictionary(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseFunction(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseSentence(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors, size_t args_count ...);
-	SyntaxExpr* ParseIf(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseLoop(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseFlowControl(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseDeclare(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxBlock* ParseBlock(std::vector<Token>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseExpr(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseComma(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseTernaryOperator(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseAssign(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseOr(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseAnd(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseCmp(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseAdd(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseMul(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParsePow(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParsePrefix(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParsePostfix(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseElement(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseLiteral(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseSimpleLiteral(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseArray(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	std::pair<SyntaxExpr*, SyntaxExpr*>* ParseKeyVal(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseDictionary(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseFunction(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseSentence(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors, size_t args_count ...);
+	SyntaxExpr* ParseIf(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseLoop(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseFlowControl(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr* ParseDeclare(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxBlock* ParseBlock(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
 };
 #endif
