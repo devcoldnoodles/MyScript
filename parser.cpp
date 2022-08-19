@@ -7,27 +7,32 @@ namespace myscript
 {
 	SyntaxExpr* ParseExpr(std::vector<TokenDesc*> &tokens, size_t &index, std::vector<Error> &errors)
 	{
-		return ParseComma(tokens, index, errors);
+		return ParseParallelCommand(tokens, index, errors);
 	}
-	SyntaxExpr* ParseComma(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors)
+	SyntaxExpr* ParseParallelCommand(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* lexp = nullptr;
 		SyntaxExpr* rexp = nullptr;
+
 		if ((lexp = ParseAssign(tokens, temp, errors)) == nullptr)
 			return nullptr;
+
 		while (tokens[temp]->value == Token::COMMA)
 		{
 			if ((rexp = ParseAssign(tokens, ++temp, errors)) == nullptr)
 			{
 				errors.push_back({"Expected expression", tokens[--temp]->lines});
-				delete lexp;
-				return nullptr;
+				goto ErrorHandle;
 			}
 			lexp = new SyntaxComma(lexp, rexp);
 		}
 		index = temp;
 		return lexp;
+	ErrorHandle:
+		delete lexp;
+		delete rexp;
+		return nullptr;
 	}
 	SyntaxExpr* ParseAssign(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors)
 	{
@@ -321,7 +326,7 @@ namespace myscript
 		switch (tokens[temp]->value)
 		{
 		case Token::INC:
-			if ((expr = ParsePostfix(tokens, ++temp, errors)) == nullptr)
+			if ((expr = ParseSuffix(tokens, ++temp, errors)) == nullptr)
 			{
 				errors.push_back({"Expected identifier", tokens[--temp]->lines});
 				return nullptr;
@@ -329,7 +334,7 @@ namespace myscript
 			expr = new SyntaxPrefixPlusx2(expr);
 			break;
 		case Token::DEC:
-			if ((expr = ParsePostfix(tokens, ++temp, errors)) == nullptr)
+			if ((expr = ParseSuffix(tokens, ++temp, errors)) == nullptr)
 			{
 				errors.push_back({"Expected identifier", tokens[--temp]->lines});
 				return nullptr;
@@ -337,7 +342,7 @@ namespace myscript
 			expr = new SyntaxPostfixMinusx2(expr);
 			break;
 		case Token::ADD:
-			if ((expr = ParsePostfix(tokens, ++temp, errors)) == nullptr)
+			if ((expr = ParseSuffix(tokens, ++temp, errors)) == nullptr)
 			{
 				errors.push_back({"Expected identifier", tokens[--temp]->lines});
 				return nullptr;
@@ -345,7 +350,7 @@ namespace myscript
 			expr = new SyntaxPrefixPlus(expr);
 			break;
 		case Token::SUB:
-			if ((expr = ParsePostfix(tokens, ++temp, errors)) == nullptr)
+			if ((expr = ParseSuffix(tokens, ++temp, errors)) == nullptr)
 			{
 				errors.push_back({"Expected identifier", tokens[--temp]->lines});
 				return nullptr;
@@ -353,7 +358,7 @@ namespace myscript
 			expr = new SyntaxPrefixMinus(expr);
 			break;
 		case Token::NOT:
-			if ((expr = ParsePostfix(tokens, ++temp, errors)) == nullptr)
+			if ((expr = ParseSuffix(tokens, ++temp, errors)) == nullptr)
 			{
 				errors.push_back({"Expected identifier", tokens[--temp]->lines});
 				return nullptr;
@@ -361,7 +366,7 @@ namespace myscript
 			expr = new SyntaxNot(expr);
 			break;
 		case Token::NEW:
-			if ((expr = ParsePostfix(tokens, ++temp, errors)) == nullptr)
+			if ((expr = ParseSuffix(tokens, ++temp, errors)) == nullptr)
 			{
 				errors.push_back({"Expected identifier", tokens[--temp]->lines});
 				return nullptr;
@@ -369,14 +374,14 @@ namespace myscript
 			expr = new SyntaxNew(expr);
 			break;
 		default:
-			if ((expr = ParsePostfix(tokens, temp, errors)) == nullptr)
+			if ((expr = ParseSuffix(tokens, temp, errors)) == nullptr)
 				return nullptr;
 			break;
 		}
 		index = temp;
 		return expr;
 	}
-	SyntaxExpr* ParsePostfix(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors)
+	SyntaxExpr* ParseSuffix(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
 		SyntaxExpr* lexp = nullptr;
@@ -612,7 +617,7 @@ namespace myscript
 	SyntaxExpr* ParseDictionary(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors)
 	{
 		size_t temp = index;
-		SyntaxDictionary* dict = new SyntaxDictionary();
+		SyntaxObject* dict = new SyntaxObject();
 		std::pair<SyntaxExpr*, SyntaxExpr*>* key;
 		if (tokens[temp++]->value != Token::LBRACE)
 			goto ErrorHandle;

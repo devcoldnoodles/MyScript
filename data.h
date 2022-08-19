@@ -55,7 +55,7 @@ namespace myscript
 		CALL, // call the function
 		PARAMSET, // 
 		INSTARR, //
-		INSTDIC, //
+		INSTOBJ, //
 		REFSET, //
 		REFGET, //
 		ARRSET, //

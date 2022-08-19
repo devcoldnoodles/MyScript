@@ -23,10 +23,10 @@ namespace myscript
         // std::map<VarDesc, MetaObject *, VarDescCompare> glob;
         std::vector<std::string> names;
         std::vector<uint16_t> codes;
+        std::vector<VirtualThread *> threads;
         MetaObject *p_null;
         MetaObject *p_true;
         MetaObject *p_false;
-        std::vector<VirtualThread *> threads;
 
     public:
         friend class VirtualThread;
@@ -37,7 +37,7 @@ namespace myscript
         void UnLock(MetaObject *index);
         MetaObject *Allocate(const size_t alloc_size);
         size_t GetGlobalIndex(const std::string &id);
-        MetaObject *GetGlobalValue(const std::string &id) { return global[GetGlobalIndex(id)]; }
+        // MetaObject *GetGlobalValue(const std::string &id) { return global[GetGlobalIndex(id)]; }
         void SetGlobalValue(const size_t id, MetaObject *ref);
         MetaObject *CreateHeader(const uint16_t _type, const uint32_t _size, const uint16_t _adinf = 0);
         MetaObject *CreateHeader(const uint16_t _type, const uint32_t _size, const uint16_t _adinf, const void *_content);

@@ -299,7 +299,7 @@ void VirtualThread::Execute()
             StackPush(addr);
         }
         break;
-        case OpCode::INSTDIC:
+        case OpCode::INSTOBJ:
         {
             uint16_t operand = (uint16_t)*cursor++;
             MetaObject *addr = machine->CreateHeader(MetaObject::OBJECT, operand * sizeof(MetaObject *) * 2);

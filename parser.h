@@ -3,27 +3,27 @@
 #include "data.h"
 #include "scanner.h"
 
-namespace myscript 
+namespace myscript
 {
 	static float tf1 = 1;
-	static short* float1 = (short*)&tf1;
-	
+	static short *float1 = (short *)&tf1;
+
 	struct SyntaxNode
 	{
 		size_t line;
 		virtual std::string GetType() { return "empty"; }
-		virtual bool CreateCode(CompliationDesc* cd) { return false; }
+		virtual bool CreateCode(CompliationDesc *cd) { return false; }
 	};
 	struct SyntaxExpr : SyntaxNode
 	{
-		virtual bool CreateLCode(CompliationDesc* cd) { return false; }
-		virtual bool CreateRCode(CompliationDesc* cd) { return false; }
+		virtual bool CreateLCode(CompliationDesc *cd) { return false; }
+		virtual bool CreateRCode(CompliationDesc *cd) { return false; }
 	};
 	struct SyntaxLiteral : SyntaxExpr
 	{
 		TokenDesc *desc;
 		SyntaxLiteral(TokenDesc *_desc) : desc(_desc) { line = _desc->lines; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			switch (desc->value)
 			{
@@ -42,14 +42,14 @@ namespace myscript
 				if (value <= std::numeric_limits<float>::max())
 				{
 					float temp = value;
-					short* fvalue = (short*)&temp;
+					short *fvalue = (short *)&temp;
 					cd->code.push_back(OpCode::PUSHDWORD);
 					cd->code.push_back(fvalue[0]);
 					cd->code.push_back(fvalue[1]);
 				}
 				else
 				{
-					short* dvalue = (short*)&value;
+					short *dvalue = (short *)&value;
 					cd->code.push_back(OpCode::PUSHQWORD);
 					cd->code.push_back(dvalue[0]);
 					cd->code.push_back(dvalue[1]);
@@ -64,21 +64,22 @@ namespace myscript
 				if (value <= std::numeric_limits<float>::max())
 				{
 					float temp = value;
-					short* fvalue = (short*)&temp;
+					short *fvalue = (short *)&temp;
 					cd->code.push_back(OpCode::PUSHDWORD);
 					cd->code.push_back(fvalue[0]);
 					cd->code.push_back(fvalue[1]);
 				}
 				else
 				{
-					short* dvalue = (short*)&value;
+					short *dvalue = (short *)&value;
 					cd->code.push_back(OpCode::PUSHQWORD);
 					cd->code.push_back(dvalue[0]);
 					cd->code.push_back(dvalue[1]);
 					cd->code.push_back(dvalue[2]);
 					cd->code.push_back(dvalue[3]);
 				}
-			} break;
+			}
+			break;
 			case Token::IDENTIFIER:
 			case Token::LITERAL_STRING:
 			{
@@ -105,9 +106,9 @@ namespace myscript
 	struct SyntaxIdentifier : SyntaxExpr
 	{
 		std::string id;
-		
+
 		SyntaxIdentifier(const TokenDesc *_desc) : id(_desc->literal.s) { line = _desc->lines; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			uint16_t value = cd->Identify(id);
 			if (value == 0xFFFF)
@@ -133,7 +134,7 @@ namespace myscript
 			cd->code.push_back(value);
 			return true;
 		}
-		bool CreateLCode(CompliationDesc* cd)
+		bool CreateLCode(CompliationDesc *cd)
 		{
 			uint16_t value = cd->Identify(id);
 			if (value == 0xFFFF)
@@ -160,7 +161,7 @@ namespace myscript
 				cd->code.push_back(findex);
 				return true;
 			}
-			if( cd->GetScopeVariable(value)->option & VarDesc::CONST)
+			if (cd->GetScopeVariable(value)->option & VarDesc::CONST)
 			{
 				cd->errors.push_back({"'" + id + "' is constants value", line});
 				return false;
@@ -177,16 +178,20 @@ namespace myscript
 	};
 	struct SyntaxComma : SyntaxExpr // ,
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxComma(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) { line = lexpr->line; }
-		~SyntaxComma() { delete lexpr;	delete rexpr; }
-		
-		bool CreateCode(CompliationDesc* cd)
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxComma(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) { line = lexpr->line; }
+		~SyntaxComma()
+		{
+			delete lexpr;
+			delete rexpr;
+		}
+
+		bool CreateCode(CompliationDesc *cd)
 		{
 			return CreateRCode(cd);
 		}
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
@@ -197,11 +202,11 @@ namespace myscript
 	};
 	struct SyntaxNot : SyntaxExpr // !
 	{
-		SyntaxExpr* expr;
-		SyntaxNot(SyntaxExpr* _expr) : expr(_expr) { line = _expr->line; }
+		SyntaxExpr *expr;
+		SyntaxNot(SyntaxExpr *_expr) : expr(_expr) { line = _expr->line; }
 		~SyntaxNot() { delete expr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -211,12 +216,12 @@ namespace myscript
 	};
 	struct SyntaxOr : SyntaxExpr // ||
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxOr(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) { line = lexpr->line; }
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxOr(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) { line = lexpr->line; }
 		~SyntaxOr() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -228,12 +233,12 @@ namespace myscript
 	};
 	struct SyntaxAnd : SyntaxExpr // &&
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxAnd(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxAnd(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxAnd() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -245,12 +250,12 @@ namespace myscript
 	};
 	struct SyntaxXor : SyntaxExpr // ^
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxXor(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxXor(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxXor() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -262,12 +267,12 @@ namespace myscript
 	};
 	struct SyntaxEqual : SyntaxExpr // ==
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxEqual(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxEqual() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -279,12 +284,12 @@ namespace myscript
 	};
 	struct SyntaxNotEqual : SyntaxExpr // !=
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxNotEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxNotEqual(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxNotEqual() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -296,12 +301,12 @@ namespace myscript
 	};
 	struct SyntaxGreatThan : SyntaxExpr // >
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxGreatThan(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxGreatThan(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxGreatThan() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -313,12 +318,12 @@ namespace myscript
 	};
 	struct SyntaxGreatEqual : SyntaxExpr // >=
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxGreatEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxGreatEqual(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxGreatEqual() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -330,12 +335,12 @@ namespace myscript
 	};
 	struct SyntaxLessThan : SyntaxExpr // <
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxLessThan(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxLessThan(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxLessThan() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -347,12 +352,12 @@ namespace myscript
 	};
 	struct SyntaxLessEqual : SyntaxExpr // <=
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxLessEqual(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxLessEqual(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxLessEqual() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -364,11 +369,15 @@ namespace myscript
 	};
 	struct SyntaxUnaryOperator : SyntaxExpr
 	{
-		SyntaxExpr* expr;
+		SyntaxExpr *expr;
 		OpCode operation;
-		~SyntaxUnaryOperator() { if(expr) delete expr; }
+		~SyntaxUnaryOperator()
+		{
+			if (expr)
+				delete expr;
+		}
 
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -378,12 +387,18 @@ namespace myscript
 	};
 	struct SyntaxBinaryOperator : SyntaxExpr
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
 		OpCode operation;
-		~SyntaxBinaryOperator() { if(lexpr) delete lexpr; if(rexpr) delete rexpr; }
+		~SyntaxBinaryOperator()
+		{
+			if (lexpr)
+				delete lexpr;
+			if (rexpr)
+				delete rexpr;
+		}
 
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -395,15 +410,23 @@ namespace myscript
 	};
 	struct SyntaxTernaryOperator : SyntaxExpr
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* expr;
-		SyntaxExpr* rexpr;
+		SyntaxExpr *lexpr;
+		SyntaxExpr *expr;
+		SyntaxExpr *rexpr;
 		OpCode operation;
 		SyntaxTernaryOperator() {}
-		SyntaxTernaryOperator(SyntaxExpr* _lexpr, SyntaxExpr* _expr, SyntaxExpr* _rexpr) : lexpr(_lexpr), expr(_expr), rexpr(_rexpr) {}
-		~SyntaxTernaryOperator() {if(lexpr) delete lexpr; if(expr) delete expr; if(rexpr) delete rexpr; }
+		SyntaxTernaryOperator(SyntaxExpr *_lexpr, SyntaxExpr *_expr, SyntaxExpr *_rexpr) : lexpr(_lexpr), expr(_expr), rexpr(_rexpr) {}
+		~SyntaxTernaryOperator()
+		{
+			if (lexpr)
+				delete lexpr;
+			if (expr)
+				delete expr;
+			if (rexpr)
+				delete rexpr;
+		}
 
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -424,12 +447,12 @@ namespace myscript
 	};
 	struct SyntaxAdd : SyntaxExpr // +
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxAdd(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxAdd(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxAdd() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -441,12 +464,12 @@ namespace myscript
 	};
 	struct SyntaxSub : SyntaxExpr // -
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxSub(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxSub(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxSub() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -458,12 +481,12 @@ namespace myscript
 	};
 	struct SyntaxMul : SyntaxExpr // *
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxMul(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxMul(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxMul() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -475,12 +498,12 @@ namespace myscript
 	};
 	struct SyntaxDiv : SyntaxExpr // /
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxDiv(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxDiv(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxDiv() { delete lexpr, rexpr; }
-		
-		bool CreateRCode(CompliationDesc* cd)
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -492,13 +515,13 @@ namespace myscript
 	};
 	struct SyntaxMod : SyntaxExpr // %
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxMod(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxMod(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxMod() { delete lexpr, rexpr; }
-		
+
 		std::string GetType() const { return "mod"; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -510,13 +533,13 @@ namespace myscript
 	};
 	struct SyntaxPow : SyntaxExpr // **
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxPow(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxPow(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxPow() { delete lexpr, rexpr; }
-		
+
 		std::string GetType() const { return "pow"; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -528,13 +551,13 @@ namespace myscript
 	};
 	struct SyntaxAssign : SyntaxExpr
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxAssign(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxAssign(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxAssign() { delete lexpr, rexpr; }
-		
+
 		std::string GetType() const { return "assign"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
@@ -543,7 +566,7 @@ namespace myscript
 			cd->code.push_back(POP);
 			return true;
 		}
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
@@ -554,12 +577,12 @@ namespace myscript
 	};
 	struct SyntaxPrefixPlus : SyntaxExpr // +
 	{
-		SyntaxExpr* expr;
-		SyntaxPrefixPlus(SyntaxExpr* _expr) : expr(_expr) {}
+		SyntaxExpr *expr;
+		SyntaxPrefixPlus(SyntaxExpr *_expr) : expr(_expr) {}
 		~SyntaxPrefixPlus() { delete expr; }
-		
+
 		std::string GetType() const { return "prefix plus"; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -568,12 +591,12 @@ namespace myscript
 	};
 	struct SyntaxPrefixMinus : SyntaxExpr // -
 	{
-		SyntaxExpr* expr;
-		SyntaxPrefixMinus(SyntaxExpr* _expr) : expr(_expr) {}
+		SyntaxExpr *expr;
+		SyntaxPrefixMinus(SyntaxExpr *_expr) : expr(_expr) {}
 		~SyntaxPrefixMinus() { delete expr; }
-		
+
 		std::string GetType() const { return "prefix minus"; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -583,12 +606,12 @@ namespace myscript
 	};
 	struct SyntaxPrefixPlusx2 : SyntaxExpr // ++
 	{
-		SyntaxExpr* expr;
-		SyntaxPrefixPlusx2(SyntaxExpr* _expr) : expr(_expr) {}
+		SyntaxExpr *expr;
+		SyntaxPrefixPlusx2(SyntaxExpr *_expr) : expr(_expr) {}
 		~SyntaxPrefixPlusx2() { delete expr; }
-		
+
 		std::string GetType() const { return "prefix plusx2"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -601,7 +624,7 @@ namespace myscript
 			cd->code.push_back(POP);
 			return true;
 		}
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -616,12 +639,12 @@ namespace myscript
 	};
 	struct SyntaxPostfixPlusx2 : SyntaxExpr // ++
 	{
-		SyntaxExpr* expr;
-		SyntaxPostfixPlusx2(SyntaxExpr* _expr) : expr(_expr) {}
+		SyntaxExpr *expr;
+		SyntaxPostfixPlusx2(SyntaxExpr *_expr) : expr(_expr) {}
 		~SyntaxPostfixPlusx2() { delete expr; }
-		
+
 		std::string GetType() const { return "postfix plusx2"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -634,7 +657,7 @@ namespace myscript
 			cd->code.push_back(POP);
 			return true;
 		}
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -653,12 +676,12 @@ namespace myscript
 	};
 	struct SyntaxPrefixMinusx2 : SyntaxExpr // --
 	{
-		SyntaxExpr* expr;
-		SyntaxPrefixMinusx2(SyntaxExpr* _expr) : expr(_expr) {}
+		SyntaxExpr *expr;
+		SyntaxPrefixMinusx2(SyntaxExpr *_expr) : expr(_expr) {}
 		~SyntaxPrefixMinusx2() { delete expr; }
-		
+
 		std::string GetType() const { return "minusx2"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -671,7 +694,7 @@ namespace myscript
 			cd->code.push_back(POP);
 			return true;
 		}
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -686,12 +709,12 @@ namespace myscript
 	};
 	struct SyntaxPostfixMinusx2 : SyntaxExpr // --
 	{
-		SyntaxExpr* expr;
-		SyntaxPostfixMinusx2(SyntaxExpr* _expr) : expr(_expr) {}
+		SyntaxExpr *expr;
+		SyntaxPostfixMinusx2(SyntaxExpr *_expr) : expr(_expr) {}
 		~SyntaxPostfixMinusx2() { delete expr; }
-		
+
 		std::string GetType() const { return "minusx2"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -704,7 +727,7 @@ namespace myscript
 			cd->code.push_back(POP);
 			return true;
 		}
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -723,12 +746,12 @@ namespace myscript
 	};
 	struct SyntaxNew : SyntaxExpr // new
 	{
-		SyntaxExpr* expr;
-		SyntaxNew(SyntaxExpr* _expr) : expr(_expr) {}
+		SyntaxExpr *expr;
+		SyntaxNew(SyntaxExpr *_expr) : expr(_expr) {}
 		~SyntaxNew() { delete expr; }
-		
+
 		std::string GetType() const { return "new"; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -738,13 +761,13 @@ namespace myscript
 	};
 	struct SyntaxAs : SyntaxExpr // as
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxAs(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxAs(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxAs() { delete lexpr, rexpr; }
-		
+
 		std::string GetType() const { return "as"; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -756,13 +779,13 @@ namespace myscript
 	};
 	struct SyntaxIs : SyntaxExpr // is
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxIs(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxIs(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxIs() { delete lexpr, rexpr; }
-		
+
 		std::string GetType() const { return "is"; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!lexpr->CreateRCode(cd))
 				return false;
@@ -772,15 +795,15 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxDot : SyntaxExpr // .
+	struct SyntaxDot : SyntaxExpr // object.member
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxDot(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxDot(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxDot() { delete lexpr; }
-		
+
 		std::string GetType() const { return "dot"; }
-		bool CreateLCode(CompliationDesc* cd)
+		bool CreateLCode(CompliationDesc *cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
@@ -789,7 +812,7 @@ namespace myscript
 			cd->code.push_back(REFSET);
 			return true;
 		}
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
@@ -801,24 +824,23 @@ namespace myscript
 	};
 	struct SyntaxRef : SyntaxExpr // arr[0]
 	{
-		SyntaxExpr* lexpr;
-		SyntaxExpr* rexpr;
-		SyntaxRef(SyntaxExpr* _lexpr, SyntaxExpr* _rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
+		SyntaxExpr *lexpr;
+		SyntaxExpr *rexpr;
+		SyntaxRef(SyntaxExpr *_lexpr, SyntaxExpr *_rexpr) : lexpr(_lexpr), rexpr(_rexpr) {}
 		~SyntaxRef() { delete lexpr, rexpr; }
-		
+
 		std::string GetType() const { return "ref"; }
-		bool CreateLCode(CompliationDesc* cd)
+		bool CreateLCode(CompliationDesc *cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
 			if (!lexpr->CreateRCode(cd))
 				return false;
 
-			
 			cd->code.push_back(ARRSET);
 			return true;
 		}
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!rexpr->CreateRCode(cd))
 				return false;
@@ -830,13 +852,18 @@ namespace myscript
 	};
 	struct SyntaxCall : SyntaxExpr
 	{
-		SyntaxExpr* expr;
-		std::vector<SyntaxExpr*> params;
-		SyntaxCall(SyntaxExpr* _func) : expr(_func) {}
-		~SyntaxCall() { delete expr; for (auto param : params) delete param; }
-		
+		SyntaxExpr *expr;
+		std::vector<SyntaxExpr *> params;
+		SyntaxCall(SyntaxExpr *_func) : expr(_func) {}
+		~SyntaxCall()
+		{
+			delete expr;
+			for (auto param : params)
+				delete param;
+		}
+
 		std::string GetType() const { return "call"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -849,7 +876,7 @@ namespace myscript
 			cd->code.push_back(POP);
 			return true;
 		}
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			if (!expr->CreateRCode(cd))
 				return false;
@@ -864,12 +891,16 @@ namespace myscript
 	};
 	struct SyntaxArray : SyntaxExpr
 	{
-		std::vector<SyntaxExpr*> elements;
+		std::vector<SyntaxExpr *> elements;
 		SyntaxArray() {}
-		~SyntaxArray() { for (auto element : elements) delete element; }
-		
+		~SyntaxArray()
+		{
+			for (auto element : elements)
+				delete element;
+		}
+
 		std::string GetType() const { return "array"; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			size_t elements_size = elements.size();
 			for (size_t index = 0; index < elements_size; ++index)
@@ -880,14 +911,15 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxDictionary : SyntaxExpr
+	struct SyntaxObject : SyntaxExpr
 	{
-		std::vector<std::pair<SyntaxExpr*, SyntaxExpr*>> elements;
-		
-		std::string GetType() const { return "dictionary"; }
+		std::vector<std::pair<SyntaxExpr *, SyntaxExpr *>> elements;
 
-		bool CreateRCode(CompliationDesc* cd)
+		std::string GetType() const { return "object"; }
+
+		bool CreateRCode(CompliationDesc *cd)
 		{
+			cd->scope.push_back(LocalScope());	
 			size_t elements_size = elements.size();
 			for (size_t index = 0; index < elements_size; ++index)
 			{
@@ -896,32 +928,38 @@ namespace myscript
 				if (!elements[elements_size - index - 1].first->CreateRCode(cd))
 					return false;
 			}
-			cd->code.push_back(INSTDIC);
+			cd->code.push_back(INSTOBJ);
 			cd->code.push_back(elements_size);
 			return true;
 		}
 	};
 	struct SyntaxDeclare : SyntaxExpr
 	{
-		std::vector<std::pair<VarDesc, SyntaxExpr*>> elements;
+		std::vector<std::pair<VarDesc, SyntaxExpr *>> elements;
 
-		~SyntaxDeclare() { for (auto element : elements) delete element.second; }
+		~SyntaxDeclare()
+		{
+			for (auto element : elements)
+				delete element.second;
+		}
 		std::string GetType() const { return "declare"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			for (auto element : elements)
 			{
-				if(cd->scope.empty())
+				if (cd->scope.empty())
 				{
 					size_t global_size = cd->global.size();
-					for(size_t index = 0; index < global_size; ++index)
-						if(cd->global[index].name == element.first.name)
+					for (size_t index = 0; index < global_size; ++index)
+					{
+						if (cd->global[index].name == element.first.name)
 						{
 							cd->errors.push_back({"Already declared " + element.first.name, line});
 							return false;
 						}
+					}
 					cd->global.push_back({element.first});
-					if(element.second != nullptr)
+					if (element.second != nullptr)
 					{
 						if (!element.second->CreateRCode(cd))
 							return false;
@@ -948,11 +986,11 @@ namespace myscript
 			}
 			return true;
 		}
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			for (auto element : elements)
 			{
-				if(cd->scope.empty())
+				if (cd->scope.empty())
 				{
 					cd->errors.push_back({"Incorrect right expr declare must in scope range", line});
 					return false;
@@ -980,10 +1018,14 @@ namespace myscript
 	};
 	struct SyntaxBlock : SyntaxExpr
 	{
-		std::vector<SyntaxExpr*> sents;
-		virtual ~SyntaxBlock() { for (auto sent : sents) delete sent; }
-		
-		bool CreateCode(CompliationDesc* cd)
+		std::vector<SyntaxExpr *> sents;
+		virtual ~SyntaxBlock()
+		{
+			for (auto sent : sents)
+				delete sent;
+		}
+
+		bool CreateCode(CompliationDesc *cd)
 		{
 			cd->scope.push_back(LocalScope());
 			size_t sents_size = sents.size();
@@ -1008,8 +1050,8 @@ namespace myscript
 	struct SyntaxTree : SyntaxBlock
 	{
 		std::vector<Error> errors;
-		static bool ParseText(SyntaxTree& code, const std::string& str);
-		bool CreateCode(CompliationDesc* cd)
+		static bool ParseText(SyntaxTree &code, const std::string &str);
+		bool CreateCode(CompliationDesc *cd)
 		{
 			// for (auto sent = sents.begin(); sent != sents.end(); ++sent)
 			// {
@@ -1033,11 +1075,15 @@ namespace myscript
 	struct SyntaxFunction : SyntaxExpr
 	{
 		std::vector<std::string> params;
-		SyntaxBlock* sents;
-		~SyntaxFunction() { if (sents) delete sents; }
-		
+		SyntaxBlock *sents;
+		~SyntaxFunction()
+		{
+			if (sents)
+				delete sents;
+		}
+
 		std::string GetType() const { return "function"; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			cd->scope.push_back(LocalScope());
 			size_t param_size = params.size();
@@ -1046,7 +1092,7 @@ namespace myscript
 			cd->code.push_back(PUSHFUNC);
 			cd->code.push_back(NONE);
 			size_t delta = cd->code.size();
-			if(param_size > 0)
+			if (param_size > 0)
 			{
 				cd->code.push_back(PARAMSET);
 				cd->code.push_back(param_size);
@@ -1064,11 +1110,11 @@ namespace myscript
 	};
 	struct SyntaxSingleSentence : SyntaxExpr
 	{
-		SyntaxExpr* expr;
-		SyntaxSingleSentence(SyntaxExpr* _expr = nullptr) : expr(_expr) {}
+		SyntaxExpr *expr;
+		SyntaxSingleSentence(SyntaxExpr *_expr = nullptr) : expr(_expr) {}
 		~SyntaxSingleSentence() { delete expr; }
-		
-		bool CreateCode(CompliationDesc* cd)
+
+		bool CreateCode(CompliationDesc *cd)
 		{
 			if (expr != nullptr)
 				return expr->CreateCode(cd);
@@ -1077,13 +1123,19 @@ namespace myscript
 	};
 	struct SyntaxIf : SyntaxExpr
 	{
-		SyntaxExpr* cond;
-		SyntaxBlock* truesents;
-		SyntaxBlock* falsesents;
-		~SyntaxIf() { delete cond; delete truesents; if (falsesents) delete falsesents; }
-		
+		SyntaxExpr *cond;
+		SyntaxBlock *truesents;
+		SyntaxBlock *falsesents;
+		~SyntaxIf()
+		{
+			delete cond;
+			delete truesents;
+			if (falsesents)
+				delete falsesents;
+		}
+
 		std::string GetType() const { return "if"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			if (!cond->CreateRCode(cd))
 				return false;
@@ -1109,15 +1161,25 @@ namespace myscript
 	};
 	struct SyntaxLoop : SyntaxExpr
 	{
-		SyntaxExpr* init;
-		SyntaxExpr* prefix_condition;
-		SyntaxExpr* postfix_condition;
-		SyntaxExpr* loop;
-		SyntaxBlock* sents;
-		~SyntaxLoop() { if (init) delete init; if (prefix_condition) delete prefix_condition; if (postfix_condition) delete postfix_condition; if (loop) delete loop; }
-		
+		SyntaxExpr *init;
+		SyntaxExpr *prefix_condition;
+		SyntaxExpr *postfix_condition;
+		SyntaxExpr *loop;
+		SyntaxBlock *sents;
+		~SyntaxLoop()
+		{
+			if (init)
+				delete init;
+			if (prefix_condition)
+				delete prefix_condition;
+			if (postfix_condition)
+				delete postfix_condition;
+			if (loop)
+				delete loop;
+		}
+
 		std::string GetType() const { return "loop"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			cd->scope.push_back(LocalScope());
 			if (init != nullptr)
@@ -1176,11 +1238,11 @@ namespace myscript
 	};
 	struct SyntaxReturn : SyntaxExpr
 	{
-		SyntaxExpr* value;
-		SyntaxReturn(SyntaxExpr* _value) : value(_value) { }
+		SyntaxExpr *value;
+		SyntaxReturn(SyntaxExpr *_value) : value(_value) {}
 		~SyntaxReturn() { delete value; }
 		std::string GetType() const { return "return"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			if (cd->scope.empty())
 			{
@@ -1202,7 +1264,7 @@ namespace myscript
 	{
 		SyntaxContinue(size_t _line) { line = _line; }
 		std::string GetType() const { return "continue"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			if (cd->scope.empty())
 			{
@@ -1219,7 +1281,7 @@ namespace myscript
 	{
 		SyntaxBreak(size_t _line) { line = _line; }
 		std::string GetType() const { return "break"; }
-		bool CreateCode(CompliationDesc* cd)
+		bool CreateCode(CompliationDesc *cd)
 		{
 			if (cd->scope.empty())
 			{
@@ -1234,44 +1296,44 @@ namespace myscript
 	};
 	struct SyntaxClass : SyntaxExpr
 	{
-		std::vector<SyntaxExpr*> member;
-		
+		std::vector<SyntaxExpr *> member;
+
 		std::string GetType() const { return "class"; }
-		bool CreateRCode(CompliationDesc* cd)
+		bool CreateRCode(CompliationDesc *cd)
 		{
 			auto delta = cd->code.size();
 			cd->scope.push_back(LocalScope());
-			for(auto iter : member)
+			for (auto iter : member)
 				iter->CreateCode(cd);
 			cd->code.push_back(DEF);
 			cd->code.push_back(cd->code.size() - delta);
 			return true;
 		}
 	};
-	SyntaxExpr* ParseExpr(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseComma(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseTernaryOperator(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseAssign(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseOr(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseAnd(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseCmp(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseAdd(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseMul(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParsePow(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParsePrefix(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParsePostfix(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseElement(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseLiteral(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseSimpleLiteral(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseArray(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	std::pair<SyntaxExpr*, SyntaxExpr*>* ParseKeyVal(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseDictionary(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseFunction(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseSentence(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors, size_t args_count ...);
-	SyntaxExpr* ParseIf(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseLoop(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseFlowControl(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxExpr* ParseDeclare(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
-	SyntaxBlock* ParseBlock(std::vector<TokenDesc*>& tokens, size_t& index, std::vector<Error>& errors);
+	SyntaxExpr *ParseExpr(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseParallelCommand(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseTernaryOperator(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseAssign(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseOr(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseAnd(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseCmp(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseAdd(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseMul(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParsePow(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParsePrefix(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseSuffix(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseElement(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseLiteral(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseSimpleLiteral(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseArray(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	std::pair<SyntaxExpr *, SyntaxExpr *> *ParseKeyVal(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseDictionary(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseFunction(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseSentence(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors, size_t args_count...);
+	SyntaxExpr *ParseIf(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseLoop(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseFlowControl(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxExpr *ParseDeclare(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
+	SyntaxBlock *ParseBlock(std::vector<TokenDesc *> &tokens, size_t &index, std::vector<Error> &errors);
 };
 #endif

@@ -26,4 +26,5 @@ namespace myscript
         TokenDesc *ScanChar(TokenDesc *desc);
     };
 } // namespace script
+
 #endif
