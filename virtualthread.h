@@ -2,8 +2,7 @@
 #define __VIRTUALTHREAD_H__
 
 #include <vector>
-#include <cstdlib>
-#include "data.h"\
+#include "data.h"
 
 namespace myscript
 {

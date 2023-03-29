@@ -1,9 +1,7 @@
 #ifndef __BYTECODE_H__
 #define __BYTECODE_H__
 
-#include "pch.h"
 #include "data.h"
-#include <iostream>
 
 namespace myscript
 {
@@ -42,7 +40,6 @@ namespace myscript
 	MetaObject* CreateMetaCFunction(CFunc func);
 	MetaObject* CreateMetaCObject(const void* addr, const size_t size);
 	MetaObject* CreateMetaData(const void* data, const size_t size);
-	MetaObject* CreateInstance();
 	const std::string ToString(MetaObject::Type);
 	const std::string ToString(MetaObject*);
 }

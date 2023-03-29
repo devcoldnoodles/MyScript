@@ -42,7 +42,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc> &result)
                     }
                     ++src;
                 }
-                result.push_back(TokenDesc(Token::LITERAL_INTEGER, lines, (void*)integerValue));
+                result.push_back(TokenDesc(Token::LITERAL_INTEGER, lines, (long long)integerValue));
                 break;
             }
         case '1':

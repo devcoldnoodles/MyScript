@@ -2,7 +2,19 @@ function recur(n) {
     return n > 1 ? recur(n-1) + recur(n-2) : n;
 }
 
+var a = [1,2,3,4,5];
+var b = 3;
+
+var c = {
+    a : 1, 
+    test : function() {return a;}
+};
+
+c.a = 2;
+
 print("script begin\n");
 const begin = clock();
+print(c.a, "\n");
+print(c.test() , "\n");
 print(recur(30));
 print("\nusing time = ", clock() - begin);

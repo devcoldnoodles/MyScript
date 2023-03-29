@@ -1,5 +1,7 @@
-#include "pch.h"
 #include "bytecode.h"
+
+#include <cstdio>
+#include <iostream>
 
 namespace myscript 
 {
@@ -96,14 +98,14 @@ namespace myscript
 	const std::string ToString(MetaObject::Type type)
 	{
 		return type == MetaObject::NULLPTR ? "null" :
-			type == MetaObject::BOOLEAN ? "boolean" :
-			type == MetaObject::NUMBER ? "number" :
-			type == MetaObject::STRING ? "string" :
-			type == MetaObject::FUNCTION ? "function" :
-			type == MetaObject::ARRAY ? "array" :
-			type == MetaObject::OBJECT ? "object" :
-			type == MetaObject::COBJECT ? "cobject" :
-			type == MetaObject::CFUNCTION ? "cfunction" : "error";
+			   type == MetaObject::BOOLEAN ? "boolean" :
+			   type == MetaObject::NUMBER ? "number" :
+			   type == MetaObject::STRING ? "string" :
+			   type == MetaObject::FUNCTION ? "function" :
+			   type == MetaObject::ARRAY ? "array" :
+			   type == MetaObject::OBJECT ? "object" :
+			   type == MetaObject::COBJECT ? "cobject" :
+			   type == MetaObject::CFUNCTION ? "cfunction" : "error";
 	}
 	
 	const std::string ToString(MetaObject* object)

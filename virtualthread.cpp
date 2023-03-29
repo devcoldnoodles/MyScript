@@ -2,6 +2,13 @@
 #include "virtualmachine.h"
 #include "bytecode.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <iterator>
+
 using namespace myscript;
 
 VirtualThread::VirtualThread(VirtualMachine *_machine, uint16_t *_cursor) : machine(_machine), cursor(_cursor)
@@ -826,12 +833,7 @@ MetaObject *VirtualThread::OperateGE(MetaObject *l, MetaObject *r)
 MetaObject *VirtualThread::OperateLT(MetaObject *l, MetaObject *r)
 {
     if (l->type == MetaObject::NUMBER && r->type == MetaObject::NUMBER)
-    {
-        double lv = *((double *)l->content);
-        double rv = *((double *)r->content);
-        return lv < rv ? machine->p_true : machine->p_false;
-    }
-
+        return *((double *)l->content) < *((double *)r->content) ? machine->p_true : machine->p_false;
     if (l->type == MetaObject::STRING && r->type == MetaObject::STRING)
         return strcmp(l->content, r->content) < 0 ? machine->p_true : machine->p_false;
     return machine->p_null;

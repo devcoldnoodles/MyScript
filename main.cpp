@@ -1,9 +1,9 @@
-#include "pch.h"
 #include "bytecode.h"
 #include "parser.h"
 #include "virtualmachine.h"
 #include <ctime>
 #include <fstream>
+#include <cstring>
 
 using namespace myscript;
 
