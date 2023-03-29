@@ -3,7 +3,7 @@
 
 using namespace myscript;
 
-bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
+bool Scanner::Tokenize(const char *src, std::vector<TokenDesc> &result)
 {
     unsigned int lines = 1;
     while (*src)
@@ -22,7 +22,6 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
         case '0':
             if (*(src + 1) == 'x')
             {
-                TokenDesc *desc = new TokenDesc{Token::LITERAL_STRING, lines, NULL};
                 int integerValue = 0;
                 src += 2;
                 while (*src)
@@ -43,8 +42,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                     }
                     ++src;
                 }
-                desc->literal.i = integerValue;
-                result.push_back(desc);
+                result.push_back(TokenDesc(Token::LITERAL_INTEGER, lines, (void*)integerValue));
                 break;
             }
         case '1':
@@ -57,7 +55,8 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
         case '8':
         case '9':
         {
-            TokenDesc *desc = new TokenDesc{Token::LITERAL_INTEGER, lines, NULL};
+            short value = Token::LITERAL_INTEGER;
+            Literal literal;
             int integerValue = 0;
             double floatValue = .0;
             while (*src >= '0' && *src <= '9')
@@ -66,7 +65,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 integerValue += *src - '0';
                 ++src;
             }
-            desc->literal.i = integerValue;
+            literal.l = integerValue;
             if (*src == '.')
             {
                 double decimalIndex = 1;
@@ -76,16 +75,15 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                     floatValue += (*src - '0') * decimalIndex;
                     ++src;
                 }
-                desc->value = Token::LITERAL_FLOAT;
-                desc->literal.d = integerValue + floatValue;
+                value = Token::LITERAL_FLOAT;
+                literal.d = integerValue + floatValue;
             }
-            result.push_back(desc);
+            result.push_back(TokenDesc(value, lines, literal));
             continue;
         }
         break;
         case '\"':
         {
-            TokenDesc *desc = new TokenDesc{Token::LITERAL_STRING, lines, NULL};
             const size_t capcity = 1024 * 1024;
             char temp[capcity];
             int pos = 0;
@@ -121,17 +119,17 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                     break;
                 }
             }
-            desc->literal.s = new char[pos + 1];
-            memcpy(desc->literal.s, temp, pos);
-            desc->literal.s[pos] = 0;
-            result.push_back(desc);
+
+            char *literal = new char[pos + 1];
+            memcpy(literal, temp, pos);
+            literal[pos] = 0;
+            result.push_back(TokenDesc(Token::LITERAL_STRING, lines, literal));
         }
         break;
         case '\'':
         {
-            TokenDesc *desc = new TokenDesc{Token::LITERAL_STRING, lines, NULL};
-            char temp;
-            if (*(++src) == '\\')
+            char temp = *++src;
+            if (temp == '\\')
             {
                 switch (*(++src))
                 {
@@ -158,46 +156,41 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                     break;
                 }
             }
-            else
-            {
-                temp = *src;
-            }
-            desc->literal.c = temp;
-            result.push_back(desc);
+            result.push_back(TokenDesc(Token::LITERAL_STRING, lines, temp));
         }
         break;
         case ':':
-            result.push_back(new TokenDesc{Token::COLON, lines, NULL});
+            result.push_back(TokenDesc(Token::COLON, lines, NULL));
             break;
         case ';':
-            result.push_back(new TokenDesc{Token::SEMICOLON, lines, NULL});
+            result.push_back(TokenDesc(Token::SEMICOLON, lines, NULL));
             break;
         case '.':
-            result.push_back(new TokenDesc{Token::PERIOD, lines, NULL});
+            result.push_back(TokenDesc(Token::PERIOD, lines, NULL));
             break;
         case ',':
-            result.push_back(new TokenDesc{Token::COMMA, lines, NULL});
+            result.push_back(TokenDesc(Token::COMMA, lines, NULL));
             break;
         case '?':
-            result.push_back(new TokenDesc{Token::CONDITIONAL, lines, NULL});
+            result.push_back(TokenDesc(Token::CONDITIONAL, lines, NULL));
             break;
         case '(':
-            result.push_back(new TokenDesc{Token::LPAREN, lines, NULL});
+            result.push_back(TokenDesc(Token::LPAREN, lines, NULL));
             break;
         case ')':
-            result.push_back(new TokenDesc{Token::RPAREN, lines, NULL});
+            result.push_back(TokenDesc(Token::RPAREN, lines, NULL));
             break;
         case '{':
-            result.push_back(new TokenDesc{Token::LBRACE, lines, NULL});
+            result.push_back(TokenDesc(Token::LBRACE, lines, NULL));
             break;
         case '}':
-            result.push_back(new TokenDesc{Token::RBRACE, lines, NULL});
+            result.push_back(TokenDesc(Token::RBRACE, lines, NULL));
             break;
         case '[':
-            result.push_back(new TokenDesc{Token::LBRACKET, lines, NULL});
+            result.push_back(TokenDesc(Token::LBRACKET, lines, NULL));
             break;
         case ']':
-            result.push_back(new TokenDesc{Token::RBRACKET, lines, NULL});
+            result.push_back(TokenDesc(Token::RBRACKET, lines, NULL));
             break;
         case '<':
         {
@@ -207,7 +200,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 value = Token::LE;
                 ++src;
             }
-            result.push_back(new TokenDesc{value, lines, NULL});
+            result.push_back(TokenDesc(value, lines, NULL));
         }
         break;
         case '>':
@@ -218,7 +211,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 value = Token::GE;
                 ++src;
             }
-            result.push_back(new TokenDesc{value, lines, NULL});
+            result.push_back(TokenDesc(value, lines, NULL));
         }
         break;
         case '!':
@@ -229,7 +222,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 value = Token::NEQ;
                 ++src;
             }
-            result.push_back(new TokenDesc{value, lines, NULL});
+            result.push_back(TokenDesc(value, lines, NULL));
         }
         break;
         case '=':
@@ -240,7 +233,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 value = Token::EQ;
                 ++src;
             }
-            result.push_back(new TokenDesc{value, lines, NULL});
+            result.push_back(TokenDesc(value, lines, NULL));
         }
         break;
         case '+':
@@ -257,7 +250,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 ++src;
                 break;
             }
-            result.push_back(new TokenDesc{value, lines, NULL});
+            result.push_back(TokenDesc(value, lines, NULL));
         }
         break;
         case '-':
@@ -274,7 +267,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 ++src;
                 break;
             }
-            result.push_back(new TokenDesc{value, lines, NULL});
+            result.push_back(TokenDesc(value, lines, NULL));
         }
         break;
         case '*':
@@ -291,7 +284,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 ++src;
                 break;
             }
-            result.push_back(new TokenDesc{value, lines, NULL});
+            result.push_back(TokenDesc(value, lines, NULL));
         }
         break;
         case '/':
@@ -317,7 +310,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                     value = Token::ASSIGN_DIV;
                     ++src;
                 }
-                result.push_back(new TokenDesc{value, lines, NULL});
+                result.push_back(TokenDesc(value, lines, NULL));
             }
         }
         break;
@@ -335,7 +328,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 ++src;
                 break;
             }
-            result.push_back(new TokenDesc{value, lines, NULL});
+            result.push_back(TokenDesc(value, lines, NULL));
         }
         break;
         case '&':
@@ -352,7 +345,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 ++src;
                 break;
             }
-            result.push_back(new TokenDesc{value, lines, NULL});
+            result.push_back(TokenDesc(value, lines, NULL));
         }
         break;
         case '^':
@@ -363,7 +356,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 value = Token::ASSIGN_BXOR;
                 ++src;
             }
-            result.push_back(new TokenDesc{value, lines, NULL});
+            result.push_back(TokenDesc(value, lines, NULL));
         }
         break;
         case '%':
@@ -374,7 +367,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 value = Token::ASSIGN_MOD;
                 ++src;
             }
-            result.push_back(new TokenDesc{value, lines, NULL});
+            result.push_back(TokenDesc(value, lines, NULL));
         }
         break;
         default:
@@ -388,14 +381,14 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
                 
             if (src != temp)
             {
-                TokenDesc *desc = new TokenDesc{Token::IDENTIFIER, lines, NULL};
-                desc->literal.s = new char[src - temp + 1];
-                memcpy(desc->literal.s, temp, src - temp);
-                desc->literal.s[src - temp] = 0;
+                short value = Token::IDENTIFIER;
+                char *literal = new char[src - temp + 1];
+                memcpy(literal, temp, src - temp);
+                literal[src - temp] = 0;
                 for (int seq = Token::META; seq <= Token::NAMESPACE; ++seq)
-                    if (!strcmp(desc->literal.s, tokenlist[seq].str))
-                        desc->value = tokenlist[seq].type;
-                result.push_back(desc);
+                    if (!strcmp(literal, tokenlist[seq].str))
+                        value = tokenlist[seq].type;
+                result.push_back(TokenDesc(value, lines, literal));
                 continue;
             }
         }
@@ -404,7 +397,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc *> &result)
         ++src;
     }
 
-    result.push_back(new TokenDesc{Token::EOT, lines, NULL});
+    result.push_back(TokenDesc(Token::EOT, lines, NULL));
     return true;
 }
 
@@ -510,7 +503,7 @@ TokenDesc *Scanner::ScanString(TokenDesc *desc)
     //         }
     //         break;
     //     case '\"':
-    //         desc->next = new TokenDesc{Token::LITERAL, lines, (void *)temp.c_str()};
+    //         desc->next = new TokenDesc(Token::LITERAL, lines, (void *)temp.c_str());
     //         return desc->next;
     //     default:
     //         temp += src[pos];

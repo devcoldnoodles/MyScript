@@ -1,6 +1,7 @@
 #include "virtualmachine.h"
 #include "virtualthread.h"
 #include "bytecode.h"
+#include <string.h>
 
 using namespace myscript;
 

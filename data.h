@@ -25,7 +25,7 @@ namespace myscript
 		}
 	};
 
-	enum OpCode : uint16_t
+	enum OpCode : short
 	{
 		NONE = 0, // unused value causes error
 		PUSH, // push global value at stack
@@ -66,10 +66,10 @@ namespace myscript
 		IS, // operator is
 		EQ, // operator ==
 		NEQ, // operator !=
-		GT, // operator >
-		GE, // operator >=
 		LT, // operator <
 		LE, // operator <=
+		GT, // operator >
+		GE, // operator >=
 		AND, // operator &&
 		OR, // operator ||
 		XOR, // operator ^

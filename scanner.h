@@ -14,7 +14,7 @@ namespace myscript
         size_t lines;
 
     public:
-        static bool Tokenize(const char *src, std::vector<TokenDesc*> &result);
+        static bool Tokenize(const char *src, std::vector<TokenDesc> &result);
         static TokenDesc *Scan(std::string src);
         void Scan(TokenDesc *desc);
         short Advance(bool inc_lines = false);

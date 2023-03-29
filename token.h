@@ -22,24 +22,24 @@ namespace myscript
 	_ELEM_(DEC, "--", 0)                    \
 	/* binary operator */                   \
 	_ELEM_(ARROW, "=>", 0)                  \
-	_ELEM_(ASSIGN, "=", 2)                  \
+	_ELEM_(BOR, "|", 6)                     \
+	_ELEM_(BAND, "&", 8)                    \
+	_ELEM_(BXOR, "^", 7)                    \
 	_ELEM_(ADD, "+", 12)                    \
 	_ELEM_(SUB, "-", 12)                    \
 	_ELEM_(MUL, "*", 11)                    \
 	_ELEM_(DIV, "/", 11)                    \
 	_ELEM_(MOD, "%", 11)                    \
+	_ELEM_(POW, "**", 11)                   \
+	_ELEM_(ASSIGN, "=", 2)                  \
+	_ELEM_(ASSIGN_BOR, "|=", 3)             \
+	_ELEM_(ASSIGN_BAND, "&=", 3)            \
+	_ELEM_(ASSIGN_BXOR, "^=", 3)            \
 	_ELEM_(ASSIGN_ADD, "+=", 3)             \
 	_ELEM_(ASSIGN_SUB, "-=", 3)             \
 	_ELEM_(ASSIGN_MUL, "*=", 3)             \
 	_ELEM_(ASSIGN_DIV, "/=", 3)             \
 	_ELEM_(ASSIGN_MOD, "%=", 3)             \
-	_ELEM_(POW, "**", 11)                   \
-	_ELEM_(BOR, "|", 6)                     \
-	_ELEM_(BAND, "&", 8)                    \
-	_ELEM_(BXOR, "^", 7)                    \
-	_ELEM_(ASSIGN_BOR, "|=", 3)             \
-	_ELEM_(ASSIGN_BAND, "&=", 3)            \
-	_ELEM_(ASSIGN_BXOR, "^=", 3)            \
 	_ELEM_(OR, "||", 4)                     \
 	_ELEM_(AND, "&&", 5)                    \
 	_ELEM_(EQ, "==", 5)                     \
@@ -89,7 +89,7 @@ namespace myscript
 	static struct Token
 	{
 #define T(SIGN, STR, PREC) SIGN,
-		const enum Type { TOKEN(T) EOT } type;
+		const enum Type : short { TOKEN(T) EOT } type;
 #undef T
 		const int precedence;
 		const char str[12];
@@ -97,21 +97,29 @@ namespace myscript
 	} tokenlist[] = {TOKEN(T){Token::EOT}};
 #undef T
 
+	union Literal
+	{
+		void *p;
+		char c;
+		char *s;
+		long long l;
+		double d;
+	};
+	
 	struct TokenDesc
 	{
 		short value;
 		unsigned int lines;
-		union
-		{
-			void *p;
-			char c;
-			char *s;
-			int i;
-			double d;
-		} literal;
+		Literal literal;
 
+		TokenDesc(short value, unsigned int lines, Literal literal);
 		TokenDesc(short value, unsigned int lines, void *literal);
-		~TokenDesc();
+		TokenDesc(short value, unsigned int lines, char literal);
+		TokenDesc(short value, unsigned int lines, char *literal);
+		TokenDesc(short value, unsigned int lines, long long literal);
+		TokenDesc(short value, unsigned int lines, double literal);
+		TokenDesc(TokenDesc &&other);
+		TokenDesc &operator=(TokenDesc &&other);
 		const char *GetInfo();
 	};
 }
