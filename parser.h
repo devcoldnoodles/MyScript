@@ -695,6 +695,7 @@ namespace myscript
 
 	struct SyntaxObject : SyntaxExpr
 	{
+		// std::map<std::string, SyntaxExpr *>> elements2;
 		std::vector<std::pair<SyntaxExpr *, SyntaxExpr *>> elements;
 
 		std::string GetType() const { return "object"; }

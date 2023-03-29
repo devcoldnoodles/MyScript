@@ -541,11 +541,11 @@ namespace myscript
 		SyntaxExpr *value;
 		if (temp->value == Token::IDENTIFIER)
 			key = new SyntaxLiteral(TokenDesc{Token::LITERAL_STRING, temp->lines, temp->literal.s}), ++temp;
-		else if ((key = ParseLiteral(temp, errors)) == NULL)
-			return NULL;
+		else if ((key = ParseLiteral(temp, errors)) == nullptr)
+			return nullptr;
 		if ((temp++)->value != Token::COLON)
 			goto ErrorHandle;
-		if ((value = ParseAssign(temp, errors)) == NULL)
+		if ((value = ParseAssign(temp, errors)) == nullptr)
 		{
 			errors.push_back({"Expected value", temp->lines});
 			goto ErrorHandle;
@@ -554,7 +554,7 @@ namespace myscript
 		return new std::pair<SyntaxExpr *, SyntaxExpr *>(key, value);
 	ErrorHandle:
 		delete key;
-		return NULL;
+		return nullptr;
 	}
 	SyntaxExpr *ParseObject(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
@@ -563,12 +563,12 @@ namespace myscript
 		std::pair<SyntaxExpr *, SyntaxExpr *> *key;
 		if ((temp++)->value != Token::LBRACE)
 			goto ErrorHandle;
-		if ((key = ParseKeyVal(temp, errors)) != NULL)
+		if ((key = ParseKeyVal(temp, errors)) != nullptr)
 		{
 			object->elements.push_back(*key);
 			while (temp->value == Token::COMMA)
 			{
-				if ((key = ParseKeyVal(++temp, errors)) == NULL)
+				if ((key = ParseKeyVal(++temp, errors)) == nullptr)
 				{
 					errors.push_back({"Expected key and value", temp->lines});
 					goto ErrorHandle;
@@ -585,7 +585,7 @@ namespace myscript
 		return object;
 	ErrorHandle:
 		delete object;
-		return NULL;
+		return nullptr;
 	}
 	SyntaxExpr *ParseFunction(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
