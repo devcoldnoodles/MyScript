@@ -301,6 +301,7 @@ bool Scanner::Tokenize(const char *src, std::vector<TokenDesc> &result)
                 src += 2;
                 while (*src && *src != '\n')
                     ++src;
+                ++lines;
             }
             else
             {
