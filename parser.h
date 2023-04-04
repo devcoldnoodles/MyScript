@@ -695,7 +695,7 @@ namespace myscript
 
 	struct SyntaxObject : SyntaxExpr
 	{
-		// std::map<std::string, SyntaxExpr *>> elements2;
+		std::map<std::string, SyntaxExpr *> elements2;
 		std::vector<std::pair<SyntaxExpr *, SyntaxExpr *>> elements;
 
 		std::string GetType() const { return "object"; }
@@ -810,9 +810,9 @@ namespace myscript
 			return true;
 		}
 	};
-	struct SyntaxBlock : SyntaxExpr
+	struct SyntaxBlock : SyntaxNode
 	{
-		std::vector<SyntaxExpr *> sents;
+		std::vector<SyntaxNode *> sents;
 		virtual ~SyntaxBlock()
 		{
 			for (auto sent : sents)
@@ -911,16 +911,15 @@ namespace myscript
 	struct SyntaxSingleSentence : SyntaxExpr
 	{
 		SyntaxExpr *expr;
-		SyntaxSingleSentence(SyntaxExpr *_expr = nullptr) : expr(_expr) {}
+		SyntaxSingleSentence(SyntaxExpr *_expr) : expr(_expr) {}
 		~SyntaxSingleSentence() { delete expr; }
 
 		bool CreateCode(CompliationDesc *cd)
 		{
-			if (!cd)
+			if (!cd || !expr)
 				return false;
-			if (expr != nullptr)
-				return expr->CreateCode(cd);
-			return true;
+
+			return expr->CreateCode(cd);
 		}
 	};
 	struct SyntaxIf : SyntaxExpr
@@ -1126,7 +1125,6 @@ namespace myscript
 	};
 
 	SyntaxExpr *ParseExpr(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
-	SyntaxExpr *ParseChain(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
 	SyntaxExpr *ParseTernaryOperator(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
 	SyntaxExpr *ParseAssign(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
 	SyntaxExpr *ParseLogicalOR(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
@@ -1143,10 +1141,10 @@ namespace myscript
 	std::pair<SyntaxExpr *, SyntaxExpr *> *ParseKeyVal(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
 	SyntaxExpr *ParseObject(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
 	SyntaxExpr *ParseFunction(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
-	SyntaxExpr *ParseSentence(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors, size_t args_count...);
+	SyntaxExpr *ParseSentence(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
+	SyntaxExpr *ParseSingleSentence(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
 	SyntaxExpr *ParseIf(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
 	SyntaxExpr *ParseLoop(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
-	SyntaxExpr *ParseFlowControl(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
 	SyntaxExpr *ParseDeclare(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
 	SyntaxBlock *ParseBlock(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors);
 };

@@ -1,16 +1,10 @@
 #include "parser.h"
 
 using namespace myscript;
-#define ParseGeneralSentences(iter, errors) ParseSentence(iter, errors, 4, ParseIf, ParseLoop, ParseExpr, ParseDeclare)
 
 namespace myscript
 {
 	SyntaxExpr *ParseExpr(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
-	{
-		return ParseChain(iter, errors);
-	}
-
-	SyntaxExpr *ParseChain(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
 		auto temp = iter;
 		SyntaxExpr *lexp = nullptr;
@@ -486,6 +480,7 @@ namespace myscript
 			return nullptr;
 		}
 	}
+
 	SyntaxExpr *ParseArray(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
 		auto temp = iter;
@@ -534,13 +529,14 @@ namespace myscript
 		delete expr;
 		return nullptr;
 	}
+
 	std::pair<SyntaxExpr *, SyntaxExpr *> *ParseKeyVal(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
 		auto temp = iter;
 		SyntaxExpr *key;
 		SyntaxExpr *value;
 		if (temp->value == Token::IDENTIFIER)
-			key = new SyntaxLiteral(TokenDesc{Token::LITERAL_STRING, temp->lines, temp->literal.s}), ++temp;
+			key = new SyntaxLiteral(Token::LITERAL_STRING, temp->lines, temp->literal), ++temp;
 		else if ((key = ParseLiteral(temp, errors)) == nullptr)
 			return nullptr;
 		if ((temp++)->value != Token::COLON)
@@ -556,6 +552,7 @@ namespace myscript
 		delete key;
 		return nullptr;
 	}
+
 	SyntaxExpr *ParseObject(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
 		auto temp = iter;
@@ -587,6 +584,7 @@ namespace myscript
 		delete object;
 		return nullptr;
 	}
+
 	SyntaxExpr *ParseFunction(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
 		auto temp = iter;
@@ -621,25 +619,38 @@ namespace myscript
 		delete expr;
 		return nullptr;
 	}
-	SyntaxExpr *ParseSentence(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors, size_t args_count...)
+
+	SyntaxExpr *ParseSentence(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
 		auto temp = iter;
-		SyntaxExpr *sent = nullptr;
-		va_list args_ptr;
-		va_start(args_ptr, args_count);
-		for (size_t count = 0; count < args_count; ++count)
-			if ((sent = va_arg(args_ptr, SyntaxExpr * (*)(std::vector<TokenDesc>::iterator &, std::vector<Error> &))(temp, errors)) != nullptr)
+		SyntaxExpr *expr = nullptr;
+		typedef SyntaxExpr * (*sentence_t)(std::vector<TokenDesc>::iterator &, std::vector<Error> &);
+		static const std::vector<sentence_t> sentences = {ParseSingleSentence, ParseIf, ParseLoop, ParseDeclare};
+		for (const sentence_t &sentence : sentences)
+		{
+			if ((expr = sentence(temp, errors)) != nullptr)
 				break;
-		va_end(args_ptr);
-		while (temp->value == Token::SEMICOLON)
-			++temp;
+		}
+		while ((temp++)->value == Token::SEMICOLON);
 		iter = temp;
-		return sent;
+		return expr;
 	}
+
+	SyntaxExpr *ParseSingleSentence(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
+	{
+		auto temp = iter;
+		SyntaxExpr *expr = nullptr;
+		if ((expr = ParseExpr(temp, errors)) == nullptr)
+			return nullptr;
+
+		iter = temp;
+		return new SyntaxSingleSentence(expr);
+	}
+
 	SyntaxExpr *ParseIf(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
 		auto temp = iter;
-		SyntaxIf *sent = new SyntaxIf();
+		SyntaxIf *node = new SyntaxIf();
 
 		if ((temp++)->value != Token::IF)
 			goto ErrorHandle;
@@ -649,7 +660,7 @@ namespace myscript
 			errors.push_back({"Expected (", (--temp)->lines});
 			goto ErrorHandle;
 		}
-		if ((sent->cond = ParseExpr(temp, errors)) == nullptr)
+		if ((node->cond = ParseExpr(temp, errors)) == nullptr)
 		{
 			errors.push_back({"Expected expression", (--temp)->lines});
 			goto ErrorHandle;
@@ -659,38 +670,38 @@ namespace myscript
 			errors.push_back({"Expected )", (--temp)->lines});
 			goto ErrorHandle;
 		}
-		if ((sent->truesents = ParseBlock(temp, errors)) == nullptr)
+		if ((node->truesents = ParseBlock(temp, errors)) == nullptr)
 			goto ErrorHandle;
-		if (temp->value == Token::ELSE && (sent->falsesents = ParseBlock(++temp, errors)) == nullptr)
+		if (temp->value == Token::ELSE && (node->falsesents = ParseBlock(++temp, errors)) == nullptr)
 			goto ErrorHandle;
 		iter = temp;
-		return sent;
+		return node;
 	ErrorHandle:
-		delete sent;
+		delete node;
 		return nullptr;
 	}
 
-	SyntaxExpr *ParseLoop(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
+    SyntaxExpr *ParseLoop(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
 		auto temp = iter;
-		SyntaxLoop *sent = new SyntaxLoop();
+		SyntaxLoop *node = new SyntaxLoop();
 		if ((temp++)->value != Token::LOOP)
 			goto ErrorHandle;
 		if (temp->value == Token::LPAREN)
 		{
-			sent->prefix_condition = ParseExpr(++temp, errors);
-			if (sent->prefix_condition == nullptr)
-				sent->prefix_condition = ParseDeclare(temp, errors);
+			node->prefix_condition = ParseExpr(++temp, errors);
+			if (node->prefix_condition == nullptr)
+				node->prefix_condition = ParseDeclare(temp, errors);
 			if (temp->value == Token::SEMICOLON)
 			{
-				sent->init = sent->prefix_condition;
-				sent->prefix_condition = ParseExpr(++temp, errors);
+				node->init = node->prefix_condition;
+				node->prefix_condition = ParseExpr(++temp, errors);
 				if ((temp++)->value != Token::SEMICOLON)
 				{
 					errors.push_back({"Expected semicolon", (--temp)->lines});
 					goto ErrorHandle;
 				}
-				sent->loop = ParseExpr(temp, errors);
+				node->loop = ParseExpr(temp, errors);
 			}
 			if ((temp++)->value != Token::RPAREN)
 			{
@@ -698,16 +709,16 @@ namespace myscript
 				goto ErrorHandle;
 			}
 		}
-		if ((sent->sents = ParseBlock(temp, errors)) == nullptr)
+		if ((node->sents = ParseBlock(temp, errors)) == nullptr)
 			goto ErrorHandle;
 		if (temp->value == Token::LPAREN)
 		{
-			if (sent->init || sent->prefix_condition || sent->loop)
+			if (node->init || node->prefix_condition || node->loop)
 			{
 				errors.push_back({"Can`t overlap with dislocation declaration", temp->lines});
 				goto ErrorHandle;
 			}
-			sent->postfix_condition = ParseExpr(++temp, errors);
+			node->postfix_condition = ParseExpr(++temp, errors);
 			if ((temp++)->value != Token::RPAREN)
 			{
 				errors.push_back({"Expected )", (--temp)->lines});
@@ -715,18 +726,19 @@ namespace myscript
 			}
 		}
 		iter = temp;
-		return sent;
+		return node;
 	ErrorHandle:
-		delete sent;
+		delete node;
 		return nullptr;
 	}
+
 	SyntaxExpr *ParseDeclare(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
 		auto temp = iter;
-		SyntaxDeclare *expr = new SyntaxDeclare();
+		SyntaxDeclare *node = new SyntaxDeclare();
 		VarDesc desc;
 		desc.option = VarDesc::VAR;
-		expr->line = temp->lines;
+		node->line = temp->lines;
 		switch ((temp++)->value)
 		{
 		case Token::CONST:
@@ -747,7 +759,7 @@ namespace myscript
 						goto ErrorHandle;
 					}
 				}
-				expr->elements.push_back(std::make_pair(desc, init));
+				node->elements.push_back(std::make_pair(desc, init));
 			} while (temp->value == Token::COMMA);
 		}
 		break;
@@ -756,7 +768,7 @@ namespace myscript
 			if (temp->value != Token::IDENTIFIER)
 				goto ErrorHandle;
 			SyntaxFunction *func = new SyntaxFunction();
-			expr->elements.push_back(std::make_pair(desc = {(temp++)->literal.s, VarDesc::CONST}, func));
+			node->elements.push_back(std::make_pair(desc = {(temp++)->literal.s, VarDesc::CONST}, func));
 			if ((temp++)->value != Token::LPAREN)
 			{
 				errors.push_back({"Expected (", (--temp)->lines});
@@ -789,7 +801,7 @@ namespace myscript
 			if (temp->value != Token::IDENTIFIER)
 				goto ErrorHandle;
 			SyntaxClass *clsinf = new SyntaxClass();
-			expr->elements.push_back(std::make_pair(desc = {(temp++)->literal.s, VarDesc::CONST}, clsinf));
+			node->elements.push_back(std::make_pair(desc = {(temp++)->literal.s, VarDesc::CONST}, clsinf));
 			if ((temp++)->value != Token::LBRACE)
 			{
 				errors.push_back({"Expected {", (--temp)->lines});
@@ -812,16 +824,16 @@ namespace myscript
 			goto ErrorHandle;
 		}
 		iter = temp;
-		return expr;
+		return node;
 	ErrorHandle:
-		delete expr;
+		delete node;
 		return nullptr;
 	}
+
 	SyntaxBlock *ParseBlock(std::vector<TokenDesc>::iterator &iter, std::vector<Error> &errors)
 	{
 		auto temp = iter;
 		SyntaxBlock *blocks = new SyntaxBlock();
-		SyntaxExpr *expr;
 		bool check = false;
 		if (temp->value == Token::LBRACE)
 		{
@@ -835,9 +847,10 @@ namespace myscript
 				errors.push_back({"Expected }", (--temp)->lines});
 				goto ErrorHandle;
 			}
-			if ((expr = ParseGeneralSentences(temp, errors)) == nullptr)
+			SyntaxNode *node = nullptr;
+			if ((node = ParseSentence(temp, errors)) == nullptr)
 				goto ErrorHandle;
-			blocks->sents.push_back(expr);
+			blocks->sents.push_back(node);
 		} while (check && temp->value != Token::RBRACE);
 		if (temp->value == Token::RBRACE)
 			++temp;
@@ -860,8 +873,8 @@ namespace myscript
 		auto iter = result.begin();
 		while (iter->value != Token::EOT)
 		{
-			SyntaxExpr *sent;
-			if ((sent = ParseGeneralSentences(iter, code.errors)) == nullptr)
+			SyntaxNode *sent;
+			if ((sent = ParseSentence(iter, code.errors)) == nullptr)
 				return false;
 			code.sents.push_back(sent);
 		}

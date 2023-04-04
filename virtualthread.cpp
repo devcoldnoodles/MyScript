@@ -283,7 +283,7 @@ void VirtualThread::Execute()
             MetaObject *target = machine->global[operand];
             if (target->type != MetaObject::METADATA)
             {
-                PrintError({"invalid operation", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -332,7 +332,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 3)
             {
-                PrintError({"잘못된 호출", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -343,7 +343,7 @@ void VirtualThread::Execute()
             {
                 if (key->type != MetaObject::NUMBER)
                 {
-                    PrintError({"인덱스 참조는 숫자만 가능합니다.", 0});
+                    PrintError({"Index references can only be numeric.", 0});
                     callback = 0;
                     break;
                 }
@@ -351,7 +351,7 @@ void VirtualThread::Execute()
                 size_t size = arr->size / sizeof(MetaObject *);
                 if (index >= size)
                 {
-                    PrintError({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
+                    PrintError({"The index you are trying to reference is out of range.", 0});
                     callback = 0;
                     break;
                 }
@@ -366,20 +366,20 @@ void VirtualThread::Execute()
             {
                 if (key->type != MetaObject::NUMBER)
                 {
-                    PrintError({"인덱스 참조는 숫자만 가능합니다.", 0});
+                    PrintError({"Index references can only be numeric.", 0});
                     callback = 0;
                     break;
                 }
                 size_t index = static_cast<size_t>(*(double *)key->content);
                 if (index >= arr->size)
                 {
-                    PrintError({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
+                    PrintError({"The index you are trying to reference is out of range.", 0});
                     callback = 0;
                     break;
                 }
                 if (value->type != MetaObject::STRING)
                 {
-                    PrintError({"문자만 대입가능합니다.", 0});
+                    PrintError({"A type that cannot be assigned.", 0});
                     callback = 0;
                     break;
                 }
@@ -389,7 +389,7 @@ void VirtualThread::Execute()
             }
             else
             {
-                PrintError({"왼쪽 표현식은 인덱스 참조가 불가능합니다.", 0});
+                PrintError({"The expression on the left cannot be an index reference.", 0});
                 callback = 0;
                 break;
             }
@@ -399,7 +399,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 호출.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -409,7 +409,7 @@ void VirtualThread::Execute()
             {
                 if (key->type != MetaObject::NUMBER)
                 {
-                    PrintError({"인덱스 참조는 숫자만 가능합니다.", 0});
+                    PrintError({"Index references can only be numeric.", 0});
                     callback = 0;
                     break;
                 }
@@ -417,7 +417,7 @@ void VirtualThread::Execute()
                 size_t size = arr->size / sizeof(MetaObject *);
                 if (index >= size)
                 {
-                    PrintError({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
+                    PrintError({"The index you are trying to reference is out of range.", 0});
                     callback = 0;
                     break;
                 }
@@ -429,14 +429,14 @@ void VirtualThread::Execute()
             {
                 if (key->type != MetaObject::NUMBER)
                 {
-                    PrintError({"인덱스 참조는 숫자만 가능합니다.", 0});
+                    PrintError({"Index references can only be numeric.", 0});
                     callback = 0;
                     break;
                 }
                 size_t index = static_cast<size_t>(*(double *)key->content);
                 if (index >= arr->size)
                 {
-                    PrintError({"참조하려는 인덱스가 범위를 넘어섰습니다.", 0});
+                    PrintError({"The index you are trying to reference is out of range.", 0});
                     callback = 0;
                     break;
                 }
@@ -445,7 +445,7 @@ void VirtualThread::Execute()
             }
             else
             {
-                PrintError({"왼쪽 표현식은 인덱스 참조가 불가능합니다.", 0});
+                PrintError({"The left expression cannot be index-referenced.", 0});
                 callback = 0;
                 break;
             }
@@ -455,7 +455,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 3)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -464,7 +464,7 @@ void VirtualThread::Execute()
             MetaObject *value = StackBack(2);
             if (arr->type != MetaObject::OBJECT)
             {
-                PrintError({"참조할 수 없는 객체입니다.", 0});
+                PrintError({"An object that cannot be referenced.", 0});
                 callback = 0;
                 break;
             }
@@ -495,7 +495,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -503,7 +503,7 @@ void VirtualThread::Execute()
             MetaObject *key = StackBack(1);
             if (arr->type != MetaObject::OBJECT)
             {
-                PrintError({"참조할 수 없는 객체입니다.", 0});
+                PrintError({"An object that cannot be referenced.", 0});
                 callback = 0;
                 break;
             }
@@ -531,7 +531,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 1)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -544,7 +544,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -557,7 +557,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -599,7 +599,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -632,7 +632,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -645,7 +645,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -658,7 +658,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -671,7 +671,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -684,7 +684,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -697,7 +697,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 1)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -710,7 +710,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -723,7 +723,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -736,7 +736,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -749,7 +749,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -762,7 +762,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
@@ -775,7 +775,7 @@ void VirtualThread::Execute()
         {
             if (stack.size() < 2)
             {
-                PrintError({"잘못된 바이트코드입니다.", 0});
+                PrintError({"This is an invalid operation.", 0});
                 callback = 0;
                 break;
             }
