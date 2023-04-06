@@ -631,7 +631,7 @@ namespace myscript
 			if ((expr = sentence(temp, errors)) != nullptr)
 				break;
 		}
-		while ((temp++)->value == Token::SEMICOLON);
+		while (temp->value == Token::SEMICOLON)	++temp;
 		iter = temp;
 		return expr;
 	}
