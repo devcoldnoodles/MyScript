@@ -5,22 +5,14 @@
 
 namespace myscript 
 {
-	MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size)
-	{
-		MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + _size);
-		alloc->type = _type;
-		alloc->adinf = _adinf;
-		alloc->size = _size;
-		return alloc;
-	}
-
 	MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size, const void* _content)
 	{
 		MetaObject* alloc = (MetaObject*)malloc(sizeof(MetaObject) + _size);
 		alloc->type = _type;
 		alloc->adinf = _adinf;
 		alloc->size = _size;
-		memcpy(alloc->content, _content, _size);
+		if (_content)
+			memcpy(alloc->content, _content, _size);
 		return alloc;
 	}
 

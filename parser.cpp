@@ -271,7 +271,7 @@ namespace myscript
 				errors.push_back({"Expected identifier", (--temp)->lines});
 				return nullptr;
 			}
-			expr = new SyntaxPostfixMinusx2(expr);
+			expr = new SyntaxSuffixMinusx2(expr);
 			break;
 		case Token::ADD:
 			if ((expr = ParseSuffix(++temp, errors)) == nullptr)
@@ -325,10 +325,10 @@ namespace myscript
 		switch (temp->value)
 		{
 		case Token::INC:
-			lexp = new SyntaxPostfixPlusx2(lexp), ++temp;
+			lexp = new SyntaxSuffixPlusx2(lexp), ++temp;
 			break;
 		case Token::DEC:
-			lexp = new SyntaxPostfixMinusx2(lexp), ++temp;
+			lexp = new SyntaxSuffixMinusx2(lexp), ++temp;
 			break;
 		case Token::AS:
 			if ((rexp = ParseElement(++temp, errors)) == nullptr)
@@ -718,7 +718,7 @@ namespace myscript
 				errors.push_back({"Can`t overlap with dislocation declaration", temp->lines});
 				goto ErrorHandle;
 			}
-			node->postfix_condition = ParseExpr(++temp, errors);
+			node->suffix_condition = ParseExpr(++temp, errors);
 			if ((temp++)->value != Token::RPAREN)
 			{
 				errors.push_back({"Expected )", (--temp)->lines});
@@ -852,7 +852,7 @@ namespace myscript
 				goto ErrorHandle;
 			blocks->sents.push_back(node);
 		} while (check && temp->value != Token::RBRACE);
-		if (temp->value == Token::RBRACE)
+		if (check && temp->value == Token::RBRACE)
 			++temp;
 		iter = temp;
 		return blocks;

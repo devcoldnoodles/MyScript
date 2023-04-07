@@ -28,8 +28,7 @@ namespace myscript
 		char content[0];
 	};
 	
-	MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size);
-	MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size, const void* _content);
+	MetaObject* CreateMetaObject(MetaObject::Type _type, uint16_t _adinf, uint32_t _size, const void* _content = nullptr);
 	MetaObject* CreateMetaNull(void);
 	MetaObject* CreateMetaBool(const bool boolean);
 	MetaObject* CreateMetaNumber(const double number);

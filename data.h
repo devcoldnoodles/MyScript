@@ -125,10 +125,12 @@ namespace myscript
 	struct CompliationDesc
 	{
 		std::vector<uint16_t> code;
+		std::vector<uint16_t> temp;
 		std::vector<LocalScope> scope;
 		std::vector<VarDesc> global;
 		std::vector<Error> errors;
 		std::map<VarDesc, MetaObject *, VarDescCompare> globals;
+
 
 		const uint16_t Identify(const std::string &id) const
 		{

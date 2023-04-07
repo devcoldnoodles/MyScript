@@ -338,7 +338,7 @@ namespace myscript
 		}
 	};
 	
-	struct SyntaxPrefixPlusx2 : SyntaxExpr // ++
+	struct SyntaxPrefixPlusx2 : SyntaxExpr // ++expr
 	{
 		SyntaxExpr *expr;
 		SyntaxPrefixPlusx2(SyntaxExpr *_expr) : expr(_expr) {}
@@ -376,13 +376,13 @@ namespace myscript
 		}
 	};
 
-	struct SyntaxPostfixPlusx2 : SyntaxExpr // ++
+	struct SyntaxSuffixPlusx2 : SyntaxExpr // expr++
 	{
 		SyntaxExpr *expr;
-		SyntaxPostfixPlusx2(SyntaxExpr *_expr) : expr(_expr) {}
-		~SyntaxPostfixPlusx2() { delete expr; }
+		SyntaxSuffixPlusx2(SyntaxExpr *_expr) : expr(_expr) {}
+		~SyntaxSuffixPlusx2() { delete expr; }
 
-		std::string GetType() const { return "postfix plusx2"; }
+		std::string GetType() const { return "suffix plusx2"; }
 		bool CreateCode(CompliationDesc *cd)
 		{
 			if (!cd)
@@ -457,11 +457,11 @@ namespace myscript
 		}
 	};
 
-	struct SyntaxPostfixMinusx2 : SyntaxExpr // --
+	struct SyntaxSuffixMinusx2 : SyntaxExpr // --
 	{
 		SyntaxExpr *expr;
-		SyntaxPostfixMinusx2(SyntaxExpr *_expr) : expr(_expr) {}
-		~SyntaxPostfixMinusx2() { delete expr; }
+		SyntaxSuffixMinusx2(SyntaxExpr *_expr) : expr(_expr) {}
+		~SyntaxSuffixMinusx2() { delete expr; }
 
 		std::string GetType() const { return "minusx2"; }
 		bool CreateCode(CompliationDesc *cd)
@@ -966,7 +966,7 @@ namespace myscript
 	{
 		SyntaxExpr *init;
 		SyntaxExpr *prefix_condition;
-		SyntaxExpr *postfix_condition;
+		SyntaxExpr *suffix_condition;
 		SyntaxExpr *loop;
 		SyntaxBlock *sents;
 		~SyntaxLoop()
@@ -975,8 +975,8 @@ namespace myscript
 				delete init;
 			if (prefix_condition)
 				delete prefix_condition;
-			if (postfix_condition)
-				delete postfix_condition;
+			if (suffix_condition)
+				delete suffix_condition;
 			if (loop)
 				delete loop;
 		}
@@ -1009,9 +1009,9 @@ namespace myscript
 				cd->scope.back().endpoint.push_back(cd->code.size());
 				cd->code.push_back(NONE);
 			}
-			if (postfix_condition != nullptr)
+			if (suffix_condition != nullptr)
 			{
-				if (!postfix_condition->CreateRCode(cd))
+				if (!suffix_condition->CreateRCode(cd))
 					return false;
 				cd->code.push_back(CFJMP);
 				cd->scope.back().endpoint.push_back(cd->code.size());
